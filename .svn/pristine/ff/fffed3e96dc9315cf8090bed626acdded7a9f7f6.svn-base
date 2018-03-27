@@ -1,0 +1,480 @@
+package com.hnzy.hot.sbgls.controller;
+
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.alibaba.fastjson.JSONObject;
+import com.hnzy.hot.sbgl.pojo.Fm;
+import com.hnzy.hot.sbgl.pojo.Yh;
+import com.hnzy.hot.sbgl.service.FmService;
+import com.hnzy.hot.sbgl.service.QgService;
+import com.hnzy.hot.sbgls.service.FmsService;
+import com.hnzy.hot.socket.server.ServerSessionMap;
+import com.hnzy.hot.socket.util.CzUtil;
+import com.hnzy.hot.socket.util.MapUtils;
+import com.hnzy.hot.socket.util.MapUtilsDf;
+import com.hnzy.hot.xxgl.service.RzService;
+
+@Controller
+@RequestMapping("/FmglController")
+public class FmsglController {
+	@Autowired
+	private FmsService fmsService;
+	@Autowired
+	private FmService fmService;
+	@Autowired
+	private QgService qgService;
+	@Autowired
+	private RzService rzService;
+	private List<Yh> yhInfoList;
+	String param = null;
+	String fmId;
+	String qgId;
+    private static Log log = LogFactory.getLog(FmsglController.class);
+	// 读阀
+	@ResponseBody
+	@RequestMapping("dFm")
+	public JSONObject duFm(HttpSession session ,HttpServletRequest request, Fm f, String ids, Fm fm) {
+      //根据阀门获取用户信息
+		fm = fmService.findbyVad(ids);
+		int buildNo = fm.getYh().getBuildNO();
+		int cellNo = fm.getYh().getCellNO();
+		int houseNo = fm.getYh().getHouseNO();
+		f = fmService.findIDbyqgvd(ids);
+		fmId = f.getValAd();
+		qgId = f.getQgID();
+		// 把FmID转换为int类型
+		int fInteger = Integer.valueOf(fmId);
+		// FmID十进制转换为十六进制
+		String fmd = Integer.toHexString(fInteger);
+		// 阀门ID
+		fm = fmService.findJzq(fmId);
+		// 区管ID
+		String ip = fm.getQg().getJzq().getJzqIp();
+		// 端口号
+		int port = fm.getQg().getJzq().getJzqPort();
+		// // IP地址和端口号
+		String pt = "/" + ip + ":" + port;
+		// fmId十进制
+		String ja = "F00F0400" + qgId + "040" + fmd;
+		log.info("读阀发送数据："+ja);
+		boolean sessionmap = cz(ja, pt);
+		try {
+			Thread.sleep(3000);
+
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		JSONObject jsonObject = new JSONObject();
+		if (sessionmap == true && MapUtilsDf.getMapUtils().get("dFm")!=null && MapUtilsDf.getMapUtils().get("dFm").equals("success")) {
+			MapUtilsDf.getMapUtils().add("dFm", null);
+			jsonObject.put("js", "0");
+			jsonObject.put("fmId", "阀门号:" + fmId + "楼栋号:" + buildNo + "单元号:" + cellNo + "户号:" + houseNo);
+			return jsonObject;
+		} else if (sessionmap == true && MapUtilsDf.getMapUtils().get("dFm")!=null && MapUtilsDf.getMapUtils().get("dFm").equals("超时") 
+				|| sessionmap == true && MapUtilsDf.getMapUtils().get("dFm") == null) {
+			MapUtilsDf.getMapUtils().add("dFm", null);
+			jsonObject.put("js", "1");
+			jsonObject.put("fmId", "阀门号:" + fmId + "楼栋号:" + buildNo + "单元号:" + cellNo + "户号:" + houseNo);
+			return jsonObject;
+		} else if (sessionmap == false && MapUtilsDf.getMapUtils().get("dFm") == null) {
+			log.info("发送数据失败,集中器不在线");
+			MapUtilsDf.getMapUtils().add("dFm", null);
+			jsonObject.put("js", "3");
+			jsonObject.put("fmId", "阀门号:" + fmId + "楼栋号:" + buildNo + "单元号:" + cellNo + "户号:" + houseNo);
+			return jsonObject;
+		}else {
+			MapUtilsDf.getMapUtils().add("dFm", null);
+			jsonObject.put("js", "2");
+			jsonObject.put("fmId", "阀门号:" + fmId + "楼栋号:" + buildNo + "单元号:" + cellNo + "户号:" + houseNo);
+			return jsonObject;
+		}
+
+	}
+
+	// 开阀门
+	@RequestMapping("kFm")
+	@ResponseBody
+	public JSONObject KFm(Fm fm, String ids) {
+		JSONObject kString = null;
+		fm = fmService.findIDbyqgvd(ids);
+		fmId = fm.getValAd();
+		qgId = fm.getQgID();
+		kString = kfm(fm, fmId, qgId);
+		return kString;
+
+	}
+
+	// 发送参数
+	@RequestMapping("FsCs")
+	@ResponseBody
+	public String FsCs(Fm f, String fmId, String qgId, int wdsd, int tjzq, int tjcs) {
+
+		// 参数十进制转换为十六进制
+		String Wdsd = "00" + Integer.toHexString(wdsd);
+		String subwdsd = Wdsd.substring(Wdsd.length() - 2);
+		String Tjzq = "00" + Integer.toHexString(tjzq);
+		String subtjzq = Tjzq.substring(Tjzq.length() - 2);
+		String Tjcs = "00" + Integer.toHexString(tjcs);
+		String subtjcs = Tjcs.substring(Tjcs.length() - 2);
+		String UppWdsd = CzUtil.Uppercase(subwdsd).toString();
+		String UppTjzq = CzUtil.Uppercase(subtjzq).toString();
+		String UppTjcs = CzUtil.Uppercase(subtjcs).toString();
+		param = "FsCs";
+		MapUtils.getMapUtils().add("param", param);
+		// 根据fmID查找阀门状态
+		f = fmService.findIDbyqgvd(fmId);
+		String status = f.getStatus();
+		String sts = null;
+		if (status.equals("开")) {
+			sts = "01";
+		} else {
+			sts = "00";
+		}
+		// 把FmID转换为int类型
+		int fInteger = Integer.valueOf(fmId);
+		// FmID十进制转换为十六进制
+		String fmd = Integer.toHexString(fInteger);
+		String UppFmd = CzUtil.Uppercase(fmd).toString();
+		// 阀门ID
+		Fm fm = fmService.findJzq(fmId);
+		// 区管ID
+		String ip = fm.getQg().getJzq().getJzqIp();
+		// 端口号
+		int port = fm.getQg().getJzq().getJzqPort();
+		// IP地址和端口号
+		String pt = "/" + ip + ":" + port;
+
+		// fmId十进制
+		String ja = "F0160900" + qgId + "040" + UppFmd + "" + sts + "FFFFFF" + UppWdsd + "" + UppTjzq + "" + UppTjcs
+				+ "";
+		log.info("发送参数发送数据："+ja);
+		boolean sessionmap = cz(ja, pt);
+		try {
+			Thread.sleep(3000);
+
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		if (sessionmap == true &&  MapUtils.getMapUtils().get("FsCs")!=null && MapUtils.getMapUtils().get("FsCs").equals("success")) {
+			MapUtils.getMapUtils().add("FsCs", null);
+
+			return "0";
+		} else if (sessionmap == true && MapUtils.getMapUtils().get("sb")!=null&& MapUtils.getMapUtils().get("sb").equals( "fail")
+				&& MapUtils.getMapUtils().get("FsCs") != null) {
+			MapUtils.getMapUtils().add("sb", null);
+			return "2";
+		} else if (sessionmap == true &&  MapUtils.getMapUtils().get("cs")!=null && MapUtils.getMapUtils().get("cs").equals("超时")
+				|| sessionmap == true && MapUtils.getMapUtils().get("FsCs") == null) {
+			MapUtils.getMapUtils().add("cs", null);
+			return "3";
+		} else if (sessionmap == false && MapUtils.getMapUtils().get("FsCs") == null) {
+			log.info("发送数据失败,集中器不在线");
+			return "4";
+		} else {
+			MapUtils.getMapUtils().add("FsCs", null);
+			MapUtils.getMapUtils().add("sb", null);
+			return "1";
+		}
+
+	}
+
+	// 抽取相同部分
+	public boolean cz(String ja, String pt) {
+
+		// 把十六进制数，转换为十进制相加
+		int jia = CzUtil.FsZh(ja);
+		// 十进制转换为十六进制
+		String hex = Integer.toHexString(jia);
+		// 截取相加结果后两位
+		String je = null;
+		for (int j = 0; j < hex.length() - 1; j++) {
+			je = hex.charAt(hex.length() - 2) + "" + hex.charAt(hex.length() - 1);
+		}
+		String[] keys = new String[] { pt };
+		String mString = ja + je + "FF";
+		// 解码
+		byte[] b = CzUtil.jm(mString);
+		ServerSessionMap sessionMap = ServerSessionMap.getInstance();
+		boolean sessionmap = sessionMap.sendMessage(keys, b);
+		return sessionmap;
+
+	}
+
+	public JSONObject kfm(Fm fm, String fmId, String qgId) {
+		param = "kFm";
+		MapUtils.getMapUtils().add("param", param);
+		// 根据阀门查找信息
+		fm = fmService.findbyVad(fmId);
+		int buildNo = fm.getYh().getBuildNO();
+		int cellNo = fm.getYh().getCellNO();
+		int houseNo = fm.getYh().getHouseNO();
+
+		// 把FmID转换为int类型
+		int fInteger = Integer.valueOf(fmId);
+		// FmID十进制转换为十六进制
+		String fmd = Integer.toHexString(fInteger);
+		// 阀门ID
+		fm = fmService.findJzq(fmId);
+		// 区管ID
+		String ip = fm.getQg().getJzq().getJzqIp();
+		// 端口号
+		int port = fm.getQg().getJzq().getJzqPort();
+		// IP地址和端口号
+		String pt = "/" + ip + ":" + port;
+		// fmId十进制
+		String ja = "F0160900" + qgId + "040" + fmd + "01FFFF01FFFFFF";
+		log.info("开阀发送数据："+ja);
+		boolean sessionmap = cz(ja, pt);
+		try {
+			Thread.sleep(3000);
+
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		JSONObject jsonObject = new JSONObject();
+		if (sessionmap == true &&  MapUtils.getMapUtils().get("kFm")!=null && MapUtils.getMapUtils().get("kFm").equals("success")) {
+			MapUtils.getMapUtils().add("kFm", null);
+			jsonObject.put("js", "0");
+			jsonObject.put("fmId", "阀门号:" + fmId + "楼栋号:" + buildNo + "单元号:" + cellNo + "户号:" + houseNo);
+			
+			return jsonObject;
+		} else if (sessionmap == true &&  MapUtils.getMapUtils().get("sb")!=null && MapUtils.getMapUtils().get("sb").equals("fail")
+				&& MapUtils.getMapUtils().get("kFm") != null) {
+			MapUtils.getMapUtils().add("sb", null);
+			jsonObject.put("js", "2");
+			jsonObject.put("fmId", "阀门号:" + fmId + "楼栋号:" + buildNo + "单元号:" + cellNo + "户号:" + houseNo);
+			return jsonObject;
+		} else if (sessionmap == true && MapUtils.getMapUtils().get("cs")!=null  && MapUtils.getMapUtils().get("cs").equals("超时")
+				|| sessionmap == true && MapUtils.getMapUtils().get("kFm") == null) {
+			MapUtils.getMapUtils().add("cs", null);
+			jsonObject.put("js", "3");
+			jsonObject.put("fmId", "阀门号:" + fmId + "楼栋号:" + buildNo + "单元号:" + cellNo + "户号:" + houseNo);
+			return jsonObject;
+		} else if (sessionmap == false && MapUtils.getMapUtils().get("kFm") == null) {
+			jsonObject.put("js", "4");
+			jsonObject.put("fmId", "阀门号:" + fmId + "楼栋号:" + buildNo + "单元号:" + cellNo + "户号:" + houseNo);
+			log.info("发送数据失败,集中器不在线");
+			return jsonObject;
+		} else {
+			MapUtils.getMapUtils().add("sb", null);
+			MapUtils.getMapUtils().add("kFm", null);
+			jsonObject.put("js", "1");
+			jsonObject.put("fmId", "阀门号:" + fmId + "楼栋号:" + buildNo + "单元号:" + cellNo + "户号:" + houseNo);
+			return jsonObject;
+		}
+	}
+
+	// 关阀门
+	@RequestMapping("gFm")
+	@ResponseBody
+	public JSONObject gFm(Fm fm, String ids) {
+		JSONObject kString = null;
+		fm = fmService.findIDbyqgvd(ids);
+		fmId = fm.getValAd();
+		qgId = fm.getQgID();
+		kString = gf(fm, fmId, qgId);
+		return kString;
+
+	}
+
+	public JSONObject gf(Fm fm, String fmId, String qgId) {
+		param = "gFm";
+		MapUtils.getMapUtils().add("param", param);
+		// 根据阀门查找信息
+		fm = fmService.findbyVad(fmId);
+		int buildNo = fm.getYh().getBuildNO();
+		int cellNo = fm.getYh().getCellNO();
+		int houseNo = fm.getYh().getHouseNO();
+		// 把FmID转换为int类型
+		int fInteger = Integer.valueOf(fmId);
+		// FmID十进制转换为十六进制
+		String fmd = Integer.toHexString(fInteger);
+		// 阀门ID
+		fm = fmService.findJzq(fmId);
+		// 区管ID
+		String ip = fm.getQg().getJzq().getJzqIp();
+		// 端口号
+		int port = fm.getQg().getJzq().getJzqPort();
+		// IP地址和端口号
+		String pt = "/" + ip + ":" + port;
+		// fmId十进制
+		String ja = "F0160900" + qgId + "040" + fmd + "00FFFF00FFFFFF";
+		log.info("关阀发送数据："+ja);
+		boolean sessionmap = cz(ja, pt);
+
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		JSONObject jsonObject = new JSONObject();
+		if (sessionmap == true && MapUtils.getMapUtils().get("gFm")!=null && MapUtils.getMapUtils().get("gFm").equals("success")) {
+			MapUtils.getMapUtils().add("gFm", null);
+			jsonObject.put("fmId", "阀门号:" + fmId + "楼栋号:" + buildNo + "单元号:" + cellNo + "户号:" + houseNo);
+			jsonObject.put("js", "0");
+			return jsonObject;
+		} else if (sessionmap == true && MapUtils.getMapUtils().get("sb")!=null && MapUtils.getMapUtils().get("sb").equals("fail")) {
+			
+			MapUtils.getMapUtils().add("sb", null);
+			jsonObject.put("fmId", "阀门号:" + fmId + "楼栋号:" + buildNo + "单元号:" + cellNo + "户号:" + houseNo);
+			jsonObject.put("js", "2");
+			return jsonObject;
+		} else if (sessionmap == true && MapUtils.getMapUtils().get("cs")!=null && MapUtils.getMapUtils().get("cs").equals("超时") 
+				|| sessionmap == true && MapUtils.getMapUtils().get("gFm") == null) {
+			MapUtils.getMapUtils().add("cs", null);
+			jsonObject.put("fmId", "阀门号:" + fmId + "楼栋号:" + buildNo + "单元号:" + cellNo + "户号:" + houseNo);
+			jsonObject.put("js", "3");
+			return jsonObject;
+		} else if (sessionmap == false && MapUtils.getMapUtils().get("kFm") == null) {
+			jsonObject.put("fmId", "阀门号:" + fmId + "楼栋号:" + buildNo + "单元号:" + cellNo + "户号:" + houseNo);
+			jsonObject.put("js", "4");
+			log.info("发送数据失败,集中器不在线");
+			return jsonObject;
+		} else {
+			MapUtils.getMapUtils().add("sb", null);
+			MapUtils.getMapUtils().add("gFm", null);
+			MapUtils.getMapUtils().add("cs", null);
+			jsonObject.put("fmId", "阀门号:" + fmId + "楼栋号:" + buildNo + "单元号:" + cellNo + "户号:" + houseNo);
+			jsonObject.put("js", "1");
+			return jsonObject;
+		}
+
+	}
+
+	// 读传感器地址
+	@RequestMapping("cgqads")
+	@ResponseBody
+	public JSONObject cgqads(String fmId, String qgId) {
+		// 把FmID转换为int类型
+		int fInteger = Integer.valueOf(fmId);
+		// FmID十进制转换为十六进制
+		String fmd = Integer.toHexString(fInteger);
+		// 阀门ID
+		Fm fm = fmService.findJzq(fmId);
+		// 区管ID
+		String ip = fm.getQg().getJzq().getJzqIp();
+		// 端口号
+		int port = fm.getQg().getJzq().getJzqPort();
+		// IP地址和端口号
+		String pt = "/" + ip + ":" + port;
+		String ja = "F0115200" + qgId + "0" + fmd + "679A00";
+		log.info("读传感器地址发送数据："+ja);
+		boolean sessionmap = cz(ja, pt);
+//		Qg qg = qgService.findVALs(qgId);
+//		//查询阀门个数
+//		int fmCount = Integer.valueOf(qg.getvALedID()) - Integer.valueOf(qg.getvALstID()) + 1;
+//		//根据阀门设置停留时间
+//		int Tsleep = fmCount * 1000;
+
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		JSONObject jsonObject = new JSONObject();
+		if (sessionmap == true && MapUtils.getMapUtils().get("dcgq")!=null && MapUtils.getMapUtils().get("dcgq") .equals("success")) {
+			String CgqId= MapUtils.getMapUtils().get("cgqID");
+			
+			String FmId = MapUtils.getMapUtils().get("fmId");
+			int fmID= Integer.parseInt( FmId , 16);
+			jsonObject.put("cgqID", CgqId);
+			jsonObject.put("fmId", fmID);
+			jsonObject.put("cgs", "0");
+			MapUtils.getMapUtils().add("dcgq", null);
+		}else if (sessionmap == false && MapUtils.getMapUtils().get("dcgq") == null ) {
+			jsonObject.put("cgs", "3");
+			log.info("发送数据失败,集中器不在线");
+		}else if (sessionmap == true && MapUtils.getMapUtils().get("dcgq")!=null && MapUtils.getMapUtils().get("dcgq").equals("超时")) {
+			jsonObject.put("cgs", "2");
+			MapUtils.getMapUtils().add("dcgq", null);
+		}else {
+			jsonObject.put("cgs", "1");
+			MapUtils.getMapUtils().add("dcgq", null);
+		}
+		return jsonObject;
+	}
+
+	// 搜索
+		@RequestMapping("searchInfo")
+		@ResponseBody
+		public JSONObject searchInfo(HttpServletRequest request, ModelMap map, @Param("xqName") String xqName,
+				@Param("buildNo") int buildNo, @Param("cellNo") int cellNo, @Param("houseNo") Integer houseNo)
+				throws UnsupportedEncodingException {
+			xqName = new String(xqName.getBytes("ISO-8859-1"), "utf-8") + "";
+			JSONObject jsonObject = new JSONObject();
+			if (houseNo == null) {
+				houseNo = 0;
+				jsonObject.put("findList", fmsService.searchInfo(xqName, buildNo, cellNo, houseNo));
+			}
+			// 小区名称
+			yhInfoList = fmsService.findYhNameList();
+			// 列表
+			jsonObject.put("findList", fmsService.searchInfo(xqName, buildNo, cellNo, houseNo));
+			return jsonObject;
+		}
+
+		// 获取所有的小区
+		@RequestMapping("findYhNameList")
+		public String findYhNameList(@RequestParam(value = "pageNum", required = false) String pageNum, ModelMap map) {
+			yhInfoList = fmsService.findYhNameList();
+			List<Yh> findList = fmsService.findList();
+			map.addAttribute("yhInfoList", yhInfoList);
+			map.addAttribute("findList", findList);
+			return "sbgls/fmgl";
+		}
+
+		// 根据小区获取楼栋号
+		@RequestMapping("findYhBuildNObyXqName")
+		@ResponseBody
+		public JSONObject findYhBuildNObyXqName(String xqName) throws UnsupportedEncodingException {
+			xqName = new String(xqName.getBytes("ISO-8859-1"), "utf-8") + "";
+			yhInfoList = fmsService.findYhBuildNObyXqName(xqName);
+			JSONObject jsonObject = new JSONObject();
+			if (yhInfoList != null) {
+				jsonObject.put("xqlist", yhInfoList);
+			} else {
+				jsonObject.put("fail", null);
+			}
+			return jsonObject;
+		}
+
+		// 根据小 区楼栋号获取单元号
+		@RequestMapping("findYhCellNOByBuild")
+		@ResponseBody
+		public JSONObject findYhCellNOByBuild(@Param("build") int build, @Param("xqName") String xqName)
+				throws UnsupportedEncodingException {
+			xqName = new String(xqName.getBytes("ISO-8859-1"), "utf-8") + "";
+			yhInfoList = fmsService.findYhCellNOByBuild(xqName, build);
+			JSONObject jsonObject = new JSONObject();
+			if (yhInfoList != null) {
+				jsonObject.put("cellList", yhInfoList);
+			} else {
+				jsonObject.put("fail", null);
+			}
+			return jsonObject;
+
+		}
+
+		public List<Yh> getYhInfoList() {
+			return yhInfoList;
+		}
+
+		public void setYhInfoList(List<Yh> yhInfoList) {
+			this.yhInfoList = yhInfoList;
+		}
+
+	}

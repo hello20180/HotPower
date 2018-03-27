@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.sbgl.dao.FmDao">
+	<resultMap type="Fm" id="fm">
+		<result property="id" column="ID" />
+		<result property="yh.yhName" column="YhName" />
+		<result property="yh.xqName" column="XqName" />
+		<result property="yh.buildNO" column="BuildNO" />
+		<result property="yh.cellNO" column="CellNO" />
+		<result property="yh.houseNO" column="HouseNO" />
+		<result property="yh.YLFQ" column="YLFQ" />
+		<result property="valAd" column="ValAd" />
+		<result property="status" column="Status" />
+		<result property="famKd" column="FamKd" />
+		<result property="tqyb" column="Tqyb"/>
+		<result property="lockSt" column="LockSt" />
+		<result property="jFSt" column="JFSt" />
+		<result property="valTemp" column="ValTemp" />
+		<result property="roomTemp" column="RoomTemp" />
+		<result property="hTemSet" column="HTemSet" />
+		<result property="mTemSet" column="MTemSet" />
+		<result property="lTemSet" column="LTemSet" />
+		<result property="qgID" column="QgID" />
+		<result property="type" column="Type"/>
+		<result property="yh.sFJF" column="SFJF" />
+		<result property="yh.sFQF" column="SFQF" />
+		<result property="yh.sFTR" column="SFTR" />
+		<result property="yh.yhbm" column="YHBM" />
+		<result property="yh.jfsj" column="JFSJ" />
+		<result property="yh.idNum" column="IDNum" />
+		<result property="yh.heatArea" column="HeatArea" />
+		<result property="yh.WCAd" column="WCAd"/>
+		<result property="yh.bz" column="Bz"/>
+		<result property="yh.yhfl" column="Yhfl" />
+		<result property="yh.bjxx" column="Bjxx" />
+		<result property="yh.bjTime" column="BjTime" />
+		<result property="yh.yhRb" column="YhRb" />
+		<result property="yh.cjq" column="Cjq" />
+		<result property="recordTime" column="RecordTime" />
+		<result property="qg.jzqID" column="JzqID" />
+		<result property="qg.jzq.jzqIp" column="JzqIp" />
+		<result property="qg.jzq.jzqPort" column="JzqPort" />
+	</resultMap>
+	<select id="find" resultMap="fm">
+		Select 
+		f.ID,
+		y.YhName,
+		y.XqName,
+		y.BuildNO,
+		y.CellNO,
+		y.HouseNO,
+		y.Bjxx,
+		y.YLFQ,
+		y.BjTime,
+		f.ValAd,
+		y.WCAd,
+		f.Status,
+		f.FamKd,
+		f.LockSt,
+		f.JFSt,
+		f.ValTemp,
+		f.RoomTemp,
+		f.QgID,
+		y.SFJF,
+		y.SFQF,
+		y.SFTR,
+		y.YHBM,
+		y.JFSJ,
+		y.Bz,
+		f.RecordTime,
+		y.HeatArea,
+		y.ValAd,
+		y.IDNum,
+		y.Yhfl,
+		y.YhRb,
+		y.Cjq,
+		f.Tqyb,
+		y.IDNum,
+		y.WCAd
+		from T_FmInfo f,T_YhInfo y
+		where y.ValAd = f.ValAd and y.SFJF='是' and XqName='砥柱大厦' ORDER BY y.HouseNO  asc
+	</select>
+	<select id="findz" resultMap="fm" parameterType="Fm">
+		Select 
+        y.ValAd,
+		f.ID,
+		y.YhName,
+		y.XqName,
+		y.BuildNO,
+		y.CellNO,
+		y.HouseNO,
+		y.Bjxx,
+		y.BjTime,
+		y.Bz,
+		f.ValAd,
+		f.Status,
+		f.FamKd,
+		f.LockSt,
+		f.JFSt,
+		f.Tqyb,
+		y.YLFQ,
+		f.ValTemp,
+		f.RoomTemp,
+		f.QgID,
+		y.SFJF,
+		y.SFQF,
+		y.SFTR,
+		y.YHBM,
+		y.JFSJ,
+		f.RecordTime,
+		y.HeatArea,
+		y.Yhfl,
+		y.YhRb,
+		y.Cjq,
+		y.IDNum,
+		y.WCAd
+		from T_FmInfo f,T_YhInfo y
+		where
+		y.ValAd = f.ValAd and y.SFJF='是'  
+		<if test="xqName!=null">
+			and y.XqName=#{xqName}
+		</if>
+		<if test="buildNO!=null">
+			and y.BuildNo=#{buildNO}
+		</if>
+		<if test="cellNO!=null">
+			and y.CellNO=#{cellNO}
+		</if>
+		ORDER BY y.HouseNO  asc
+	</select>
+
+	<select id="findYhNameList" resultMap="fm">
+		select distinct y.XqName from T_FmInfo f,T_YhInfo y
+		where f.ValAd=y.ValAd
+	</select>
+	<select id="findYhBuildNObyXqName" parameterType="Fm" resultMap="fm">
+		select y.BuildNO from T_FmInfo f,T_YhInfo y
+		where f.ValAd=y.ValAd and y.XqName=#{xqName} group by y.BuildNO
+	</select>
+
+	<select id="findYhCellNOByBuild" parameterType="Fm" resultMap="fm">
+		select y.CellNO from T_FmInfo f,T_YhInfo y
+		where f.ValAd=y.ValAd and y.XqName=#{xqName} and y.BuildNO=#{build} group
+		by y.CellNO
+	</select>
+	<select id="findJzq" parameterType="Fm" resultMap="fm">
+		select distinct Jzq.JzqPort,Jzq.JzqIP,fm.QgID
+		from T_JzqInfo Jzq,T_FmInfo fm,T_QgInfo qg
+		where fm.QgID=qg.QgID
+		and qg.JzqID=Jzq.JzqID
+		and fm.ValAd=#{fmId}
+	</select>
+	<select id="findIDbyqgvd" parameterType="Fm" resultMap="fm">
+		select ID,ValAd,QgID,Status from T_FmInfo where ValAd=#{id}
+	</select>
+	<select id="findbyVad" parameterType="Fm" resultMap="fm">
+		select distinct y.buildNO,y.CellNO,y.HouseNO from T_FmInfo f,T_YhInfo y
+		where y.ValAd= f.ValAd and f.ValAd=#{fmId}
+	</select>
+</mapper>

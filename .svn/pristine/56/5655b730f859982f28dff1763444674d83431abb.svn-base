@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.hrzgl.dao.HeatWXDao">
+	<resultMap type="HeatWX" id="heatWX">
+		<id property="id" column="ID" />
+		<result property="title" column="Title"/>
+		<result property="article" column="Article"/>
+		<result property="wx" column="WX"/>
+		<result property="wxTime" column="WXTime"/>
+		<result property="remark" column="Remark"/>
+		<result property="image" column="Image"/>
+		<result property="hesName" column="HESName"/>
+	</resultMap>
+
+	<select id="findJLSD" resultMap="heatWX">
+		select * from HeatWX where HESName like'%金领时代%' order by id desc 
+	</select>
+	<select id="findDZDS" resultMap="heatWX">
+		select * from HeatWX where HESName like'%砥柱大厦%' order by id desc 
+	</select>
+	<select id="findTFSF" resultMap="heatWX">
+		select * from HeatWX where HESName like'%天发首府%' order by id desc 
+	</select>
+	<select id="findDXY" resultMap="heatWX">
+		select * from HeatWX where HESName like'%德馨苑%' order by id desc 
+	</select>
+	<select id="findYHCB" resultMap="heatWX">
+		select * from HeatWX where HESName like'%壹号城邦%' order by id desc 
+	</select>
+	
+	<select id="findById" parameterType="HeatWX" resultMap="heatWX">
+		select * from HeatWX where id=#{id}
+	</select>
+
+	
+</mapper>

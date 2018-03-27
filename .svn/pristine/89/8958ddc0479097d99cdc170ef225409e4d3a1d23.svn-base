@@ -1,0 +1,133 @@
+package com.hnzy.hot.kfgl.service.Impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.annotations.Param;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.hnzy.hot.kfgl.dao.RepairDao;
+import com.hnzy.hot.kfgl.pojo.Repair;
+import com.hnzy.hot.kfgl.service.RepairService;
+import com.hnzy.hot.sjbb.pojo.YhInfo;
+@Service
+public class RepairServiceImpl implements RepairService
+{
+	@Autowired
+	private RepairDao repairDao;
+	
+	@Override
+	public List<Repair> findRepair()
+	{		
+		return repairDao.findRepair();
+	}
+	
+	@Override
+	public List<Repair> findPlace(String xqName)
+	{
+		return repairDao.findPlace(xqName);
+	}
+
+
+	
+	@Override
+	public void InsertRepair(Repair repair)
+	{
+		repairDao.Insert(repair);
+	}
+
+	@Override
+	public void deleteRepair(String id)
+	{
+		repairDao.delete(Integer.parseInt(id));
+	}
+
+	@Override
+	public Repair findRepairById(int id)
+	{
+		return repairDao.findById(id);
+	}
+
+	@Override
+	public void updateRepair(Repair repair)
+	{
+		repairDao.update(repair);
+	}
+
+	@Override
+	public List<Repair> findByState(@Param("place")String place,@Param("hesName")String hesName,@Param("state")String state)
+	{
+		return repairDao.findByState(place,hesName,state);
+	}
+
+	@Override
+	public int sum(Repair repair)
+	{
+		
+		return repairDao.sum(repair);
+	}
+
+	@Override
+	public int state0()
+	{
+		return repairDao.state0();
+	}
+
+	@Override
+	public int state1()
+	{
+		return repairDao.state1();
+	}
+
+	@Override
+	public int state2()
+	{
+		return repairDao.state2();
+	}
+
+	@Override
+	public List<Map<String,Object>>  chartSearch(String xqName){
+	List<Map<String,Object>> wxList=new ArrayList<Map<String,Object>>();
+	   Map<String,Object> map=new HashMap<String,Object>();
+	   map.put("未接单", repairDao.statePlace0(xqName));
+	   map.put("已接单", repairDao.statePlace1(xqName));
+	   map.put("已完成", repairDao.statePlace2(xqName));
+	   wxList.add(map);
+		return wxList;
+
+	 }
+
+	@Override
+	public List<Repair> findState()
+	{
+		return repairDao.findState();
+	}
+
+	@Override
+	public int stateCx(String place, String hesName, String state)
+	{
+		return repairDao.stateCx(place, hesName, state);
+	}
+
+	@Override
+	public int stateywc(String place, String hesName, String state)
+	{
+		return repairDao.stateywc(place, hesName, state);
+	}
+
+	@Override
+	public int stateyjd(String place, String hesName, String state)
+	{
+		return repairDao.stateyjd(place, hesName, state);
+	}
+
+	@Override
+	public int statewjd(String place, String hesName, String state)
+	{
+		return repairDao.statewjd(place, hesName, state);
+	}
+
+}

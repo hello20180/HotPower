@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.sbgls.dao.FmsglDao">
+	<resultMap type="Yh" id="yh">
+		<id property="id" column="ID" />
+		<result property="yhName" column="YhName" />
+		<result property="numID" column="IDNum" />
+		<result property="valAd" column="ValAd" />
+		<result property="WCAd" column="WCAd"/> 
+		<result property="rbAd" column="RbAd" />
+		<result property="rbType" column="RbType" />
+		<result property="buildNO" column="BuildNO" />
+		<result property="cellNO" column="CellNO" />
+		<result property="houseNO" column="HouseNO" />
+		<result property="telephone" column="Telephone" />
+		<result property="mobilephone" column="Mobilephone" />
+		<result property="email" column="Email" />
+		<result property="xqName" column="XqName" />
+		<result property="buileArea" column="BuileArea" />
+		<result property="useArea" column="UseArea" />
+		<result property="heatArea" column="HeatArea" />
+		<result property="billWay" column="BillWay" />
+		<result property="sFJF" column="SFJF" />
+		<result property="sFQF" column="SFQF" />
+		<result property="sFTR" column="SFTR" />
+		<result property="AZWZ" column="AZWZ" />
+		<result property="YLFQ" column="YLFQ" />
+		<result property="yhfl" column="Yhfl" />
+		<result property="bjxx" column="Bjxx"/>
+		<result property="bjTime" column="BjTime"/>
+		<result property="bz" column="Bz"/>
+		<result property="faultInfor" column="FaultInfor" />
+		<association property="fm" javaType="com.hnzy.hot.sbgl.pojo.Fm" >
+		<result property="id" column="ID" />
+		<result property="valAd" column="ValAd" />
+		<result property="status" column="Status" />	
+		<result property="famKd" column="FamKd" />
+		<result property="lockSt" column="LockSt" />
+		<result property="jFSt" column="JFSt" />
+		<result property="valTemp" column="ValTemp" />
+		<result property="roomTemp" column="RoomTemp" />
+		<result property="hTemSet" column="HTemSet" />
+		<result property="mTemSet" column="MTemSet" />
+		<result property="lTemSet" column="LTemSet" />
+		<result property="qgID" column="QgID" />
+		<result property="tqyb" column="Tqyb"/>
+		<result property="type" column="Type"/>
+		<result property="recordTime" column="RecordTime" />
+		</association>	
+	</resultMap>
+	
+	<select id="findYhNameList" resultMap="yh">
+        select distinct XqName  from T_FmInfo,T_YhInfo
+		where T_FmInfo.ValAd=T_YhInfo.ValAd
+	</select>
+	
+	<select id="findYhBuildNObyXqName" parameterType="Yh" resultMap="yh">
+	   select BuildNO from T_FmInfo,T_YhInfo
+	   where T_FmInfo.ValAd=T_YhInfo.ValAd and XqName=#{xqName} group by BuildNO
+	</select>
+	
+	<select id="findYhCellNOByBuild" parameterType="Yh" resultMap="yh">
+	   select CellNO from T_FmInfo,T_YhInfo
+	   where T_FmInfo.ValAd=T_YhInfo.ValAd and XqName=#{xqName} and BuildNO=#{build} group by CellNO
+	</select>
+	<select id="findList" resultMap="yh">
+	 select  *
+	  from T_FmInfo,T_YhInfo
+		where T_FmInfo.ValAd=T_YhInfo.ValAd and XqName='砥柱大厦' and SFJF='是'
+	</select>
+	   <select id="searchInfo" resultMap="yh">
+	   select *
+	   from T_YhInfo , T_FmInfo
+		where T_FmInfo.ValAd=T_YhInfo.ValAd
+		<if test="xqName!='--选择小区名称--'">
+			and XqName=#{xqName}
+		</if>
+		<if test="buildNo!=0">
+			and BuildNO=#{buildNo}
+		</if>
+		<if test="cellNo!=0">
+			and CellNO=#{cellNo}
+		</if>
+		<if test="houseNo!=0">
+			and HouseNO=#{houseNo}
+		</if>
+		<if test="sfjf!='--选择缴费状态--'">
+			and SFJF=#{sfjf}
+		</if>
+		</select>
+		<select id="yhflSear" parameterType="Yh" resultMap="yh">
+		  select *
+	   from T_YhInfo , T_FmInfo
+		where T_FmInfo.ValAd=T_YhInfo.ValAd and SFJF='是'
+		<if test="yhfl!=''">
+		and Yhfl=#{yhfl}
+	 	</if>
+		</select>
+		<update id="updateType" parameterType="Yh">
+		update T_FmInfo set Type=#{type} where ValAd=#{fmId}
+		</update>
+		<update id="updateRooTemp" parameterType="Yh">
+		 update T_FmInfo set RoomTemp=#{tqyb}+1 from T_FmInfo where ValAd &gt;'170900001' and ValAd &lt;'170900696'
+		</update>
+</mapper>

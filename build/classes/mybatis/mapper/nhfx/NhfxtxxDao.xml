@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.nhfx.dao.NhfxtxxDao">
+	<resultMap type="Nhfxtxx" id="nhfxtxx">
+		<id property="id" column="id" />
+		<result property="xqName" column="XqName"/>
+		<result property="nhz" column="Nhz"/>
+		<result property="readTime" column="ReadTime"/>
+	</resultMap>
+	<select id="sumYlHeat" parameterType="Nhfxtxx" resultMap="nhfxtxx">
+	select Nhz ,ReadTime,XqName,Nhz
+	from Nhfx
+	<where>
+	<if test="xqName!='' and xqName!='--选择小区名称--'">
+	  xqName=#{xqName}
+	</if>
+	<if test="readTime1!=null and readTime1!='' and readTime2!=null and readTime2!='' ">
+	 and readTime between #{readTime1} and #{readTime2}
+	</if>
+	</where>
+	</select>
+	<insert id="UpNhxx" parameterType="Nhfxtxx">
+	Insert into Nhfx (XqName,Nhz,ReadTime) values (#{xqName},#{nhz},#{readTime1} )
+	</insert>
+	<select id="findList" resultMap="nhfxtxx" parameterType="Nhfxtxx">
+	 select ReadTime from Nhfx 
+	<where>
+	<if test="xqName!='' and xqName!='--选择小区名称--'">
+	  XqName=#{xqName}
+	</if>
+	</where>
+	</select>
+	<select id="findTimeListS" parameterType="Nhfxtxx" resultMap="nhfxtxx">
+		 select ReadTime from Nhfx 
+	<where>
+	<if test="xqName!='' and xqName!='--选择小区名称--'">
+	  XqName=#{xqName}
+	</if>
+	<if test="readTime!=null and readTime!=''" >
+	  and readTime &gt; #{readTime}
+	</if>
+	</where>
+	</select>
+	<select id="findNhz" parameterType="Nhfxtxx" resultMap="nhfxtxx">
+	select Nhz from Nhfx where 1=1
+	<if test="TimeListId!=null and TimeListId!='--选择时间--'" >
+	  and readTime=#{TimeListId}
+	</if>
+	</select>
+	<select id="findNhzS" parameterType="Nhfxtxx" resultMap="nhfxtxx">
+	select Nhz from Nhfx where 1=1
+	<if test="TimeListSId!=null and TimeListSId!='--选择时间--'" >
+	  and readTime=#{TimeListSId}
+	</if>
+	</select>
+</mapper>

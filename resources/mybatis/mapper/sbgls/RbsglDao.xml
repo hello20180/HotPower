@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.sbgls.dao.RbsglDao">
+	<resultMap type="Yh" id="yh">
+		<id property="id" column="ID" />
+		<result property="yhName" column="YhName" />
+		<result property="numID" column="IDNum" />
+		<result property="valAd" column="ValAd" /> 
+		<result property="rbAd" column="RbAd" />
+		<result property="rbType" column="RbType" />
+		<result property="buildNO" column="BuildNO" />
+		<result property="cellNO" column="CellNO" />
+		<result property="houseNO" column="HouseNO" />
+		<result property="telephone" column="Telephone" />
+		<result property="mobilephone" column="Mobilephone" />
+		<result property="email" column="Email" />
+		<result property="xqName" column="XqName" />
+		<result property="buileArea" column="BuileArea" />
+		<result property="useArea" column="UseArea" />
+		<result property="heatArea" column="HeatArea" />
+		<result property="billWay" column="BillWay" />
+		<result property="sFJF" column="SFJF" />
+		<result property="sFQF" column="SFQF" />
+		<result property="sFTR" column="SFTR" />
+		<result property="WCAd" column="WCAd" />
+		<result property="AZWZ" column="AZWZ" />
+		<result property="YLFQ" column="YLFQ" />
+		<result property="bz" column="Bz" />
+		<result property="fm.qgID" column="QgID" />
+		<result property="fm.valAd" column="ValAd" />
+		<result property="fm.qg.jzq.jzqIp" column="JzqIP" />
+		<result property="fm.qg.jzq.jzqPort" column="JzqPort" />
+		<result property="faultInfor" column="FaultInfor" />
+		<association property="rb" javaType="com.hnzy.hot.sbgl.pojo.Rb" >
+		<result property="rbType" column="RbType" />
+		<result property="rbAd" column="RbAd" />	
+		<result property="energy" column="Energy" />
+		<result property="energyUnit" column="EnergyUnit" />
+		<result property="power" column="Power" />
+		<result property="flow" column="Flow" />
+		<result property="inTmp" column="In_Tmp" />
+		<result property="outTmp" column="Out_Tmp" />
+		<result property="diffTmp" column="Diff_Tmp" />
+		<result property="operTime" column="OperTime" />
+		<result property="energyLj" column="EnergyLj" />
+		<result property="errCode" column="ErrCode" />
+		<result property="readMTime" column="ReadMTime" />
+		<result property="recordTime" column="RecordTime" />
+		<result property="rbExp" column="RbExp" />
+		<result property="rbGHExp" column="RbGHExp"/>
+		<result property="rlc" column="Rlc"/>
+		</association>	
+	</resultMap>
+	
+	<select id="findYhNameList" resultMap="yh">
+         select distinct XqName  from T_YhInfo
+	</select>
+	
+	<select id="findYhBuildNObyXqName" parameterType="Yh" resultMap="yh">
+	    select BuildNO   from T_YhInfo where XqName=#{xqName} group by BuildNO
+	</select>
+	
+	<select id="findYhCellNOByBuild" parameterType="Yh" resultMap="yh">
+	    select CellNO   from T_YhInfo where XqName=#{xqName} and BuildNO=#{build} group by CellNO
+	</select>
+	<select id="findList" resultMap="yh">
+	Select
+		y.YhName,
+		y.XqName,
+		y.BuildNO,
+		y.CellNO,
+		f.ValAd,
+		f.QgID,
+		y.HouseNO,
+		r.RbType,
+		r.RbAd,
+		r.Energy,
+		r.EnergyUnit,
+		r.Power,
+		r.Flow,
+		r.In_Tmp,
+		r.Out_Tmp,
+		r.Diff_Tmp,
+		r.OperTime,
+		r.ErrCode,
+		r.ReadMTime,
+		r.RecordTime,
+		r.EnergyLj,
+		r.RbExp,
+		y.Bz
+		from T_YhInfo y,T_RbInfo r,T_FmInfo f
+		where y.RbAd=r.RbAd and f.ValAd=y.ValAd
+	</select>
+	   <select id="searchInfo" resultMap="yh">
+	Select
+		y.YhName,
+		y.XqName,
+		y.BuildNO,
+		y.CellNO,
+		f.ValAd,
+		f.QgID,
+		y.HouseNO,
+		r.RbType,
+		r.RbAd,
+		r.Energy,
+		r.EnergyUnit,
+		r.Power,
+		r.Flow,
+		r.In_Tmp,
+		r.Out_Tmp,
+		r.Diff_Tmp,
+		r.OperTime,
+		r.ErrCode,
+		r.ReadMTime,
+		r.RecordTime,
+		r.EnergyLj,
+		r.RbExp,
+		y.Bz
+		from T_YhInfo y,T_RbInfo r,T_FmInfo f
+		where y.RbAd=r.RbAd and f.ValAd=y.ValAd
+		<if test="xqName!='--选择小区名称--'">
+			and XqName=#{xqName}
+		</if>
+		<if test="buildNo!=0">
+			and BuildNO=#{buildNo}
+		</if>
+		<if test="cellNo!=0">
+			and CellNO=#{cellNo}
+		</if>
+		<if test="houseNo!=0">
+			and HouseNO=#{houseNo}
+		</if>
+		<if test="recordTime1!=null and recordTime1!=''">
+			and r.recordTime &gt;= #{recordTime1}
+		</if>
+		<if test="recordTime2!=null and recordTime2!=''">
+			and r.recordTime &lt;=#{recordTime2}
+		</if>
+		</select>
+		 <select id="searchHis" resultMap="yh">
+	 		Select top 500
+		y.YhName,
+		y.XqName,
+		y.BuildNO,
+		y.CellNO,
+		f.ValAd,
+		f.QgID,
+		y.HouseNO,
+		r.RbType,
+		r.RbAd,
+		r.Energy,
+		r.EnergyUnit,
+		r.Power,
+		r.Flow,
+		r.In_Tmp,
+		r.Out_Tmp,
+		r.Diff_Tmp,
+		r.OperTime,
+		r.ErrCode,
+		r.ReadMTime,
+		r.RecordTime,
+		r.EnergyLj,
+		r.RbExp,
+		y.Bz
+		from T_YhInfo y,T_RbInfo r,T_FmInfo f
+		where y.RbAd=r.RbAd and f.ValAd=y.ValAd
+		<if test="xqName!='--选择小区名称--'">
+			and XqName=#{xqName}
+		</if>
+		<if test="buildNo!=0">
+			and BuildNO=#{buildNo}
+		</if>
+		<if test="cellNo!=0">
+			and CellNO=#{cellNo}
+		</if>
+		<if test="houseNo!=0">
+			and HouseNO=#{houseNo}
+		</if>
+		<if test="recordTime1!=null and recordTime1!=''">
+			and r.recordTime &gt;= #{recordTime1}
+		</if>
+		<if test="recordTime2!=null and recordTime2!=''">
+			and r. recordTime &lt;=#{recordTime2}
+		</if>
+		</select>
+		<select id="SelRb" resultMap="yh" parameterType="Yh" >
+				select distinct yh.RbAd,yh.XqName,yh.CellNo,yh.BuildNO,yh.HouseNO,fm.qgID,jzq.JzqIP,jzq.JzqPort
+            from  T_YhInfo yh,T_FmInfo fm,T_QgInfo qg,T_JzqInfo jzq
+            where  yh.ValAd=fm.ValAd and fm.QgID=qg.QgID 
+	             and qg.JzqID=jzq.JzqID and yh.RbAd=#{rbAd}
+		</select>
+		<select id="searEp" resultMap="yh" parameterType="Yh" >
+		  Select top 500
+		y.YhName,
+		y.XqName,
+		y.BuildNO,
+		y.CellNO,
+		f.ValAd,
+		f.QgID,
+		y.HouseNO,
+		r.RbType,
+		r.RbAd,
+		r.Energy,
+		r.EnergyUnit,
+		r.Power,
+		r.Flow,
+		r.In_Tmp,
+		r.Out_Tmp,
+		r.Diff_Tmp,
+		r.OperTime,
+		r.ErrCode,
+		r.ReadMTime,
+		r.RecordTime,
+		r.EnergyLj,
+		r.RbExp,
+		y.Bz
+		from T_YhInfo y,T_RbInfo r,T_FmInfo f
+		where y.RbAd=r.RbAd and f.ValAd=y.ValAd
+		<if test="gs!=null and gs!=''">
+			and In_Tmp&gt;#{gs}
+		</if>
+		<if test="hs!=null and hs!=''">
+			and Out_Tmp&gt;#{hs}
+		</if>
+		<if test="wc!=null">
+			and Diff_Tmp&lt;#{wc}
+		</if>
+		
+		</select>
+		<select id="SelRbExp" resultMap="yh">
+		select RbAd,Diff_Tmp from T_RbInfo
+		</select>
+		<select id="SelRbEp" resultMap="yh">
+		select top 2  r.Diff_Tmp,r.Energy,r.In_Tmp,r.Out_Tmp,r.Flow,r.Power,r.Diff_Tmp,r.OperTime from T_RbHistory r where RbAd=#{rbAd} order by RecordTime desc
+		</select>
+		<update id="UpExp" parameterType="Yh" >
+		update T_RbInfo set RbExp=#{rbExp} where RbAd=#{rbAd}
+		</update>
+</mapper>

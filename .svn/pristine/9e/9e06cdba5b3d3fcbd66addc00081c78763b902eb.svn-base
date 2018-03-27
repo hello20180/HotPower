@@ -1,0 +1,49 @@
+package com.hnzy.hot.sbgls.service.Impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.hnzy.hot.sbgl.pojo.Yh;
+import com.hnzy.hot.sbgls.dao.FmsglDao;
+import com.hnzy.hot.sbgls.service.FmsService;
+
+
+@Service
+public class FmsServiceImpl implements FmsService{
+
+	@Autowired
+	private FmsglDao fmsglDao;
+	@Override
+	public List<Yh> findYhNameList() {
+		return fmsglDao.findYhNameList();
+	}
+
+	@Override
+	public List<Yh> findYhBuildNObyXqName(String xqName) {
+		return fmsglDao.findYhBuildNObyXqName(xqName);
+	}
+
+	@Override
+	public List<Yh> findYhCellNOByBuild(String xqName,int build) {
+		return fmsglDao.findYhCellNOByBuild(xqName, build);
+	}
+
+	@Override
+	public List<Yh> findList() {
+		return fmsglDao.findList();
+	}
+
+	@Override
+	public List<Yh> searchInfo( String xqName, int buildNo, int cellNo,
+			Integer houseNo) {
+		return fmsglDao.searchInfo(xqName, buildNo, cellNo, houseNo);
+	}
+
+//	@Override
+//	public int fmCount(Qg qgId) {
+//		return fmsglDao.fmCount(qgId);
+//	}
+
+}

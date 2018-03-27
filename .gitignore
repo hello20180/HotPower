@@ -1,6 +1,9 @@
 # Compiled class file
 *.class
 
+jdbc.properties
+applicationContext.xml
+
 # Log file
 *.log
 

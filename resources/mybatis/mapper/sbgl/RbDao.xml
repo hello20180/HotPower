@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.sbgl.dao.RbDao">
+	<resultMap type="Rb" id="rb">
+		<result property="id" column="ID" />
+		<result property="yh.yhName" column="YhName" />
+		<result property="yh.xqName" column="XqName" />
+		<result property="yh.buildNO" column="BuildNO" />
+		<result property="yh.cellNO" column="CellNO" />
+		<result property="yh.houseNO" column="HouseNO" />
+		<result property="yh.rbAd" column="RbAd" />
+		<result property="yh.bz" column="Bz" />
+		<result property="yh.fm.valAd" column="ValAd" />
+		<result property="yh.fm.qgID" column="QgID" />
+		<result property="rbType" column="RbType" />
+		<result property="rbAd" column="RbAd" />	
+		<result property="energy" column="Energy" />
+		<result property="energyLj" column="EnergyLj" />
+		<result property="energyUnit" column="EnergyUnit" />
+		<result property="power" column="Power" />
+		<result property="flow" column="Flow" />
+		<result property="inTmp" column="In_Tmp" />
+		<result property="outTmp" column="Out_Tmp" />
+		<result property="diffTmp" column="Diff_Tmp" />
+		<result property="operTime" column="OperTime" />
+		<result property="errCode" column="ErrCode" />
+		<result property="readMTime" column="ReadMTime" />
+		<result property="recordTime" column="RecordTime" />	
+		<result property="rlc" column="Rlc"/>	
+	</resultMap>
+
+	<select id="find" resultMap="rb">
+		Select
+		y.YhName,
+		y.XqName,
+		y.BuildNO,
+		y.CellNO,
+		f.ValAd,
+		f.QgID,
+		y.HouseNO,
+		r.RbType,
+		r.RbAd,
+		r.Energy,
+		r.EnergyUnit,
+		r.Power,
+		r.Flow,
+		r.In_Tmp,
+		r.Out_Tmp,
+		r.Diff_Tmp,
+		r.OperTime,
+		r.ErrCode,
+		r.ReadMTime,
+		r.RecordTime,
+		r.EnergyLj,
+		r.RbExp,
+		y.Bz
+		from T_YhInfo y,T_RbInfo r,T_FmInfo f
+		where y.RbAd=r.RbAd and f.ValAd=y.ValAd
+	</select>
+
+</mapper>

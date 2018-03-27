@@ -1,0 +1,16 @@
+jdbc.user=sa
+jdbc.password=sa
+jdbc.url=jdbc\:sqlserver\://localhost\:1433;databaseName\=DB_Znsbf;
+jdbc.driver=com.microsoft.sqlserver.jdbc.SQLServerDriver
+
+
+
+oracle.driver=oracle.jdbc.driver.OracleDriver
+oracle.url=jdbc:oracle:thin:@218.29.157.150:1521:ORCL
+oracle.username=CHARGE_SMX_SLRL
+oracle.password=CHARGE_SMX_SLRL
+
+#oracle.driver=oracle.jdbc.driver.OracleDriver
+#oracle.url=jdbc:oracle:thin:@192.168.0.103:1521:orcl
+#oracle.username=c##zy
+#oracle.password=zy

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.xtgl.dao.ServerSetDao">
+ <resultMap type="ServerSet" id="serverSet">
+ <id property="id" column="Id"/>
+ <result property="sname" column="Server_Name"/>
+ <result property="sip" column="Server_IP"/>
+ <result property="sport" column="Server_Port"/>
+ <result property="sqlname" column="SQL_Name"/>
+ <result property="sqlpass" column="SQL_Pass"/>
+</resultMap> 
+
+ <select id="findServerSet" resultMap="serverSet">
+select Id, Server_Name,Server_IP,Server_Port,SQL_Name,SQL_Pass from T_Set
+</select>
+<update id="update" parameterType="ServerSet" >
+  update T_Set set Server_Name=#{sname},Server_IP=#{sip},Server_Port=#{sport},SQL_Name=#{sqlname},SQL_Pass=#{sqlpass} where Id=#{id}
+</update> 
+</mapper>

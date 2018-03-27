@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.nhfx.dao.ZnhDao">
+	<resultMap type="Znh" id="znh">
+		<id property="id" column="id" />
+		<result property="rhLx" column="RhLx"/>
+		<result property="rh" column="Rh"/>
+		<result property="readTime" column="ReadTime"/>
+	</resultMap>
+	<insert id="InsertRh" parameterType="Znh">
+	Insert into Znhz (RhLx,Rh,ReadTime) values (#{rhLx},#{rh},#{readTime} )
+	</insert>
+	<select id="find" resultMap="znh" parameterType="Znh">
+	select * from Znhz 
+	<where>
+	<if test="rhLx!=''">
+	  RhLx=#{rhLx}
+	</if>
+	<if test="readTime1!=null and readTime1!='' and readTime2!=null and readTime2!='' ">
+	 and readTime between #{readTime1} and #{readTime2}
+	</if>
+	</where>
+	</select>
+</mapper>

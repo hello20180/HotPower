@@ -1,0 +1,10 @@
+package com.hnzy.hot.test.service;
+
+import java.util.List;
+
+import com.hnzy.hot.test.pojo.SF;
+
+public interface SFService {
+
+	public List<SF> find();
+}

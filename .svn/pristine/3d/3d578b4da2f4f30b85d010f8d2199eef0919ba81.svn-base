@@ -1,0 +1,151 @@
+package com.hnzy.hot.socket;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Date;
+import java.util.TimerTask;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.orm.hibernate3.support.IdTransferringMergeEventListener;
+
+import com.hnzy.hot.socket.server.ServerSessionMap;
+import com.hnzy.hot.socket.util.CzUtil;
+import com.hnzy.hot.socket.util.DatabaseUtil;
+import com.hnzy.hot.socket.util.oracleHelper;
+
+public class ReplyTask extends TimerTask {
+	PreparedStatement Oracleps;
+	ResultSet Oraclerst;
+	int Oraclers = 0;
+	
+	
+	
+	PreparedStatement Sqlps;
+	ResultSet Sqlrst;
+	int Sqlrs = 0;
+	
+	PreparedStatement ps;
+	ResultSet rst;
+	int rs = 0;
+	
+      //日志文件
+      private static Log log = LogFactory.getLog(ReplyTask.class);
+	@Override
+	public void run() {	
+		
+		//执行的方法
+		
+			try
+			{
+				doSomething();
+			} catch (SQLException e)
+			{
+				e.printStackTrace();
+			}
+	}
+//	@SuppressWarnings("unused")
+//	private void doSomething() throws SQLException
+//	{
+//	
+//
+//	String qgId = null;
+//	String JzqIP = null;
+//	int JzqPort = 0;
+
+	private void doSomething() throws SQLException {
+		
+		System.out.println("doSomething----");
+					// 连接SQLServer数据库
+					DatabaseUtil SqldbUtil = DatabaseUtil.getInstance();
+					Connection Sqlconnc = SqldbUtil.getConnection();
+
+					// 连接oracle数据库
+					oracleHelper OracledbUtil = oracleHelper.getInstance();
+					Connection Oracleconnc = OracledbUtil.getConnection();
+					
+					String Oraclesql = "select * from ZY  ";
+					String sql="select xqName,buildNo,cellNo,houseNo from T_YhInfo";
+					
+					String xQ;
+					String lH;
+					String dYH;
+					String sH;
+					
+					//执行查询SQLserver
+					
+					Statement slqps=Sqlconnc .createStatement();
+					Sqlrst=slqps.executeQuery(sql);
+					ResultSetMetaData sData=Sqlrst.getMetaData();
+					
+					String xqName;
+					String buildNo;
+					String cellNo;
+					String houseNo;
+					String Upsql;
+					
+					String SFJF;
+					String XQ;
+					String LH;
+					String DYH;
+					String CS;
+					String SH;
+					while(Sqlrst.next()){
+						
+						xqName =Sqlrst.getString("XqName");
+						buildNo=Sqlrst.getString("BuildNO");
+						cellNo=Sqlrst.getString("CellNO");
+						houseNo=Sqlrst.getString("HouseNO");
+							
+						XQ=xqName+"小区";
+						LH=xqName+buildNo+"#";
+						DYH="0"+cellNo;
+						CS=houseNo.substring(0,houseNo.length()-2);
+						SH=houseNo.substring(houseNo.length()-2);
+						
+						String oral="select JFZT from ZY where XQ='"+XQ+"' and LH='"+LH+"' and DYH='"+DYH+"' and CS='"+CS+"' and SH='"+SH+"'";
+						
+						Oracleps = Oracleconnc.prepareStatement(oral);
+						Oraclerst = Oracleps.executeQuery();
+						int jfzt =3;
+						String sfjf=null;
+						int col = Oraclerst.getMetaData().getColumnCount();
+						while (Oraclerst.next())
+						{
+						 	jfzt = Oraclerst.getInt("JFZT");
+						}
+//						System.out.println("xqName---"+xqName);
+//						System.out.println("buildNo---"+buildNo);
+//						System.out.println("cellNo---"+cellNo);
+//						System.out.println("houseNo---"+houseNo);
+//						
+						if (jfzt==0)
+						{
+							sfjf="是";
+						}else{
+							sfjf ="否";
+						}
+
+						
+						
+//					 	System.out.println("----------jfzt"+jfzt);
+						String update="update T_YhInfo set SFJF='"+sfjf+"' where XqName='"+xqName+"' and BuildNO='"+buildNo+"' and CellNO='"+cellNo+"' and HouseNO='"+houseNo+"'";
+						
+						ps = Sqlconnc.prepareStatement(update);
+						rs = ps.executeUpdate();
+						
+							
+					}
+					Oracleps.close();
+					Oracleconnc.close();
+					Sqlrst.close();
+					slqps.close();
+					ps.close();
+					Sqlconnc.close();
+	
+}
+	}

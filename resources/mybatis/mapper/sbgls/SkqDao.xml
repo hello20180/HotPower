@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.sbgls.dao.SkqDao">
+	<resultMap type="Skq" id="skq">
+		<id property="id" column="Id" />
+		<result property="skqSbh" column="SkqSbh"/>
+		<result property="kh" column="Kh"/>
+		<result property="state" column="State"/>
+		<result property="dateTime" column="DateTime"/>
+	</resultMap>
+	
+	<select id="find" resultMap="skq">
+        select distinct *  from Skq
+	</select>
+</mapper>

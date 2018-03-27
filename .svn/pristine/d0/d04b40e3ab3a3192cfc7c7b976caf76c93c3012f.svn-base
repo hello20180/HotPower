@@ -1,0 +1,237 @@
+package com.hnzy.hot.sjbb.service.Impl;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.ServletOutputStream;
+
+import org.apache.ibatis.annotations.Param;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.hnzy.hot.sjbb.dao.YhInfoDao;
+import com.hnzy.hot.sjbb.pojo.YhInfo;
+import com.hnzy.hot.sjbb.service.YhInfoService;
+import com.hnzy.hot.util.ExcelUtil;
+
+@Service
+public class YhInfoServiceImpl implements YhInfoService {
+@Autowired 
+private YhInfoDao yhInfoDao;
+
+@Override
+public List<YhInfo> findYhNameList() {
+	return yhInfoDao.find();
+}
+
+@Override
+public List<YhInfo> findYhBuildNObyXqName(String xqName) {
+	return yhInfoDao.findYhBuildNObyXqName(xqName);
+}
+
+@Override
+public List<YhInfo> findYhCellNOByBuild(int build,String xqName) {
+	return yhInfoDao.findYhCellNOByBuild(build, xqName);
+}
+
+@Override
+public List<YhInfo> findYhHouseNOByBuild(int house, int build, String xqName)
+{
+	return yhInfoDao.findYhHouseNOByBuild(house,build,xqName);
+}
+
+@Override
+public List<YhInfo> findXqInfoFmHistory() {
+	return yhInfoDao.findXqInfoFmHistory();
+}
+
+//导出
+public List<YhInfo> YhInfodoExportExcel(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("houseNo")Integer houseNo,@Param("status")String status){
+	return yhInfoDao.YhInfodoExportExcel(xqName, buildNo, cellNo, houseNo, status);
+}
+
+//导出
+@Override
+public void exportExcel(List<YhInfo> yhInfosList, ServletOutputStream outputStream) throws IOException {
+	ExcelUtil.exportExcel(yhInfosList, outputStream);
+}
+
+@Override
+public List<YhInfo> searchInfo(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("houseNo")int houseNo,@Param("status")String status){
+	return yhInfoDao.searchInfo(xqName, buildNo, cellNo, houseNo, status);
+}
+
+@Override
+public List<YhInfo> yhInfoJFStatus() {
+	return yhInfoDao.yhInfoJFStatus();
+}
+
+
+@Override
+public Double chartgrfxStatusK() {
+	return yhInfoDao.chartgrfxStatusK();
+}
+
+@Override
+public Double chartgrfxStatusG() {
+	return yhInfoDao.chartgrfxStatusG();
+}
+
+@Override
+public Double ChartgrfxZ() {
+	return yhInfoDao.ChartgrfxZ();
+}
+
+@Override
+public int chartSearchA(String xqName, int buildNo, int cellNo, String sfjf, String status) {
+	return yhInfoDao.chartSearchA(xqName, buildNo, cellNo, sfjf, status);
+}
+
+@Override
+public int chartSearchB(String xqName, int buildNo, int cellNo, String sfjf, String status) {
+	return yhInfoDao.chartSearchB(xqName, buildNo, cellNo, sfjf, status);
+}
+
+@Override
+public int chartSearchC(String xqName, int buildNo, int cellNo, String sfjf, String status) {
+	return yhInfoDao.chartSearchC(xqName, buildNo, cellNo, sfjf, status);
+}
+
+@Override
+public int chartSearchD(String xqName, int buildNo, int cellNo, String sfjf, String status) {
+	return yhInfoDao.chartSearchD(xqName, buildNo, cellNo, sfjf, status);
+}
+
+@Override
+public int chartSearchE(String xqName, int buildNo, int cellNo, String sfjf, String status) {
+	return yhInfoDao.chartSearchE(xqName, buildNo, cellNo, sfjf, status);
+}
+
+@Override
+public int chartSearchF(String xqName, int buildNo, int cellNo, String sfjf, String status) {
+	return yhInfoDao.chartSearchF(xqName, buildNo, cellNo, sfjf, status);
+}
+
+@Override
+public int chartSearchG(String xqName, int buildNo, int cellNo, String sfjf, String status) {
+	return yhInfoDao.chartSearchG(xqName, buildNo, cellNo, sfjf, status);
+}
+
+
+@Override
+public int findFamKdA(String xqName,int buildNo,int cellNo,String sfjf,String status)
+{
+	return yhInfoDao.findFamKdA(xqName, buildNo, cellNo, sfjf, status);
+}
+@Override
+public int findFamKdB(String xqName,int buildNo,int cellNo,String sfjf,String status)
+{
+	return yhInfoDao.findFamKdB(xqName, buildNo, cellNo, sfjf, status);
+}
+@Override
+public int findFamKdC(String xqName,int buildNo,int cellNo,String sfjf,String status)
+{
+	return yhInfoDao.findFamKdC(xqName, buildNo, cellNo, sfjf, status);
+}
+@Override
+public int findFamKdD(String xqName,int buildNo,int cellNo,String sfjf,String status)
+{
+	return yhInfoDao.findFamKdD(xqName, buildNo, cellNo, sfjf, status);
+}
+@Override
+public int findFamKdE(String xqName,int buildNo,int cellNo,String sfjf,String status)
+{
+	return yhInfoDao.findFamKdE(xqName, buildNo, cellNo, sfjf, status);
+}
+@Override
+public int findFamKdF(String xqName,int buildNo,int cellNo,String sfjf,String status)
+{
+	return yhInfoDao.findFamKdF(xqName, buildNo, cellNo, sfjf, status);
+}
+
+@Override
+public int HeatAreaByxqName(String xqName) {
+	return yhInfoDao.HeatAreaByxqName(xqName);
+}
+@Override
+public List<Map<String,Object>>  chartSearch(String xqName, int buildNo, int cellNo) {
+	List<Map<String,Object>>grList=new ArrayList<Map<String,Object>>();
+   Map<String,Object> map=new HashMap<String,Object>();
+   map.put("供热面积", yhInfoDao.chartSearchGr(xqName, buildNo, cellNo));
+   map.put("未供热面积", yhInfoDao.chartSearchNoGr(xqName, buildNo, cellNo));
+   grList.add(map);
+	return grList;
+
+ }
+
+@Override
+public  List<YhInfo> chartNameA(String xqName, int buildNo, int cellNo, String sfjf, String status) {
+	return yhInfoDao.chartNameA(xqName, buildNo, cellNo, sfjf, status);
+}
+
+@Override
+public  List<YhInfo> chartNameB(String xqName, int buildNo, int cellNo, String sfjf, String status) {
+	return yhInfoDao.chartNameB(xqName, buildNo, cellNo, sfjf, status);
+}
+
+@Override
+public  List<YhInfo> chartNameC(String xqName, int buildNo, int cellNo, String sfjf, String status) {
+	return yhInfoDao.chartNameC(xqName, buildNo, cellNo, sfjf, status);
+}
+
+@Override
+public  List<YhInfo> chartNameD(String xqName, int buildNo, int cellNo, String sfjf, String status) {
+	return yhInfoDao.chartNameD(xqName, buildNo, cellNo, sfjf, status);
+}
+
+@Override
+public  List<YhInfo> chartNameE(String xqName, int buildNo, int cellNo, String sfjf, String status) {
+	return yhInfoDao.chartNameE(xqName, buildNo, cellNo, sfjf, status);
+}
+
+@Override
+public  List<YhInfo> chartNameF(String xqName, int buildNo, int cellNo, String sfjf, String status) {
+	return yhInfoDao.chartNameF(xqName, buildNo, cellNo, sfjf, status);
+}
+
+@Override
+public  List<YhInfo> chartNameG(String xqName, int buildNo, int cellNo, String sfjf, String status) {
+	return yhInfoDao.chartNameG(xqName, buildNo, cellNo, sfjf, status);
+}
+
+@Override
+public List<YhInfo> findFKdA(String xqName, int buildNo, int cellNo, String sfjf, String status) {
+	return yhInfoDao.findFKdA(xqName, buildNo, cellNo, sfjf, status);
+}
+
+@Override
+public List<YhInfo> findFKdB(String xqName, int buildNo, int cellNo, String sfjf, String status) {
+	return yhInfoDao.findFKdB(xqName, buildNo, cellNo, sfjf, status);
+}
+
+@Override
+public List<YhInfo> findFKdC(String xqName, int buildNo, int cellNo, String sfjf, String status) {
+	return yhInfoDao.findFKdC(xqName, buildNo, cellNo, sfjf, status);
+}
+
+@Override
+public List<YhInfo> findFKdD(String xqName, int buildNo, int cellNo, String sfjf, String status) {
+	return yhInfoDao.findFKdD(xqName, buildNo, cellNo, sfjf, status);
+}
+
+@Override
+public List<YhInfo> findFKdE(String xqName, int buildNo, int cellNo, String sfjf, String status) {
+	return yhInfoDao.findFKdE(xqName, buildNo, cellNo, sfjf, status);
+}
+
+@Override
+public List<YhInfo> findFKdF(String xqName, int buildNo, int cellNo, String sfjf, String status) {
+	return yhInfoDao.findFKdF(xqName, buildNo, cellNo, sfjf, status);
+}
+
+
+
+}

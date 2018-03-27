@@ -1,0 +1,422 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+    pageEncoding="utf-8"%>
+    <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+    
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script type="text/javascript" src="../js/biao.js"></script>
+<link href="../css/main.css" rel="stylesheet" type="text/css" />
+<!-- Bootstrap -->
+<script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
+<link href="../css/bootstrap.css" rel="stylesheet">
+<script type="text/javascript" src="../js/bootstrap.js"></script>
+<script src="../js/main.js"></script>
+<style type="text/css">
+  #top{ padding-top: 10px;}
+</style>
+
+<script type="text/javascript">
+//添加时数据不能为空
+function add(){
+	var xqName=$("#add input[name=xqName]");
+	var lxrName=$("#add input[name=lxrName]");
+	var lxrPhone=$("#add input[name=lxrPhone]");
+	var nhPrice=$("#add input[name=nhPrice]");
+	var areaPriceOne=$("#add input[name=areaPriceOne]");
+	var areaPriceTwo=$("#add input[name=areaPriceTwo]");
+	var hesName=$("#add input[name=hesName]");
+	if(xqName.val()==null||xqName.val()==""||lxrName.val()==null||lxrName.val()==""||lxrPhone.val()==null||lxrPhone.val()==""||nhPrice.val()==null||nhPrice.val()==""||areaPriceOne.val()==null||areaPriceOne.val()==""||areaPriceTwo.val()==null||areaPriceTwo.val()==""||hesName.val()==null||hesName.val()==""){
+			 sAlert('信息不能为空，请填写完整!');
+			return false;
+		} 
+	var lxrPhone1=document.getElementById("add_lxrPhone").value;
+	if(isNaN(lxrPhone1)){
+				 sAlert('联系电话必须是数字！');
+			document.getElementById("add_lxrPhone").value="";
+				return;
+			} 
+	var nhPrice1=document.getElementById("add_nhPrice").value;
+	if(isNaN(nhPrice1)){
+		 sAlert('能量价格必须是数字！');
+	document.getElementById("add_nhPrice").value="";
+		return;
+	} 
+	var areaPriceOne1=document.getElementById("add_areaPriceOne").value;
+	if(isNaN(areaPriceOne1)){
+		 sAlert('面积价格1必须是数字！');
+	document.getElementById("add_areaPriceOne").value="";
+		return;
+	} 
+	var areaPriceTwo1=document.getElementById("add_areaPriceTwo").value;
+	if(isNaN(areaPriceTwo1)){
+		 sAlert('面积价格2必须是数字！');
+	document.getElementById("add_areaPriceTwo").value="";
+		return;
+	} 
+		$("#add form").submit();
+	}
+//修改时数据不允许为空
+ function edit(){
+		var xqName=$("#edit input[name=xqName]");
+		var lxrName=$("#edit input[name=lxrName]");
+		var lxrPhone=$("#edit input[name=lxrPhone]");
+		var nhPrice=$("#edit input[name=nhPrice]");
+		var areaPriceOne=$("#edit input[name=areaPriceOne]");
+		var areaPriceTwo=$("#edit input[name=areaPriceTwo]");
+		var hesName=$("#edit input[name=hesName]");
+		if(xqName.val()==null||xqName.val()==""||lxrName.val()==null||lxrName.val()==""||lxrPhone.val()==null||lxrPhone.val()==""||nhPrice.val()==null||nhPrice.val()==""||areaPriceOne.val()==null||areaPriceOne.val()==""||areaPriceTwo.val()==null||areaPriceTwo.val()==""||hesName.val()==null||hesName.val()==""){
+			 sAlert('信息不能为空，请填写完整!');
+			return false;
+		} 
+		var lxrPhone2=document.getElementById("edit_lxrPhone").value;
+		if(isNaN(lxrPhone2)){
+					 sAlert('联系电话必须是数字！');
+				document.getElementById("edit_lxrPhone").value="";
+					return;
+				} 
+		var nhPrice2=document.getElementById("edit_nhPrice").value;
+		if(isNaN(nhPrice2)){
+			 sAlert('能量价格必须是数字！');
+		document.getElementById("edit_nhPrice").value="";
+			return;
+		} 
+		var areaPriceOne2=document.getElementById("edit_areaPriceOne").value;
+		if(isNaN(areaPriceOne2)){
+			 sAlert('面积价格1必须是数字！');
+		document.getElementById("edit_areaPriceOne").value="";
+			return;
+		} 
+		var areaPriceTwo2=document.getElementById("edit_areaPriceTwo").value;
+		if(isNaN(areaPriceTwo2)){
+			 sAlert('面积价格2必须是数字！');
+		document.getElementById("edit_areaPriceTwo").value="";
+			return;
+		} 
+		$("#edit form").submit();
+	} 
+//修改
+function openEditUserPage(){
+	var ckbs=$("#xqinfo input[type=checkbox]:checked");
+	if(ckbs.length==0){
+		sAlert("请选择要修改的信息");
+		return false;
+	}
+	if(ckbs.length>1){
+		sAlert("对不起一次只能修改一条信息，您选择了"+ckbs.length+"条信息");
+		return false;
+	}
+	var id=ckbs.val();
+	var xqName=ckbs.parent().next().text();
+	var lxrName=ckbs.parent().next().next().text();
+	var lxrPhone=ckbs.parent().next().next().next().text();
+	var nhPrice=ckbs.parent().next().next().next().next().text();
+	var areaPriceOne=ckbs.parent().next().next().next().next().next().text();
+	var areaPriceTwo=ckbs.parent().next().next().next().next().next().next().text();
+	var hesName=ckbs.parent().next().next().next().next().next().next().next().text();
+	var xqAd=ckbs.parent().next().next().next().next().next().next().next().next().text();
+	
+	$("#edit_id").val(id);
+	$("#edit_xqName").val(xqName);
+	$("#edit_lxrName").val(lxrName);
+	$("#edit_lxrPhone").val(lxrPhone);
+	$("#edit_nhPrice").val(nhPrice);
+	$("#edit_areaPriceOne").val(areaPriceOne);
+	$("#edit_areaPriceTwo").val(areaPriceTwo);
+	$("#edit_hesName").val(hesName);
+	$("#edit_xqAd").val(xqAd);
+	
+	$("#edit").modal({keyboard:false});
+}
+//删除
+function openDeletePage(){
+		var ckbs=$("#xqinfo input[type=checkbox]:checked");
+		if(ckbs.length==0){
+			sAlert("请选择要删除的小区");
+			return false;
+		}
+		var id=[];
+		$.each(ckbs,function(index,data){
+			id[index]=$(data).val();
+		});
+		var names=ckbs.parent().next();
+		var deleteUserNames=[];
+		$("#deleteUser .modal-body .col-sm-7").empty();
+		$("#deleteUser .modal-body .col-sm-7").append("<h4><span class='text-danger'>你确定要删除下面这"+ckbs.length+"个小区吗？<br/>"+"</span></h4>");
+		$.each(names,function(index,data){
+			deleteUserNames[index]=$(data).text();
+			$("#deleteUser .modal-body h4").append("<span class='small  '>"+"&nbsp;&nbsp;["+$(data).text()+"]&nbsp;&nbsp;"+"</span>");
+		});
+		$("#deleteUser .modal-body .col-sm-7").append("<div><button type='button' id='btn_delete_user' class='btn btn-sm btn-primary'>确定</button>&nbsp;<button id='closeDeleteUserPage' class='btn btn-sm btn-primary' type='button'>取消</button></div>");
+		$("#closeDeleteUserPage").click(function(){
+			$("#deleteUser").modal("hide");
+		});
+		$("#btn_delete_user").click(function(){
+			$.ajax({
+				url :"delete.action?id="+id,
+				type : "post",
+				success : function() {
+					$("#deleteUser").modal("hide");
+					window.location.href="findList.action";
+				}
+				
+			});		
+		});
+		
+		$("#deleteUser").modal({keyboard:false});
+	}
+</script>
+
+</head>
+<body>
+ <div class="panel panel-success">
+ <div class="panel-heading">小区管理</div>
+ <div class="panel-body"  style="width: 99%; height: 90%; position: absolute; overflow:auto;">
+ <div id="top">
+<button type="button" class="btn btn-success" data-toggle="modal" data-target="#add">添加</button>&nbsp;&nbsp;
+   <button type="button" class="btn btn-success"
+				onClick="openEditUserPage()">修改</button>&nbsp;&nbsp;
+			<button type="button" class="btn btn-success"
+				onClick="openDeletePage()">删除</button>
+</div>
+			<hr />
+	<table id="tableSort" style="overflow:scroll;">
+				<thead>
+					<tr>
+						<th type="string" nowrap="nowrap" align="center"></th>
+						
+						<th class="text-center" nowrap="nowrap" align="center">小区名称</th>
+						<th class="text-center" nowrap="nowrap" align="center">联系人</th>
+						<th class="text-center" nowrap="nowrap" align="center">联系电话</th>
+						<th class="text-center" nowrap="nowrap" align="center">能量单价</th>
+						<th class="text-center" nowrap="nowrap" align="center">面积单价1</th>
+						<th class="text-center" nowrap="nowrap" align="center">面积单价2</th>
+						<th class="text-center" nowrap="nowrap" align="center">所属换热站</th>
+						<th class="text-center" nowrap="nowrap" align="center">小区地址</th>
+					
+					</tr>
+				</thead>
+				<tbody class="text-center" id="xqinfo">
+					<c:forEach  var="xq" items="${xq}" varStatus="status">
+								<tr class="hover" <c:if test="${status.index%2==1 }">style="background-color:#eef3fa"</c:if>>
+									<td class="sequence" align="center"><input type="checkbox" value="${xq.id }" /></td>
+                                     <td align="center" nowrap="nowrap">${xq.xqName}</td>
+                                     <td align="center" nowrap="nowrap">${xq.lxrName}</td>
+                                      <td align="center" nowrap="nowrap">${xq.lxrPhone}</td>
+                                     <td align="center" nowrap="nowrap">${xq.nhPrice}</td>
+                                      <td align="center" nowrap="nowrap">${xq.areaPriceOne}</td>
+                                     <td align="center" nowrap="nowrap">${xq.areaPriceTwo}</td>
+                                      <td align="center" nowrap="nowrap">${xq.hesName}</td>
+                                     <td align="center" nowrap="nowrap">${xq.xqAd}</td>
+                                     
+                                    
+					</c:forEach>
+				</tbody>
+			</table>
+</div>
+</div>
+<!-- 添加用户开始 ----------------------------------------------------------------->
+<div class="modal fade" id="add">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header bg-primary">
+					<h4 class="text-center" style="padding: 0; margin: 0;">添加</h4>
+				</div>
+				<div class="modal-body bg-info">
+					<form class="form form-horizontal" action="Insert.action" method="post">
+						<div class="form-group">
+							<label for="add_xqName"
+								class="col-sm-2 col-sm-offset-3 control-label">小区名称</label>
+							<div class="col-sm-4">
+								<input id="add_xqName" type="text" name="xqName"
+									class="form-control" placeholder="小区名称" />
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="add_lxrName"
+								class="col-sm-2 col-sm-offset-3 control-label">联系人</label>
+							<div class="col-sm-4">
+								<input id="add_lxrName" type="text" name="lxrName"
+									class="form-control" placeholder="联系人" />
+							</div>
+						</div>
+								<div class="form-group">
+							<label for="add_lxrPhone"
+								class="col-sm-2 col-sm-offset-3 control-label">联系电话</label>
+							<div class="col-sm-4">
+								<input id="add_lxrPhone" type="text" name="lxrPhone"
+									class="form-control" placeholder="联系电话" />
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="add_nhPrice"
+								class="col-sm-2 col-sm-offset-3 control-label">能量单价</label>
+							<div class="col-sm-4">
+								<input id="add_nhPrice" type="text" name="nhPrice"
+									class="form-control" placeholder="能量单价" />
+							</div>
+						</div>
+								<div class="form-group">
+							<label for="add_areaPriceOne"
+								class="col-sm-2 col-sm-offset-3 control-label">面积单价1</label>
+							<div class="col-sm-4">
+								<input id="add_areaPriceOne" type="text" name="areaPriceOne"
+									class="form-control" placeholder="面积单价1" />
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="add_areaPriceTwo"
+								class="col-sm-2 col-sm-offset-3 control-label">面积单价2</label>
+							<div class="col-sm-4">
+								<input id="add_areaPriceTwo" type="text" name="areaPriceTwo"
+									class="form-control" placeholder="面积单价2" />
+							</div>
+						</div>
+								<div class="form-group">
+							<label for="add_hesName"
+								class="col-sm-2 col-sm-offset-3 control-label">换热站名</label>
+							<div class="col-sm-4">
+								<input id="add_hesName" type="text" name="hesName"
+									class="form-control" placeholder="换热站名" />
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="add_xqAd"
+								class="col-sm-2 col-sm-offset-3 control-label">小区地址</label>
+							<div class="col-sm-4">
+								<input id="add_xqAd" type="text" name="xqAd"
+									class="form-control" placeholder="小区地址" />
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="col-sm-4 col-sm-offset-5">
+							<button type="button" onclick="add()" class="btn btn-primary btn-sm">提交</button>
+								<button type="reset" class="btn btn-primary btn-sm">重置</button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+<!-- 添加用户结束 -------------------------------------------------- -->
+<!---------------------------修改页面开始 --------------------------------------------------------- -->
+	<div class="modal fade bs-example-modal-sm" id="edit">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header bg-primary">
+					<h4 class="text-center" style="padding: 0; margin: 0;">修改</h4>
+				</div>
+				<div class="modal-body bg-info">
+					<form class="form form-horizontal" action="update.action" method="post">
+					 <input type="hidden" id="edit_id" name="id" />
+									<div class="form-group">
+							<label for="edit_xqName"
+								class="col-sm-2 col-sm-offset-3 control-label">小区名称</label>
+							<div class="col-sm-4">
+								<input id="edit_xqName" type="text" name="xqName"
+									class="form-control" placeholder="小区名称" />
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="edit_lxrName"
+								class="col-sm-2 col-sm-offset-3 control-label">联系人</label>
+							<div class="col-sm-4">
+								<input id="edit_lxrName" type="text" name="lxrName"
+									class="form-control" placeholder="联系人" />
+							</div>
+						</div>
+								<div class="form-group">
+							<label for="edit_lxrPhone"
+								class="col-sm-2 col-sm-offset-3 control-label">联系电话</label>
+							<div class="col-sm-4">
+								<input id="edit_lxrPhone" type="text" name="lxrPhone"
+									class="form-control" placeholder="联系电话" />
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="edit_nhPrice"
+								class="col-sm-2 col-sm-offset-3 control-label">能量单价</label>
+							<div class="col-sm-4">
+								<input id="edit_nhPrice" type="text" name="nhPrice"
+									class="form-control" placeholder="能量单价" />
+							</div>
+						</div>
+								<div class="form-group">
+							<label for="edit_areaPriceOne"
+								class="col-sm-2 col-sm-offset-3 control-label">面积单价1</label>
+							<div class="col-sm-4">
+								<input id="edit_areaPriceOne" type="text" name="areaPriceOne"
+									class="form-control" placeholder="面积单价1" />
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="edit_areaPriceTwo"
+								class="col-sm-2 col-sm-offset-3 control-label">面积单价2</label>
+							<div class="col-sm-4">
+								<input id="edit_areaPriceTwo" type="text" name="areaPriceTwo"
+									class="form-control" placeholder="面积单价2" />
+							</div>
+						</div>
+								<div class="form-group">
+							<label for="edit_hesName"
+								class="col-sm-2 col-sm-offset-3 control-label">换热站名</label>
+							<div class="col-sm-4">
+								<input id="edit_hesName" type="text" name="hesName"
+									class="form-control" placeholder="换热站名" />
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="edit_xqAd"
+								class="col-sm-2 col-sm-offset-3 control-label">小区地址</label>
+							<div class="col-sm-4">
+								<input id="edit_xqAd" type="text" name="xqAd"
+									class="form-control" placeholder="小区地址" />
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="col-sm-4 col-sm-offset-5">
+								<button type="button" onclick="edit()" class="btn btn-primary btn-sm">提交</button>
+								<button type="reset" class="btn btn-primary btn-sm">重置</button>
+							</div>
+						</div>
+
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!---------------------------修改页面结束 --------------------------------------------------------- -->
+
+	<!---------------------------删除页面开始 --------------------------------------------------------- -->
+	<div class="modal fade bs-example-modal-sm" id="deleteUser">
+		<div class="modal-dialog">
+			<div class="modal-content">
+			<form action="">
+				<div class="modal-header bg-primary">
+					<h4 class="text-center" style="padding: 0; margin: 0;">删除</h4>
+				</div>
+				<div class="modal-body bg-info">
+					<div class="row">
+						<div class="col-sm-7 col-sm-offset-3"></div>
+					</div>
+				</div>
+				<div class="modal-footer bg-primary"
+					style="padding: 5px 0; margin: 0;">
+					<div class="text-center small">河南众源</div>
+				</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<!---------------------------删除页面结束 --------------------------------------------------------- -->
+
+
+
+</body>
+</html>

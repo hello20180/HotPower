@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.chart.dao.FmHistoryLogDao">
+
+	<resultMap type="FmHistoryLog" id="fmHistory">
+
+		<id property="id" column="ID" />
+		
+		<result property="valAd" column="ValAd" />
+
+		<result property="status" column="Status" />
+
+		<result property="famKd" column="FamKd" />
+
+		<result property="lockSt" column="LockSt" />
+
+		<result property="JFSt" column="JFSt" />
+
+		<result property="valTemp" column="ValTemp" />
+		
+		<result property="roomTemp" column="RoomTemp" />
+		
+		<result property="HTemSet" column="HTemSet" />
+		
+		<result property="MTemSet" column="MTemSet" />
+		
+		<result property="LTemSet" column="LTemSet" />
+		
+		<result property="recordTime" column="RecordTime" />
+		
+	</resultMap>
+	
+	<resultMap type="FmHistoryLog" id="fmHistoryLine">
+
+		<result property="status" column="Status" />
+
+		<result property="famKd" column="FamKd" />
+
+		<result property="valTemp" column="ValTemp" />
+		
+		<result property="roomTemp" column="RoomTemp" />
+		
+		<result property="MTemSet" column="MTemSet" />
+		
+		<result property="recordTime" column="RecordTime" />
+		<result property="tqyb" column="Tqyb"/>
+	</resultMap>
+
+	<select id="findFmHistoryLine" parameterType="FmHistoryLog" resultMap="fmHistoryLine">
+		select Status,FamKd,ValTemp,RoomTemp,MTemSet,RecordTime,Tqyb
+		from T_FmHistory where ValAd=#{valAd} and RoomTemp &lt;40 
+		and RecordTime > CONVERT(varchar,#{recordTime}, 120)
+		order by RecordTime 
+	</select>
+</mapper>

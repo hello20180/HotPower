@@ -1,0 +1,1668 @@
+package com.hnzy.hot.socket.server;
+
+import java.net.SocketAddress;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.mina.core.future.CloseFuture;
+import org.apache.mina.core.future.IoFuture;
+import org.apache.mina.core.future.IoFutureListener;
+import org.apache.mina.core.service.IoHandlerAdapter;
+import org.apache.mina.core.session.IdleStatus;
+import org.apache.mina.core.session.IoSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.hnzy.hot.socket.util.CzUtil;
+import com.hnzy.hot.socket.util.DatabaseUtil;
+import com.hnzy.hot.socket.util.MapUtils;
+import com.hnzy.hot.socket.util.MapUtilsDf;
+import com.hnzy.hot.socket.util.Utils;
+import com.hnzy.hot.socket.util.oracleHelper;
+
+
+public class ServerHandler extends IoHandlerAdapter
+{
+
+	PreparedStatement ps;
+	ResultSet rst;
+	int rs = 0;
+	
+	PreparedStatement Sqlps;
+	ResultSet Sqlrst;
+	int Sqlrs = 0;
+
+	PreparedStatement Oracleps;
+	ResultSet Oraclerst;
+	int Oraclers = 0;
+	
+	String dfStatus;
+	boolean sessionmap;
+	String param;
+	private final static Logger log = LoggerFactory.getLogger(ServerHandler.class);
+	ServerSessionMap sessionMap = ServerSessionMap.getInstance();
+	// 日志文件
+	private static Log logs = LogFactory.getLog(ServerHandler.class);
+
+	/**
+	 * 当一个新客户端连接后触发此方法
+	 * 
+	 */
+	@Override
+	public void sessionCreated(IoSession session)
+	{
+		log.info("服务器创建{}链路成功!", session.getRemoteAddress());
+	}
+
+	/**
+	 * 当连接打开时调用
+	 */
+	@Override
+	public void sessionOpened(IoSession session) throws Exception
+	{
+		log.info("服务器打开了{}的连接，Session ID为{}", session.getRemoteAddress(), session.getId());
+		SocketAddress remoteAddress = (SocketAddress) session.getRemoteAddress();
+		String clientIp = remoteAddress.toString();
+		System.out.println("clientIp----"+clientIp);
+		
+		sessionMap.add(clientIp, session);
+		int port = 0;
+		String Ip = null;
+		String id = null;
+
+		DatabaseUtil dbUtil = DatabaseUtil.getInstance();
+		Connection connc = dbUtil.getConnection();
+
+		// 获取集中器IP
+		for (int i = 0; i < clientIp.length(); i++)
+		{
+			String[] ipPortString = clientIp.split(":");
+			String IP = ipPortString[0];
+
+			String[] ip = IP.split("/");
+			port = Integer.valueOf(ipPortString[1]);
+			Ip = ip[1];
+		}
+		SimpleDateFormat Sdate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		// 获取发送的时间
+		String time = Sdate.format(new Date());
+
+		// 查找集中器ID
+		String sqlcx = "select JzqID from T_JzqInfo where JzqIp='" + Ip + "'";
+		ps = connc.prepareStatement(sqlcx);
+		rst = ps.executeQuery();
+		int col = rst.getMetaData().getColumnCount();
+		while (rst.next())
+		{
+			id = rst.getString("JzqID");
+		}
+		// 如果集中器ID不为空
+		if (id != null)
+		{
+			String sql = "update T_JzqInfo set JzqPort='" + port + "',Status='1',UpdateTime='" + time
+					+ "' where JzqIp='" + Ip + "'";
+			ps = connc.prepareStatement(sql);
+			rs = ps.executeUpdate();
+			String date = "F00A0100" + id + "";
+			String jString = CzUtil.jyh(date);
+			String mString = date + "" + jString + "" + "FF";
+			// 解码
+			byte[] b = CzUtil.jm(mString);
+			String[] keys = new String[]{ clientIp };
+			logs.info("集中器ID存在发送数据" + mString);
+			// 发送数据
+			sessionMap.sendMessage(keys, b);
+
+		} else
+		{
+
+			String mString = "F00A0100AAAAAAAAA3FF";
+			// 解码
+			byte[] b = CzUtil.jm(mString);
+			String[] keys = new String[]{ clientIp };
+			logs.info("集中器ID不存在发送数据" + mString);
+			// 发送数据
+			sessionMap.sendMessage(keys, b);
+		}
+		ps.close();
+		rst.close();
+		connc.close();
+
+	}
+
+	/**
+	 * 当实现IOHandlerer的类抛出异常时调用
+	 */
+	@Override
+	public void exceptionCaught(IoSession session, Throwable cause) throws Exception
+	{
+		cause.printStackTrace();
+		log.info("{}出现异常{}", session.getRemoteAddress(), cause);
+		sessionMap.remove(session);
+	}
+
+	/**
+	 * 当接受了一个消息时调用
+	 */
+	@Override
+	public void messageReceived(IoSession session, Object message) throws Exception
+	{
+		SocketAddress remoteAddress = (SocketAddress) session.getRemoteAddress();
+		String clientIp = remoteAddress.toString();
+		System.out.println("clientIp接收----"+clientIp);
+		
+		
+		
+		byte[] base = (byte[]) message;
+		String stringMR = Utils.bytesToHexString(base);
+		System.out.println("strMR==" + stringMR);
+		String md = null;
+		if (stringMR != null && stringMR.length() > 7)
+		{
+			for (int i = 0; i < stringMR.length() - 1; i++)
+			{
+				md = stringMR.substring(4, 6);
+			}
+			// 开关阀门，批量开关
+			if (md.equals("09"))
+			{
+				kg(base);
+
+			}
+			// 读阀
+			if (md.equals("04"))
+			{
+				df(base);
+			}
+			// 读传感器地址
+			if (md.equals("52"))
+			{
+				dcgq(base);
+			}
+			// 阀门故障查询
+			if (md.equals("0f"))
+			{
+				gzcx(base);
+			}
+			// 集中器查询状态
+			if (md.equals("01"))
+			{
+				jzqCx(base);
+			}
+			// 区管查询
+			if (md.equals("05"))
+			{
+				qgCx(base);
+			}
+			// 更新区管ID
+			if (md.equals("03"))
+			{
+				UpQg(base);
+			}
+			// 集中器心跳
+			if (md.equals("02"))
+			{
+				JzqXt(base);
+			}
+			if (md.equals("1C"))
+			{
+				// 添加阀门ID
+				tjfmId(base);
+			}
+			if (md.equals("29"))
+			{
+				// 读取阀门ID
+				DqfmId(base);
+			}
+
+			if (md.equals("02"))
+			{
+				// 抄取热表
+				CqRb(base);
+			}
+			if (md.equals("3b"))
+			{
+				DkQ(base, session);
+			}
+		}
+
+	}
+
+	// 抽取相同部分
+	public boolean cz(String ja, String pt)
+	{
+
+		// 把十六进制数，转换为十进制相加
+		int jia = CzUtil.FsZh(ja);
+		// 十进制转换为十六进制
+		String hex = Integer.toHexString(jia);
+		// 截取相加结果后两位
+		String je = null;
+		for (int j = 0; j < hex.length() - 1; j++)
+		{
+			je = hex.charAt(hex.length() - 2) + "" + hex.charAt(hex.length() - 1);
+		}
+		String[] keys = new String[]{ pt };
+		String mString = ja + je + "FF";
+
+		
+		// 转换为大写
+		String stringsj = CzUtil.Uppercase(mString).toString();
+		System.out.println("发送数据数据===="+stringsj);
+		// 解码
+		byte[] b = CzUtil.jm(stringsj);
+		ServerSessionMap sessionMap = ServerSessionMap.getInstance();
+		boolean sessionmap = sessionMap.sendMessage(keys, b);
+		return sessionmap;
+
+	}
+
+	public String CzUtils(String jaString ){
+		
+		
+		// 把十六进制数，转换为十进制相加
+		int jia = CzUtil.FsZh(jaString);
+		// 十进制转换为十六进制
+		String hex = Integer.toHexString(jia);
+		// 截取相加结果后两位
+		String jeq = null;
+		for (int j = 0; j < hex.length() - 1; j++)
+		{
+			jeq = hex.charAt(hex.length() - 2) + "" + hex.charAt(hex.length() - 1);
+		}
+		
+		String stringSJ = jaString+ jeq + "FF";
+		// 转换为大写
+		String stringsj = CzUtil.Uppercase(stringSJ).toString();
+		return stringsj;
+	}
+	
+	
+	// 读卡
+	public void DkQ(byte[] base, IoSession session) throws SQLException
+	{
+		logs.info("读卡器接收数据：" + Utils.bytesToHexString(base));
+		// 接收的数据
+		String stringH = Utils.bytesToHexString(base);
+		// 转换为大写
+		String stringHandler = CzUtil.Uppercase(stringH).toString();
+		System.out.println("stringH" + stringHandler);
+
+		// 截取效验数据
+		String jy = CzUtil.getJy(stringHandler);
+		// 判断开始和结束
+		String start = null;
+		String end = null;
+		start = stringHandler.charAt(0) + "" + stringHandler.charAt(1);
+		end = stringHandler.charAt(stringHandler.length() - 2) + "" + stringHandler.charAt(stringHandler.length() - 1);
+		String je = CzUtil.getJe(stringHandler);
+		System.out.println("je==" + je);
+		if (start.equals("F0") && end.equals("FF") && je.equals("" + jy + ""))
+		{
+
+			// 截取读卡器ID号
+			String DkqId = stringHandler.substring(8, 16);
+			// 截取卡片卡号
+			String KhId = stringHandler.substring(16, 24);
+			System.out.println("--截取读卡器ID号DkqId---"+DkqId);
+			System.out.println("---截取卡片卡号KhId--"+KhId);
+			
+			//转换为十进制
+			String khId = Integer.parseInt(KhId, 16) + "";
+			//转换为int类型
+			int yHbM=Integer.parseInt(khId);
+			System.out.println("khId==" + yHbM);
+			
+//			 String Oraclesql = "select * from sf_jmxx_v where YHBM="+khId+"";
+			String Oraclesql = "select * from ZY where YHBM=" + yHbM + "";
+			
+			// 连接oracle数据库
+			oracleHelper OracledbUtil = oracleHelper.getInstance();
+			Connection Oracleconnc = OracledbUtil.getConnection();
+
+			// 连接SQLServer数据库
+			DatabaseUtil SqldbUtil = DatabaseUtil.getInstance();
+			Connection Sqlconnc = SqldbUtil.getConnection();
+
+
+			// 执行查询oracle
+			Oracleps = Oracleconnc.prepareStatement(Oraclesql);
+			Oraclerst = Oracleps.executeQuery();
+			// 获得数据oracle
+			int col = Oraclerst.getMetaData().getColumnCount();
+			String XQ = null;
+			String LH = null;
+			String DYH = null;
+			String SH = null;
+			String FGS = null;
+			Date JFSJ = null;
+			String YHBM = null;
+			int JFZT = 0;
+			while (Oraclerst.next())
+			{
+				YHBM = Oraclerst.getString("YHBM");
+				JFZT = Oraclerst.getInt("JFZT");
+				XQ = Oraclerst.getString("XQ");
+				LH = Oraclerst.getString("LH");
+				DYH = Oraclerst.getString("DYH");
+				SH = Oraclerst.getString("SH");
+				FGS = Oraclerst.getString("FGS");
+				JFSJ = Oraclerst.getTimestamp("JFSJ");
+			}
+			String jfzt = null;
+			if (JFZT == 0)
+			{
+				jfzt = "是";
+			} else
+			{
+				jfzt = "否";
+			}
+			String Upsql = "update T_YhInfo set YHBM='" + YHBM + "',FGS='" + FGS + "',JFSJ='" + JFSJ + "',SFJF='" + jfzt
+					+ "' where XqName='" + XQ + "' and BuildNO='" + LH + "' and CellNO='" + DYH + "' and HouseNO='" + SH
+					+ "'";
+			// 执行更新sqlserver
+
+			Sqlps = Sqlconnc.prepareStatement(Upsql);
+			Sqlrs = Sqlps.executeUpdate();
+
+			// 查找阀门是否开关
+			String SqlSelect = "select fm.Status,fm.QgID,yh.ValAd from T_YhInfo yh,T_FmInfo fm where yh.ValAd=fm.ValAd and yh.YHBM="
+					+ khId + "";
+			// 执行查询sql
+			
+			Sqlps = Sqlconnc.prepareStatement(SqlSelect);
+			Sqlrst = Sqlps.executeQuery();
+			int coln = Sqlrst.getMetaData().getColumnCount();
+
+			String Status = null;
+			String valAd = null;
+			String qgID=null;
+			while (Sqlrst.next())
+			{
+				Status = Sqlrst.getString("Status");
+				valAd = Sqlrst.getString("ValAd");
+				qgID = Sqlrst.getString("QgID");
+			}
+			
+			// 把FmID转换为int类型
+			int fInteger = Integer.valueOf(valAd);
+			// FmID十进制转换为十六进制
+			String fmd = Integer.toHexString(fInteger);
+			
+			//获取Ip和端口号
+			String ipString = "select distinct Jzq.JzqPort,Jzq.JzqIP "
+					+ "from T_JzqInfo Jzq,T_FmInfo fm,T_QgInfo qg ,T_YhInfo yh "
+					+ "where fm.QgID=qg.QgID and qg.JzqID=Jzq.JzqID and yh.ValAd=fm.ValAd and yh.ValAd=" + valAd
+					+ "";
+
+			Sqlps = Sqlconnc.prepareStatement(ipString);
+			Sqlrst = Sqlps.executeQuery();
+			int colc = Sqlrst.getMetaData().getColumnCount();
+			//端口号
+			String JzqPort = null;
+			//IP地址
+			String JzqIP = null;
+			while (Sqlrst.next())
+			{
+				JzqPort = Sqlrst.getString("JzqPort");
+				JzqIP = Sqlrst.getString("JzqIP");
+			}
+
+			System.out.println("-JzqPort--"+JzqPort);
+			System.out.println("-JzqIP--"+JzqIP);
+			try
+			{
+				Thread.sleep(500);
+			} catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+			
+			
+			//发送读阀门指令
+			String pt = "/" + JzqIP + ":" + JzqPort;
+			// fmId十进制
+			String jaDf = "F00F0400" + qgID + "040" + fmd;	
+			
+			log.info("读阀发送读阀门指令数据："+jaDf);
+		     sessionmap = cz(jaDf, pt);
+			System.out.println("读阀门----sessionmap----"+sessionmap);
+			
+			try
+			{
+				Thread.sleep(2000);
+			} catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+			 dfStatus=MapUtils.getMapUtils().get("df");
+			System.out.println("dfStatus==="+dfStatus);
+			
+			// 0已经交费，开阀门
+			System.out.println("ValAd------"+valAd);
+			System.out.println("Status------"+Status);
+			System.out.println("JFZT------"+JFZT);
+			
+			if(dfStatus==null){
+				try
+				{
+					Thread.sleep(1000);
+				} catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
+				//发送读阀门指令
+				String ptdf = "/" + JzqIP + ":" + JzqPort;
+				// fmId十进制
+				String jadf = "F00F0400" + qgID + "040" + fmd;	
+				
+				log.info("读阀发送读阀门指令数据："+jaDf);
+			     sessionmap = cz(jadf, ptdf);
+			     
+			     dfStatus=MapUtils.getMapUtils().get("df");
+				System.out.println("再次读阀门状态"+dfStatus);
+			}
+			
+			
+			
+			if (JFZT == 0)
+			{
+				if (dfStatus!=null && dfStatus.equals("关"))
+				{	
+					MapUtils.getMapUtils().add("df",null);
+					
+					// fmId十进制
+					String ja = "F0160900" + qgID + "040" + fmd + "01FFFF01FFFFFF";
+					
+					String param = "kFm";
+					
+					MapUtils.getMapUtils().add("param", param);
+					
+					try
+					{
+						Thread.sleep(500);
+					} catch (InterruptedException e)
+					{
+						e.printStackTrace();
+					}
+					
+					log.info("开阀发送开阀门指令数据："+ja);
+					 sessionmap = cz(ja, pt);
+					System.out.println("开阀----sessionmap----"+sessionmap);
+
+					try
+					{
+						Thread.sleep(2000);
+					} catch (InterruptedException e)
+					{
+						e.printStackTrace();
+					}
+					//判断是否为1,1则成功
+					String kfString=MapUtils.getMapUtils().get("kfSt");
+					//如果KFString为空
+					if(kfString==null){
+						
+						try
+						{
+							Thread.sleep(1000);
+						} catch (InterruptedException e)
+						{
+							e.printStackTrace();
+						}
+						//发送读阀门指令
+						String ptdf = "/" + JzqIP + ":" + JzqPort;
+						// fmId十进制
+						String jadf = "F00F0400" + qgID + "040" + fmd;	
+						
+						log.info("读阀发送读阀门指令数据："+jaDf);
+					     sessionmap = cz(jadf, ptdf);
+					     
+					     dfStatus=MapUtils.getMapUtils().get("df");
+						System.out.println("关阀再次读阀门状态"+dfStatus);
+						
+						
+					}
+					
+					
+					System.out.println("kfString==="+kfString);
+					
+					if(sessionmap==true && kfString!=null &&kfString.equals("1")){
+						// 返回读卡器指令
+						String jaString  = "F00F3B00" + DkqId + "" + KhId + "01";
+						MapUtils.getMapUtils().add("kfSt",null);
+						 sessionmap= cz(jaString, pt);
+	
+					}else{
+						
+						// 返回读卡器指令
+						String jaString  = "F00F3B00" + DkqId + "" + KhId + "03";
+						MapUtils.getMapUtils().add("kfSt",null);
+						sessionmap = cz(jaString, pt);
+						// 通讯失败						
+					}
+					// 发送关阀指令
+				} else{
+					
+					String ja = "F0160900" + qgID + "040" + fmd + "00FFFF00FFFFFF";
+					System.out.println("关阀---发送数据============"+ja);
+					log.info("关阀门指令发送数据："+ja);
+					
+					try
+					{
+						Thread.sleep(500);
+					} catch (InterruptedException e)
+					{
+						
+						e.printStackTrace();
+					}
+					
+					param = "gFm";
+					MapUtils.getMapUtils().add("param", param);
+					
+					 sessionmap = cz(ja, pt);
+					System.out.println("关阀----sessionmap----"+sessionmap);
+					try
+					{
+						Thread.sleep(2000);
+					} catch (InterruptedException e)
+					{
+						
+						e.printStackTrace();
+					}
+					//判断关阀是否成功,如果为1则成功
+					String gfString=MapUtils.getMapUtils().get("gfSt");
+					System.out.println("gfString==="+gfString);
+					//如果gfString为空
+					if(gfString==null){
+						try
+						{
+							Thread.sleep(1000);
+						} catch (InterruptedException e)
+						{
+							e.printStackTrace();
+						}
+						//发送读阀门指令
+						String ptdf = "/" + JzqIP + ":" + JzqPort;
+						// fmId十进制
+						String jadf = "F00F0400" + qgID + "040" + fmd;	
+						
+						log.info("读阀发送读阀门指令数据："+jaDf);
+					     sessionmap = cz(jadf, ptdf);
+					     
+					     dfStatus=MapUtils.getMapUtils().get("df");
+						System.out.println("再次读阀门状态"+dfStatus);
+						
+					}
+					if(sessionmap==true&& gfString!=null && gfString.equals("1")){
+						MapUtils.getMapUtils().add("gfSt",null);
+						// 返回读卡器指令
+						String jaString = "F00F3B00" + DkqId + "" + KhId + "02";
+
+						sessionmap = cz(jaString, pt);
+					}else{
+						// 返回读卡器指令
+						String jaString  = "F00F3B00" + DkqId + "" + KhId + "03";
+
+						sessionmap = cz(jaString, pt);
+						// 通讯失败
+					}
+				}
+
+				// 1未交费
+			} else {
+				// 返回读卡器指令
+				String jaString = "F00E3B00" + DkqId + "" + KhId + "03";
+				
+				sessionmap = cz(jaString, pt);
+
+			}
+		}
+
+	}
+
+	// 抄取热表
+	public void CqRb(byte[] base) throws SQLException
+	{
+		logs.info("抄取热表接收数据：" + Utils.bytesToHexString(base));
+		// 接收数据
+		String stringH = Utils.bytesToHexString(base);
+		// 转换为大写
+		String stringHandler = CzUtil.Uppercase(stringH).toString();
+		// 截取效验数据
+		String jy = CzUtil.getJy(stringHandler);
+		// 判断开始和结束
+		String start = null;
+		String end = null;
+		start = stringHandler.charAt(0) + "" + stringHandler.charAt(1);
+		end = stringHandler.charAt(stringHandler.length() - 2) + "" + stringHandler.charAt(stringHandler.length() - 1);
+		// 判断和校验
+		String je = CzUtil.getJe(stringHandler);
+		if (start.equals("F0") && end.equals("FF") && je.equals("" + jy + ""))
+		{
+			// 区管ID
+			String qgID = stringHandler.substring(8, 16);
+			System.out.println("----qgID--" + qgID);
+			// 热表ID
+			String rbId = stringHandler.substring(16, 30);
+			int RbID = Integer.parseInt(rbId, 16);
+			System.out.println("----热表ID--" + RbID);
+			// 控制应答
+			String KYD = stringHandler.substring(30, 32);
+			System.out.println("----控制应答--" + KYD);
+			// 长度
+			String CD = stringHandler.substring(32, 34);
+			System.out.println("----长度--" + CD);
+			// 数据标志，读计量数据
+			String SJBS = stringHandler.substring(34, 38);
+			System.out.println("----数据标志，读计量数据--" + SJBS);
+			// 序列号，与发送命令相同
+			String XLH = stringHandler.substring(38, 40);
+			System.out.println("----序列号，与发送命令相同--" + XLH);
+			// 结算日热量 0.00 KWh 以下数据
+			String RbRL = stringHandler.substring(40, 50);
+			System.out.println("----结算日热量 0.00 KWh  以下数据--" + RbRL);
+			// 当前热量
+			String DqRL = stringHandler.substring(50, 60);
+			String DqRLS = DqRL.substring(0, 6);
+			String DqRLF = DqRL.substring(6, 8);
+
+			// 拼接当前热量
+			String DqRLSF = DqRLS + "." + DqRLF;
+			System.out.println("----当前热量--" + DqRLSF);
+			// 热功率
+			String RGL = stringHandler.substring(60, 70);
+			String RGLS = RGL.substring(0, 6);
+			String RGLF = RGL.substring(6, 8);
+			// 拼接热功率
+			String RGLSF = RGLS + "." + RGLF;
+			System.out.println("----拼接热功率--" + RGLSF);
+			// 流量
+			String LM = stringHandler.substring(70, 80);
+			String LMS = LM.substring(0, 4);
+			String LMF = LM.substring(4, 8);
+			// 流量拼接
+			String LMSF = LMS + "." + LMF;
+			System.out.println("----流量拼接--" + LMSF);
+			// 累计流量
+			String JLM = stringHandler.substring(80, 90);
+			String JLMS = JLM.substring(0, 6);
+			String JLMF = JLM.substring(6, 8);
+			// 累计流量拼接
+			String JLMSF = JLMS + "." + JLMF;
+			System.out.println("----累计流量拼接--" + JLMSF);
+			// 供水温度
+			String GsWd = stringHandler.substring(90, 96);
+			String GsWdS = GsWd.substring(0, 4);
+			String GsWdF = GsWd.substring(4);
+			// 拼接供水温度
+			String GsWdSF = GsWdS + "." + GsWdF;
+			System.out.println("----拼接供水温度--" + GsWdSF);
+			// 回水温度
+			String HsWd = stringHandler.substring(96, 101);
+
+			String HsWdS = HsWd.substring(0, 4);
+			String HsWdF = HsWd.substring(4);
+			// 拼接回水温度
+			String HsWdSF = HsWdS + "." + HsWdF;
+			System.out.println("----拼接回水温度--" + HsWdSF);
+			// 累计工作时间 2小时
+			String GzTime = stringHandler.substring(101, 107);
+			System.out.println("----累计工作时间 2小时--" + GzTime);
+			// 实时时间
+			String SsTime = stringHandler.substring(107, 121);
+			System.out.println("----实时时间--" + SsTime);
+			// 状态
+			String status = stringHandler.substring(121, 125);
+			System.out.println("----状态--" + status);
+			DatabaseUtil dbUtil = DatabaseUtil.getInstance();
+			Connection connc = dbUtil.getConnection();
+			// 获取当前时间
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			String recordTime = df.format(new Date());
+
+			// 更新
+			String Upsql = "update T_RbInfo set RbAd='" + RbID + "',energy='" + DqRLSF + "',power='" + RGLSF
+					+ "',flow='" + LMSF + "',inTmp='" + GsWdSF + "',outTmp='" + HsWdSF + "',readMTime='" + SsTime
+					+ "',RecordTime='" + recordTime + "'where RbAd='" + RbID + "'";
+			ps = connc.prepareStatement(Upsql);
+			rs = ps.executeUpdate();
+			// 插入
+			String Insql = "insert into T_RbHistory (RbAd,energy,power,flow,inTmp,outTmp,readMTime,RecordTime)values ('"
+					+ RbID + "','" + DqRLSF + "'," + "'" + RGLSF + "','" + LMSF + "','" + GsWdSF + "','" + HsWdSF
+					+ "','" + SsTime + "','" + recordTime + "')";
+			ps = connc.prepareStatement(Insql);
+			ps.execute();
+			MapUtils.getMapUtils().add("dFm", "success");
+			logs.info("读取热表成功");
+			System.out.println("读取热表成功");
+			ps.close();
+			connc.close();
+
+		}
+	}
+
+	// 读取阀门ID
+	public void DqfmId(byte[] base)
+	{
+		logs.info("读阀接收数据：" + Utils.bytesToHexString(base));
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		// 获取发送的时间
+		String fTime = MapUtils.getMapUtils().get("time");
+		String jTime = df.format(new Date());
+		int ms = 0;
+		String sumTime = CzUtil.getSubtract(fTime, jTime);
+		if (sumTime == null)
+		{
+			sumTime = "00:00:01";
+		}
+		if (sumTime != null)
+		{
+			ms = CzUtil.transform(sumTime);
+			// 判断时间是否超时
+			if (ms <= 3)
+			{
+				// 接收的数据
+				String stringH = Utils.bytesToHexString(base);
+				// 转换为大写
+				String stringHandler = CzUtil.Uppercase(stringH).toString();
+				// 截取效验数据
+				String jy = CzUtil.getJy(stringHandler);
+				// 判断开始和结束
+				String start = null;
+				String end = null;
+				start = stringHandler.charAt(0) + "" + stringHandler.charAt(1);
+				end = stringHandler.charAt(stringHandler.length() - 2) + ""
+						+ stringHandler.charAt(stringHandler.length() - 1);
+				// 判断和校验
+				String je = CzUtil.getJe(stringHandler);
+				String fmString = "";
+				if (start.equals("F0") && end.equals("FF") && je.equals("" + jy + ""))
+				{
+					if (stringHandler.length() > 20)
+					{
+						logs.info("读阀成功：" + stringHandler);
+						String subString = stringHandler.substring(16, stringHandler.length() - 4);
+						for (int i = 0; i < subString.length(); i++)
+						{
+
+							fmString += Integer.parseInt(subString.substring(i, i + 8), 16) + " ";
+							i = i + 7;
+						}
+						MapUtils.getMapUtils().add("fmId", fmString);
+						MapUtils.getMapUtils().add("DqfmId", "success");
+						logs.info("读阀成功");
+					}
+				} else
+				{
+					MapUtils.getMapUtils().add("DqfmId", "fail");
+					logs.info("读阀失败");
+				}
+			} else
+			{
+
+				MapUtils.getMapUtils().add("DqfmId", "cs");
+				logs.info("读阀超时");
+			}
+		}
+	}
+
+	// 添加阀门ID
+	public void tjfmId(byte[] base)
+	{
+		logs.info("添加阀门ID接收数据：" + Utils.bytesToHexString(base));
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		// 获取发送的时间
+		String fTime = MapUtils.getMapUtils().get("time");
+		String jTime = df.format(new Date());
+		int ms = 0;
+		String sumTime = CzUtil.getSubtract(fTime, jTime);
+		if (sumTime == null)
+		{
+			sumTime = "00:00:01";
+		}
+		if (sumTime != null)
+		{
+
+			ms = CzUtil.transform(sumTime);
+			// 判断时间是否超时
+			if (ms <= 8)
+			{
+				// 接收的数据
+				String stringH = Utils.bytesToHexString(base);
+				// 转换为大写
+				String stringHandler = CzUtil.Uppercase(stringH).toString();
+				// 截取效验数据
+				String jy = CzUtil.getJy(stringHandler);
+				// 判断开始和结束
+				String start = null;
+				String end = null;
+				start = stringHandler.charAt(0) + "" + stringHandler.charAt(1);
+				end = stringHandler.charAt(stringHandler.length() - 2) + ""
+						+ stringHandler.charAt(stringHandler.length() - 1);
+				String je = CzUtil.getJe(stringHandler);
+				if (start.equals("F0") && end.equals("FF") && je.equals("" + jy + ""))
+				{
+					logs.info("添加阀门ID成功：" + stringHandler);
+					logs.info("添加阀门ID成功");
+					MapUtils.getMapUtils().add("tjfmId", "success");
+
+				} else
+				{
+					MapUtils.getMapUtils().add("tjfmId", "fail");
+					logs.info("添加阀门ID失败");
+				}
+			} else
+			{
+				MapUtils.getMapUtils().add("tjfmId", "cs");
+				logs.info("添加阀门ID超时");
+			}
+		}
+
+	}
+
+	// 集中器心跳
+	public void JzqXt(byte[] base) throws SQLException, ClassNotFoundException
+	{
+		JzqXtCx(base);
+	}
+
+	// 更新区管ID
+	public void UpQg(byte[] base)
+	{
+		logs.info("更新区管ID接收数据：" + Utils.bytesToHexString(base));
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		// 获取发送的时间
+		String fTime = MapUtils.getMapUtils().get("time");
+		String jTime = df.format(new Date());
+		int ms = 0;
+		String sumTime = CzUtil.getSubtract(fTime, jTime);
+		if (sumTime == null)
+		{
+			sumTime = "00:00:01";
+		}
+		if (sumTime != null)
+		{
+			ms = CzUtil.transform(sumTime);
+			// 判断时间是否超时
+			if (ms <= 3)
+			{
+				// 接收的数据
+				String stringH = Utils.bytesToHexString(base);
+				// 转换为大写
+				String stringHandler = CzUtil.Uppercase(stringH).toString();
+				// 截取效验数据
+				String jy = CzUtil.getJy(stringHandler);
+				// 判断开始和结束
+				String start = null;
+				String end = null;
+				start = stringHandler.charAt(0) + "" + stringHandler.charAt(1);
+				end = stringHandler.charAt(stringHandler.length() - 2) + ""
+						+ stringHandler.charAt(stringHandler.length() - 1);
+				String je = CzUtil.getJe(stringHandler);
+				if (start.equals("F0") && end.equals("FF") && je.equals("" + jy + ""))
+				{
+					String jeq = stringHandler.substring(16, 18);
+					if (jeq.equals("01"))
+					{
+						logs.info("更新区管ID成功：" + stringHandler);
+						logs.info("更新区管ID成功");
+						MapUtils.getMapUtils().add("UpQg", "success");
+					} else
+					{
+						logs.info("更新区管ID失败");
+						MapUtils.getMapUtils().add("UpQg", "fail");
+					}
+				}
+			} else
+			{
+				MapUtils.getMapUtils().add("UpQg", "cs");
+				logs.info("更新区管ID超时");
+			}
+		}
+	}
+
+	// 区管查询
+	public void qgCx(byte[] base) throws SQLException, ClassNotFoundException
+	{
+		logs.info("区管查询接收数据：" + Utils.bytesToHexString(base));
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		// 获取发送的时间
+		String fTime = MapUtils.getMapUtils().get("time");
+		String jTime = df.format(new Date());
+		int ms = 0;
+		String sumTime = CzUtil.getSubtract(fTime, jTime);
+		if (sumTime == null)
+		{
+			sumTime = "00:00:01";
+		}
+		if (sumTime != null)
+		{
+			ms = CzUtil.transform(sumTime);
+			// 判断时间是否超时
+			if (ms <= 6)
+			{
+				String qgId = null;
+				SimpleDateFormat Sdate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				// 获取发送的时间
+				String time = Sdate.format(new Date());
+				// 接收的数据
+				String stringH = Utils.bytesToHexString(base);
+				// 转换为大写
+				String stringHandler = CzUtil.Uppercase(stringH).toString();
+				
+				// 截取效验数据
+				String jy = CzUtil.getJy(stringHandler);
+				// 判断开始和结束
+				String start = null;
+				String end = null;
+				start = stringHandler.charAt(0) + "" + stringHandler.charAt(1);
+				end = stringHandler.charAt(stringHandler.length() - 2) + ""
+						+ stringHandler.charAt(stringHandler.length() - 1);
+				String je = CzUtil.getJe(stringHandler);
+				if (start.equals("F0") && end.equals("FF") && je.equals("" + jy + ""))
+				{
+					// 截取qgID,
+					qgId = stringHandler.substring(8, 16);
+					// 截取是否为成功
+					String sT = stringHandler.substring(16, 18);
+					
+					if (sT.equals("01"))
+					{
+						DatabaseUtil dbUtil = DatabaseUtil.getInstance();
+						Connection connc = dbUtil.getConnection();
+
+						String sql = "update T_QgInfo set QgStatus='1',RecordTime='" + time + "' where QgID='" + qgId
+								+ "'";
+						ps = connc.prepareStatement(sql);
+						rs = ps.executeUpdate();
+						logs.info("区管查询成功：" + stringHandler);
+						MapUtils.getMapUtils().add("jzq", "success");
+						logs.info("区管查询成功");
+						ps.close();
+						connc.close();
+
+					} else
+					{
+						MapUtils.getMapUtils().add("jzq", "fail");
+						logs.info("区管查询失败");
+					}
+				} else
+				{
+					MapUtils.getMapUtils().add("jzq", "fail");
+					logs.info("区管查询失败");
+				}
+			} else
+			{
+				MapUtils.getMapUtils().add("jzq", "cs");
+				logs.info("区管查询超时");
+			}
+		}
+	}
+
+	// 集中器查询
+	public void jzqCx(byte[] base) throws SQLException, ClassNotFoundException
+	{
+		JzqXtCx(base);
+
+	}
+
+	public void JzqXtCx(byte[] base) throws SQLException, ClassNotFoundException
+	{
+		logs.info("集中器查询状态接收数据：" + Utils.bytesToHexString(base));
+		String jzqPort = null;
+		SimpleDateFormat Sdate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		// 获取发送的时间
+		String time = Sdate.format(new Date());
+		// 接收的数据
+		String stringH = Utils.bytesToHexString(base);
+		// 转换为大写
+		String stringHandler = CzUtil.Uppercase(stringH).toString();
+		// 截取jzqID
+		String JzqId = stringHandler.substring(8, 16);
+
+		// 截取效验数据
+		String jy = CzUtil.getJy(stringHandler);
+		// 判断开始和结束
+		String start = null;
+		String end = null;
+		start = stringHandler.charAt(0) + "" + stringHandler.charAt(1);
+		end = stringHandler.charAt(stringHandler.length() - 2) + "" + stringHandler.charAt(stringHandler.length() - 1);
+		String je = CzUtil.getJe(stringHandler);
+		if (start.equals("F0") && end.equals("FF") && je.equals("" + jy + ""))
+		{
+			// 根据集中器 ID查找集中器端口
+			DatabaseUtil dbUtil = DatabaseUtil.getInstance();
+			Connection connc = dbUtil.getConnection();
+			String sqlcx = "select JzqPort from T_JzqInfo where JzqID='" + JzqId + "'";
+			ps = connc.prepareStatement(sqlcx);
+			rst = ps.executeQuery();
+			int col = rst.getMetaData().getColumnCount();
+			while (rst.next())
+			{
+				jzqPort = rst.getString("jzqPort");
+			}
+			// 根据集中器ID更新集中器端口
+			String sql = "update T_JzqInfo set JzqPort='" + jzqPort + "',Status='1',UpdateTime='" + time
+					+ "' where JzqID='" + JzqId + "'";
+			ps = connc.prepareStatement(sql);
+			rs = ps.executeUpdate();
+
+			rst.close();
+			ps.close();
+			connc.close();
+			logs.info("集中器查询状态成功接收数据：" + stringHandler);
+		}
+	}
+
+	// 阀门故障查询
+	public void gzcx(byte[] base) throws SQLException, ClassNotFoundException
+	{
+		logs.info("阀门故障查询接收数据：" + Utils.bytesToHexString(base));
+		// 接收的数据
+		String stringH = Utils.bytesToHexString(base);
+		// 转换为大写
+		String stringHandler = CzUtil.Uppercase(stringH).toString();
+		// 截取效验数据
+		String jy = CzUtil.getJy(stringHandler);
+		// 判断开始和结束
+		String start = null;
+		String end = null;
+		start = stringHandler.charAt(0) + "" + stringHandler.charAt(1);
+		end = stringHandler.charAt(stringHandler.length() - 2) + "" + stringHandler.charAt(stringHandler.length() - 1);
+		String je = CzUtil.getJe(stringHandler);
+		String ycString = "";
+		if (start.equals("F0") && end.equals("FF") && je.equals("" + jy + ""))
+		{
+			logs.info("阀门故障查询成功：" + stringHandler);
+			// String qgID = stringHandler.substring(8, 16);
+			// String ticme = stringHandler.substring(16, 32);
+			String fmID = stringHandler.substring(32, 40);
+			String dk = stringHandler.substring(40, 42);
+			String gb = stringHandler.substring(42, 44);
+			String kd = stringHandler.substring(44, 46);
+			String kt = stringHandler.substring(46, 48);
+			String fmwd = stringHandler.substring(48, 50);
+			String cgqtx = stringHandler.substring(50, 52);
+			String cgqwd = stringHandler.substring(52, 54);
+
+			SimpleDateFormat Sdate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			String time = Sdate.format(new Date());
+			// 十六进制转换为十进制数
+			int fmId = Integer.parseInt(fmID, 16);
+			DatabaseUtil dbUtil = DatabaseUtil.getInstance();
+			Connection connc = dbUtil.getConnection();
+			if (dk.equals("01"))
+			{
+
+				ycString = "阀门打开异常";
+				String Insql = "insert into T_AlarmInfor values ('阀门','" + fmId + "','" + ycString + "','" + time
+						+ "')";
+				ps = connc.prepareStatement(Insql);
+				ps.execute();
+			}
+			if (gb.equals("01"))
+			{
+				ycString = "阀门关闭异常";
+				String Insql = "insert into T_AlarmInfor values ('阀门','" + fmId + "','" + ycString + "','" + time
+						+ "')";
+				ps = connc.prepareStatement(Insql);
+				ps.execute();
+			}
+			if (kd.equals("01"))
+			{
+				ycString = "阀门开度异常";
+				String Insql = "insert into T_AlarmInfor values ('阀门','" + fmId + "','" + ycString + "','" + time
+						+ "')";
+				ps = connc.prepareStatement(Insql);
+				ps.execute();
+			}
+			if (kt.equals("01"))
+			{
+				ycString = "阀门壳体拆开";
+				String Insql = "insert into T_AlarmInfor values ('阀门','" + fmId + "','" + ycString + "','" + time
+						+ "')";
+				ps = connc.prepareStatement(Insql);
+				ps.execute();
+			}
+			if (fmwd.equals("01"))
+			{
+				ycString = "阀体温度异常";
+				String Insql = "insert into T_AlarmInfor values ('阀门','" + fmId + "','" + ycString + "','" + time
+						+ "')";
+				ps = connc.prepareStatement(Insql);
+				ps.execute();
+			}
+			if (cgqtx.equals("01"))
+			{
+				ycString = "无线传感器通信故障";
+				String Insql = "insert into T_AlarmInfor values ('阀门','" + fmId + "','" + ycString + "','" + time
+						+ "')";
+				ps = connc.prepareStatement(Insql);
+				ps.execute();
+			}
+			if (cgqwd.equals("01"))
+			{
+				ycString = "无线传感器温度异常";
+				String Insql = "insert into T_AlarmInfor values ('阀门','" + fmId + "','" + ycString + "','" + time
+						+ "')";
+				ps = connc.prepareStatement(Insql);
+				ps.execute();
+			}
+			ps.close();
+			connc.close();
+		}
+	}
+
+	// 读取传感器地址
+	public void dcgq(byte[] base) throws SQLException, ClassNotFoundException
+	{
+		logs.info("读取传感器地址接收数据：" + Utils.bytesToHexString(base));
+		int ms = 0;
+		String stringH = Utils.bytesToHexString(base);
+		SimpleDateFormat Sdate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		// 获取发送的时间
+
+		String fTime = MapUtils.getMapUtils().get("time");
+		String jTime = Sdate.format(new Date());
+		// 转换为大写
+		String stringHandler = CzUtil.Uppercase(stringH).toString();
+		String sumTime = CzUtil.getSubtract(fTime, jTime);
+		if (sumTime == null)
+		{
+			sumTime = "00:00:01";
+		}
+		if (sumTime != null)
+		{
+			ms = CzUtil.transform(sumTime);
+			DatabaseUtil dbUtil = DatabaseUtil.getInstance();
+			Connection connc = dbUtil.getConnection();
+			// 截取区管ID
+			String qgID = stringHandler.substring(8, 16);
+			// 根据qgID查找阀门开始号码和结束号码
+			String findFm = "select VALstID,VALedID from T_QgInfo where QgID='" + qgID + "' ";
+			ps = connc.prepareStatement(findFm);
+			rst = ps.executeQuery();
+			int col = rst.getMetaData().getColumnCount();
+			String valstID = null;
+			String valedID = null;
+			while (rst.next())
+			{
+				valstID = rst.getString("VALstID");
+				valedID = rst.getString("VALedID");
+			}
+
+			rst.close();
+			ps.close();
+			connc.close();
+
+			// 关闭数据库
+			// 查询阀门个数
+			int valse = Integer.valueOf(valedID) - Integer.valueOf(valstID) + 1;
+			// 判断时间是否超时
+			if (ms <= valse * 3)
+			{
+				if (stringH != null && jTime != null)
+				{
+
+					String jy = CzUtil.getJy(stringHandler);
+					// 判断开始和结束
+					String start = null;
+					String end = null;
+					start = stringHandler.charAt(0) + "" + stringHandler.charAt(1);
+					end = stringHandler.charAt(stringHandler.length() - 2) + ""
+							+ stringHandler.charAt(stringHandler.length() - 1);
+					String je = CzUtil.getJe(stringHandler);
+
+					if (start.equals("F0") && end.equals("FF") && je.equals("" + jy + ""))
+					{
+
+						// 截取阀门ID
+						String fmID = stringHandler.substring(22, 30);
+						String cgqID = stringHandler.substring(30, 38);
+						MapUtils.getMapUtils().add("cgqID", "" + cgqID + "");
+						MapUtils.getMapUtils().add("fmId", "" + fmID + "");
+						MapUtils.getMapUtils().add("dcgq", "success");
+						logs.info("读取传感器地址成功：" + stringHandler);
+						logs.info("读取传感器地址成功");
+					} else
+					{
+						MapUtils.getMapUtils().add("dcgq", "fail");
+						logs.info("读取传感器地址失败");
+					}
+				}
+			} else
+			{
+				logs.info("读取传感器地址超时");
+				MapUtils.getMapUtils().add("dcgq", "超时");
+			}
+		}
+	}
+
+	// 读阀
+	public void df(byte[] base) throws SQLException, ClassNotFoundException
+	{
+		logs.info("读阀接收数据：" + Utils.bytesToHexString(base));
+		String stringH = Utils.bytesToHexString(base);
+		SimpleDateFormat Sdate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		// 获取发送的时间
+		String fTime = MapUtils.getMapUtils().get("time");
+		String jTime = Sdate.format(new Date());
+		// 时间相减
+		String sumTime = CzUtil.getSubtract(fTime, jTime);
+		int ms = 0;
+		if (sumTime == null)
+		{
+			sumTime = "00:00:01";
+		}
+		if (sumTime != null)
+		{
+			ms = CzUtil.transform(sumTime);
+			// 判断时间是否超时
+			if (ms <= 60)
+			{
+				if (stringH != null)
+				{
+					// 转换为大写
+					String stringHandler = CzUtil.Uppercase(stringH).toString();
+					String jy = CzUtil.getJy(stringHandler);
+					// 判断开始和结束
+					String start = null;
+					String end = null;
+					start = stringHandler.charAt(0) + "" + stringHandler.charAt(1);
+					end = stringHandler.charAt(stringHandler.length() - 2) + ""
+							+ stringHandler.charAt(stringHandler.length() - 1);
+					String je = CzUtil.getJe(stringHandler);
+					if (start.equals("F0") && end.equals("FF") && je.equals("" + jy + ""))
+					{
+						logs.info("读阀成功：" + stringHandler);
+						String qgID = stringHandler.substring(8, 16);
+						String fmID = stringHandler.substring(18, 26);
+						String fmState = stringHandler.substring(26, 28);
+						String fmkd = stringHandler.substring(28, 30);// 十进制
+						String fmLock = stringHandler.substring(30, 32);
+						String fmJF = stringHandler.substring(32, 34);
+						String fmTemp = stringHandler.substring(34, 38);// 十进制
+						String fmRoomTemp = stringHandler.substring(38, 42);// 十进制
+						String HTemSet = stringHandler.substring(42, 44);// 十进制
+						String MTemSet = stringHandler.substring(44, 46);// 十进制
+						String LTemSet = stringHandler.substring(46, 48);// 十进制
+						String fms = fmTemp.substring(0, 2);
+						String fmf = fmTemp.substring(2);
+						String fmRs = fmRoomTemp.substring(0, 2);
+						String fmRf = fmRoomTemp.substring(2);
+						// 转换十进制
+						int Fms = Integer.parseInt("" + fms + "", 16);
+						int Fmf = Integer.parseInt("" + fmf + "", 16);
+						int FmRs = Integer.parseInt("" + fmRs + "", 16);
+						int FmRf = Integer.parseInt("" + fmRf + "", 16);
+						int FmID = Integer.parseInt("" + fmID + "", 16);
+						int Fmkd = Integer.parseInt("" + fmkd + "", 16);
+						int hTemSet = Integer.parseInt("" + HTemSet + "", 16);
+						int mTemSet = Integer.parseInt("" + MTemSet + "", 16);
+						int lTemSet = Integer.parseInt("" + LTemSet + "", 16);
+						String fmS = String.valueOf(Integer.parseInt("" + Fms + ""));
+						String fmF = String.valueOf(Integer.parseInt("" + Fmf + ""));
+						String fmRS = String.valueOf(Integer.parseInt("" + FmRs + ""));
+						String fmRF = String.valueOf(Integer.parseInt("" + FmRf + ""));
+						// 阀门温度
+						String FmTemp = fmS + "." + fmF;
+						// 室内温度
+						String FmRoomTemp = fmRS + "." + fmRF;
+						if (fmState.equals("00"))
+						{
+							fmState = "关";
+						} else
+						{
+							fmState = "开";
+						}
+						if (fmLock.equals("00"))
+						{
+							fmLock = "否";
+						} else
+						{
+							fmLock = "是";
+						}
+						if (fmJF.equals("00"))
+						{
+							fmJF = "否";
+						} else
+						{
+							fmJF = "是";
+						}
+						DatabaseUtil dbUtil = DatabaseUtil.getInstance();
+						Connection connc = dbUtil.getConnection();
+						SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+						String date = df.format(new Date());
+						String Upsql = "update T_FmInfo set QgID='" + qgID + "',Status='" + fmState + "',FamKd='" + Fmkd
+								+ "',LockSt='" + fmLock + "',JFSt='" + fmJF + "',valTemp='" + FmTemp + "',RoomTemp='"
+								+ FmRoomTemp + "',HTemSet='" + hTemSet + "',MTemSet='" + mTemSet + "',LTemSet='"
+								+ lTemSet + "',RecordTime='" + date + "' where ValAd='" + FmID + "'";
+						ps = connc.prepareStatement(Upsql);
+						rs = ps.executeUpdate();
+						String Insql = "insert into T_FmHistory values ('" + FmID + "','" + fmState + "','" + fmkd
+								+ "','" + fmLock + "','" + fmJF + "'," + "'" + FmTemp + "','" + FmRoomTemp + "','"
+								+ hTemSet + "','" + mTemSet + "','" + lTemSet + "','" + date + "')";
+						ps = connc.prepareStatement(Insql);
+						ps.execute();
+						MapUtils.getMapUtils().add("df",fmState);
+						MapUtilsDf.getMapUtils().add("dFm", "success");
+
+						
+//						String JzqIP="192.168.0.199";
+//						String JzqPort="53645";
+//						
+//						String valAd="160900500";
+//						String QgID="BEC5BEC5";
+//						// 把FmID转换为int类型
+//						int fInteger = Integer.valueOf(valAd);
+//						// FmID十进制转换为十六进制
+//						String fmd = Integer.toHexString(fInteger);
+//						// IP地址和端口号
+//						String pt = "/" + JzqIP + ":" + JzqPort;
+//						// fmId十进制
+//						String ja = "F0160900" + QgID + "040" + fmd + "01FFFF01FFFFFF";
+//						log.info("开阀发送数据："+ja);
+//						boolean sessionmap = cz(ja, pt);
+//						System.out.println("sessonMap==="+sessionmap);
+						
+						
+						// 读取阀门之后开阀门
+						// String
+						// k="F0160900BEC5BEC5040997259401FFFF0106149B27FF";
+						// // 解码
+						// byte[] b = CzUtil.jm(k);
+						// session.write(b);
+						logs.info("读阀成功");
+						ps.close();
+						connc.close();
+
+					} else
+					{
+						MapUtilsDf.getMapUtils().add("dFm", "fail");
+						logs.info("读阀失败");
+					}
+				} else
+				{
+					MapUtilsDf.getMapUtils().add("dFm", "超时");
+					logs.info("读阀超时");
+				}
+			} else
+			{
+				MapUtilsDf.getMapUtils().add("dFm", "超时");
+			}
+		}
+	}
+
+	// 当执行开关指令时候执行
+	public void kg(byte[] base) throws SQLException, ClassNotFoundException
+	{
+		logs.info("执行开关指令接收数据：" + Utils.bytesToHexString(base));
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		// 获取发送的时间
+		String fTime = MapUtils.getMapUtils().get("time");
+		String jTime = df.format(new Date());
+		int ms = 0;
+		String sumTime = CzUtil.getSubtract(fTime, jTime);
+		if (sumTime == null)
+		{
+			sumTime = "00:00:01";
+		}
+		if (sumTime != null)
+		{
+			ms = CzUtil.transform(sumTime);
+			// 判断时间是否超时
+			if (ms <= 60)
+			{
+				// 转换为十六进制
+				String stringH = Utils.bytesToHexString(base);
+				if (stringH != null)
+				{
+					String stringHandler = CzUtil.Uppercase(stringH).toString();
+					// 截取效验数据
+					String jy = CzUtil.getJy(stringHandler);
+					// 判断开始和结束
+					String start = null;
+					String end = null;
+					start = stringHandler.charAt(0) + "" + stringHandler.charAt(1);
+					end = stringHandler.charAt(stringHandler.length() - 2) + ""
+							+ stringHandler.charAt(stringHandler.length() - 1);
+					String je = CzUtil.getJe(stringHandler);
+					String string = MapUtils.getMapUtils().get("param");
+					
+					if (string != null)
+					{
+						// 截取状态
+						String Status = stringHandler.substring(stringHandler.length() - 6, stringHandler.length() - 4);
+
+						if (string.equals("kFm"))
+						{
+							// 截取阀门ID
+							String sub = stringHandler.substring(16, 24);
+							// 把十六进制数，转换为十进制
+							int pm = Integer.parseInt("" + sub + "", 16);
+							if (start.equals("F0") && end.equals("FF") && je.equals("" + jy + ""))
+							{
+								logs.info("开阀成功：" + stringHandler);
+								if (Status.equals("00"))
+								{
+									DatabaseUtil dbUtil = DatabaseUtil.getInstance();
+									Connection connc = dbUtil.getConnection();
+
+									String params = "kFm";
+									String sql = "update T_FmInfo set Status='开' where ValAd='" + pm + "'";
+									ps = connc.prepareStatement(sql);
+									rs = ps.executeUpdate();
+									logs.info("开阀是否成功===="+rs);
+									if(rs==1){
+										MapUtils.getMapUtils().add("kfSt", "1");
+										MapUtils.getMapUtils().add(params, "success");
+									}else{
+										MapUtils.getMapUtils().add("sb", "fail");
+									}
+									ps.close();
+									connc.close();
+								
+									logs.info("开阀成功");
+								} else
+								{
+									MapUtils.getMapUtils().add("sb", "fail");
+									logs.info("开阀失败");
+								}
+
+							} else
+							{
+								MapUtils.getMapUtils().add("sb", "fail");
+								logs.info("开阀失败");
+							}
+						}
+						if (string.equals("PlKFm"))
+						{
+							// 截取区管ID
+							String subQg = stringHandler.substring(8, 16);
+							String params = "PlKFm";
+							if (start.equals("F0") && end.equals("FF") && je.equals("" + jy + ""))
+							{
+								logs.info("批量开阀成功：" + stringHandler);
+								if (Status.equals("00"))
+								{
+									DatabaseUtil dbUtil = DatabaseUtil.getInstance();
+									Connection connc = dbUtil.getConnection();
+
+									String sql = "update T_FmInfo set Status='开' where QgID='" + subQg + "'";
+									ps = connc.prepareStatement(sql);
+									rs = ps.executeUpdate();
+
+									ps.close();
+									connc.close();
+									MapUtils.getMapUtils().add(params, "success");
+									logs.info("批量开阀成功");
+
+								} else
+								{
+									MapUtils.getMapUtils().add("sb", "fail");
+									logs.info("批量开阀失败");
+								}
+							} else
+							{
+								MapUtils.getMapUtils().add("sb", "fail");
+								logs.info("批量开阀失败");
+							}
+						}
+						if (string.equals("PlGfm"))
+						{
+							// 截取区管ID
+							String subQg = stringHandler.substring(8, 16);
+							String params = "PlGfm";
+							if (start.equals("F0") && end.equals("FF") && je.equals("" + jy + ""))
+							{
+								logs.info("批量关阀成功：" + stringHandler);
+								if (Status.equals("00"))
+								{
+									DatabaseUtil dbUtil = DatabaseUtil.getInstance();
+									Connection connc = dbUtil.getConnection();
+
+									String sql = "update T_FmInfo set Status='关' where QgID='" + subQg + "'";
+									ps = connc.prepareStatement(sql);
+									rs = ps.executeUpdate();
+
+									ps.close();
+									connc.close();
+									MapUtils.getMapUtils().add(params, "success");
+									logs.info("批量关阀成功");
+								} else
+								{
+									MapUtils.getMapUtils().add("sb", "fail");
+									logs.info("批量关阀失败");
+								}
+							} else
+							{
+								MapUtils.getMapUtils().add("sb", "fail");
+								logs.info("批量关阀失败");
+							}
+
+						}
+						if (string.equals("gFm"))
+						{
+							// 截取区管ID
+							String sub = stringHandler.substring(16, 24);
+							// 把十六进制数，转换为十进制相加
+							int pm = Integer.parseInt("" + sub + "", 16);
+							if (start.equals("F0") && end.equals("FF") && je.equals("" + jy + ""))
+							{
+								logs.info("关阀成功：" + stringHandler);
+								if (Status.equals("00"))
+								{
+									String params = "gFm";
+									DatabaseUtil dbUtil = DatabaseUtil.getInstance();
+									Connection connc = dbUtil.getConnection();
+
+									String sql = "update T_FmInfo set Status='关' where ValAd='" + pm + "'";
+									ps = connc.prepareStatement(sql);
+									rs = ps.executeUpdate();
+									if(rs==1){
+										MapUtils.getMapUtils().add("gfSt", "1");
+										MapUtils.getMapUtils().add(params, "success");
+									}else{
+										MapUtils.getMapUtils().add("sb", "fail");
+									}
+									logs.info("关阀是否成功===="+rs);
+									ps.close();
+									connc.close();
+									logs.info("关阀成功");
+								} else
+								{
+									MapUtils.getMapUtils().add("sb", "fail");
+									logs.info("关阀失败");
+								}
+							} else
+							{
+								MapUtils.getMapUtils().add("sb", "fail");
+								logs.info("关阀失败");
+							}
+						}
+
+						if (string.equals("FsCs"))
+						{
+							String params = "FsCs";
+							if (start.equals("F0") && end.equals("FF") && je.equals("" + jy + ""))
+							{
+								if (Status.equals("00"))
+								{
+
+									MapUtils.getMapUtils().add(params, "success");
+									logs.info("发送参数成功");
+								} else
+								{
+									MapUtils.getMapUtils().add("sb", "fail");
+									logs.info("发送参数失败");
+								}
+							} else
+							{
+								MapUtils.getMapUtils().add("sb", "fail");
+								logs.info("发送参数失败");
+							}
+						}
+
+					} else
+					{
+						MapUtils.getMapUtils().add("sb", "fail");
+						logs.info("失败");
+					}
+
+				}
+			} else
+			{
+				MapUtils.getMapUtils().add("cs", "超时");
+				logs.info("超时");
+			}
+		}
+	}
+
+	/**
+	 * 当连接进入空闲状态时调用̬
+	 */
+	@Override
+	public void sessionIdle(IoSession session, IdleStatus status) throws Exception
+	{
+		log.info("当前连接{}处于空闲状态:{}", session.getRemoteAddress(), status);
+	}
+
+	/**
+	 * 当消息已经送给客户端后触发此方法
+	 */
+	@Override
+	public void messageSent(IoSession session, Object message) throws Exception
+	{
+		log.info("服务器发送给{}的消息: {}", session.getRemoteAddress(), message);
+	}
+
+	/**
+	 * 当关闭时调用
+	 */
+	@Override
+	public void sessionClosed(IoSession session) throws Exception
+	{
+		@SuppressWarnings("deprecation")
+		CloseFuture closeFuture = session.close(true);
+		closeFuture.addListener(new IoFutureListener<IoFuture>()
+		{
+			public void operationComplete(IoFuture future)
+			{
+				if (future instanceof CloseFuture)
+				{
+					((CloseFuture) future).setClosed();
+					log.info("sessionClosed CloseFuture setClosed-->{},", future.getSession().getId());
+				}
+			}
+		});
+		sessionMap.remove(session);
+		log.info("关闭当前session：{}#{}...已移除", session.getId(), session.getRemoteAddress());
+	}
+
+}

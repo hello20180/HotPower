@@ -1,0 +1,75 @@
+/* CSS Document */
+html,body{height:100%;min-width:750px;overflow:auto;
+ }
+ .picLUp{
+    background:url(../images/body.png) no-repeat;
+    min-width:1300px;
+    background-size:100% 100%;
+}
+
+ .z-gav{width: 100%;min-width:800px; background:url(../images/banner.jpg) no-repeat;height:130px; background-size:cover;float:right;}
+.a {float:right;width:8%; height:100%; background:url(../images/xtsz.png) no-repeat; background-size:100% 100%;}
+.b {float:right;width:8%; height:100%;background:url(../images/nhfx.jpg) no-repeat; background-size:100% 100%;} 
+.c {float:right;width:8%; height:100%;background:url(../images/hrzglbei.jpg) no-repeat; background-size:100% 100%;}
+.d {float:right;width:8%; height:100%;background:url(../images/xxgl.jpg) no-repeat; background-size:100% 100%;}
+.e {float:right;width:8%; height:100%;background:url(../images/sjbb.jpg) no-repeat; background-size:100% 100%;}
+.f {float:right;width:8%; height:100%; background:url(../images/tjfx.jpg) no-repeat; background-size:100% 100%;}
+.g {float:right;width:8%; height:100%;background:url(../images/kfgl.jpg) no-repeat; background-size:100% 100%;}
+.i {float:right;width:8%; height:100%;background:url(../images/sbgl.jpg) no-repeat; background-size:100% 100%;}
+.h {float:right;width:8%; height:100%; background:url(../images/yxgl.png) no-repeat; background-size:100% 100%;}
+.sb1 {float:left;width:10%; height:50;}
+.sb2 {float:left;width:10%; height:50;}
+.sb3 {float:left;width:10%; height:50;}
+.sb4 {float:left;width:10%; height:50;}
+
+   
+   
+
+}
+.STYLE2 {
+	font-size: 14px;
+	text-decoration: none;
+	color: #0f9989;
+	
+}
+
+a{
+text-decoration:none;
+color:#000000;
+}
+
+
+
+        table{
+            border: solid 1px #666;
+            border-collapse: collapse;
+            width: 100%;
+			height:auto;
+            cursor: default;
+        }
+        tr{
+            border: solid 1px #666;
+            height: 20px;
+		
+        }
+        table thead tr{
+		background:url(../images/secai.jpg);
+        }
+        td{
+            border: solid 1px #666;
+            height:20px
+        }
+        th{
+            border: solid 1px #666;
+            text-align: center;
+            cursor: pointer;
+            height:30px;
+
+        }
+        .sequence{
+            text-align: center;
+        }
+        .hover{
+            background-color: #3399FF;
+        }
+

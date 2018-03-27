@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.xxgl.dao.RbglDao">
+	<resultMap type="Rbgl" id="rbgl">
+		<id property="id" column="ID"/>
+		<result property="rbType" column="RbType"/>
+		<result property="typeCode" column="TypeCode"/>
+		<result property="company" column="Company"/>
+	</resultMap>
+
+	<select id="find" resultMap="rbgl">
+		select * from T_RBType
+	</select>
+
+	<insert id="Insert" parameterType="Rbgl">
+		insert into T_RBType
+		(RbType,TypeCode,Company)
+		values(#{rbType},#{typeCode},#{company})
+	</insert>
+
+	<delete id="delete" parameterType="Rbgl">
+		delete from T_RBType
+		where ID=#{id}
+	</delete>
+	
+	<update id="update" parameterType="Rbgl">
+		update T_RBType set
+		RbType=#{rbType},TypeCode=#{typeCode},Company=#{company}
+		where ID=#{id}
+	</update>
+
+</mapper>

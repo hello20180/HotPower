@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.sbgls.dao.DcgqDao">
+<resultMap type="Dcgq" id="dcgq">
+<id property="id" column="ID" />
+<result property="fmId" column="fmId" />
+<result property="cgqId" column="cgqId" />
+</resultMap>
+<select id="find" resultMap="dcgq">
+select * from dcgq ORDER BY fmId asc
+</select>
+<delete id="delete" parameterType="dcgq">
+delete  from dcgq where id=#{id}
+</delete>
+</mapper>

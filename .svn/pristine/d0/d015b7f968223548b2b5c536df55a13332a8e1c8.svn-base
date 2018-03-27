@@ -1,0 +1,500 @@
+package com.hnzy.hot.sbgls.controller;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSONObject;
+import com.hnzy.hot.sbgl.pojo.Fm;
+import com.hnzy.hot.sbgl.pojo.Qg;
+import com.hnzy.hot.sbgl.service.QgService;
+import com.hnzy.hot.socket.server.ServerSessionMap;
+import com.hnzy.hot.socket.util.CzUtil;
+import com.hnzy.hot.socket.util.MapUtils;
+
+@Controller
+@RequestMapping("QyglController")
+public class QyglController {
+	@Autowired
+	private QgService qgService;
+	private List<Qg> qglist;
+	private List<Fm> fmlist;
+	boolean sessionmap = false;
+    public String ip;
+    public int port;
+    public String pString;
+    private static Log log = LogFactory.getLog(FmsglController.class);
+	// 实时数据
+	@RequestMapping("ssj")
+	@ResponseBody
+	public String ssj(Qg qg, String ids) {
+		qg = qgService.findQgID(ids);
+		 ip = qg.getJzq().getJzqIp();
+		 port = qg.getJzq().getJzqPort();
+		 pString = sj(ip, port, ids);
+		return pString;
+	}
+
+	// 批量开阀
+	@RequestMapping("PlKf")
+	@ResponseBody
+	public String PlKf(Qg qg, String ids) {
+		qg = qgService.findQgID(ids);
+		 ip = qg.getJzq().getJzqIp();
+		 port = qg.getJzq().getJzqPort();
+		 pString = plKf(ip, port, ids);
+		return pString;
+
+	}
+
+	@RequestMapping("PlGf")
+	@ResponseBody
+	public String PlGf(Qg qg, String ids) {
+		qg = qgService.findQgID(ids);
+		 ip = qg.getJzq().getJzqIp();
+		 port = qg.getJzq().getJzqPort();
+		 pString = PlGf(ip, port, ids);
+		return pString;
+
+	}
+
+	@RequestMapping("QgTS")
+	@ResponseBody
+	public String QgTS(Qg qg, String ids) {
+		qg = qgService.findQgID(ids);
+		 ip = qg.getJzq().getJzqIp();
+		 port = qg.getJzq().getJzqPort();
+		String jzqId = qg.getJzq().getJzqId();
+		 pString = qgTs(ip, port, jzqId);
+		return pString;
+
+	}
+
+	@RequestMapping("TjfmId")
+	@ResponseBody
+	public String TjfmId(Qg qg, String ids) {
+
+		qg = qgService.findQgID(ids);
+		 ip = qg.getJzq().getJzqIp();
+		 port = qg.getJzq().getJzqPort();
+		 pString = tjfmId(ip, port, ids);
+		return pString;
+
+	}
+
+	// 读取阀门ID
+	@RequestMapping("DqfmId")
+	@ResponseBody
+	public JSONObject DqfmId(Qg qg, String ids) {
+		qg = qgService.findQgID(ids);
+		ip = qg.getJzq().getJzqIp();
+		port = qg.getJzq().getJzqPort();
+		JSONObject pString = DqfmId(ip, port, ids);
+		return pString;
+	}
+
+	// 读取阀门ID
+	public JSONObject DqfmId(String jzqIp, int jzqPort, String ids) {
+
+		String pt = "/" + jzqIp + ":" + jzqPort;
+		String ja = "F00A2900" + ids;
+		log.info("读取阀门ID发送数据："+ja);
+		sessionmap = cz(ja, pt);
+		
+		try {
+			Thread.sleep(3000);
+
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		JSONObject jsonObject = new JSONObject();
+		if (sessionmap == true && MapUtils.getMapUtils().get("DqfmId")!=null &&MapUtils.getMapUtils().get("DqfmId") .equals("success") ) {
+
+			MapUtils.getMapUtils().add("cs", null);
+			MapUtils.getMapUtils().add("DqfmId", null);
+			String fmId = MapUtils.getMapUtils().get("fmId");
+			jsonObject.put("fmId", fmId);
+			jsonObject.put("js", "0");
+		} else if (sessionmap == true && MapUtils.getMapUtils().get("cs")!=null && MapUtils.getMapUtils().get("cs").equals("超时")) {
+			MapUtils.getMapUtils().add("cs", null);
+			MapUtils.getMapUtils().add("DqfmId", null);
+			jsonObject.put("js", "2");
+			return jsonObject;
+		} else if (sessionmap == false && MapUtils.getMapUtils().get("DqfmId")==null) {
+			jsonObject.put("js", "3");
+			log.info("发送数据失败,集中器不在线");
+			return jsonObject;
+		} else {
+			MapUtils.getMapUtils().add("cs", null);
+			MapUtils.getMapUtils().add("DqfmId", null);
+			jsonObject.put("js", "1");
+			return jsonObject;
+		}
+		return jsonObject;
+
+	}
+
+	// 根据qg添加阀门ID
+	public String tjfmId(String jzqIp, int jzqPort, String ids) {
+		String pt = "/" + jzqIp + ":" + jzqPort;
+		String fmString = "";
+		// 阀门总数
+		int ValstID = Integer.valueOf(qgService.findQgID(ids).getvALstID());
+		int ValedID = Integer.valueOf(qgService.findQgID(ids).getvALedID());
+		int fmcount = ValedID - ValstID + 1;
+		int fmnt = fmcount * 4 + 11;
+		String fmt = Integer.toHexString(fmnt);
+
+		// 开始阀门
+		String valstId = qgService.findQgID(ids).getvALstID();
+		// 结束阀门
+		String valedId = qgService.findQgID(ids).getvALedID();
+		// 获取所有的阀门
+		for (int i = 0; i < fmcount; i++) {
+			int sted = Integer.valueOf(valstId);
+			int sd = sted + i;
+			fmString += "0" + Integer.toHexString(sd);
+		}
+		// 如果fm总数在某些范围内
+		String fms = "";
+		String fmstr = "";
+		if (fmcount > 50 && fmcount <= 100) {
+			log.info("根据qg添加阀门ID 阀门ID大于50小于100");
+			fms = CzUtil.Uppercase(fmString).toString();
+			if (fmcount > 0) {
+				fmstr = fms.substring(0, 400);
+				// 不到四个字节补0
+				String jas = "F0D21C00" + "" + ids + fmstr + "01";
+				log.info("根据qg添加阀门ID 阀门ID大于0发送数据："+jas);
+				sessionmap = cz(jas, pt);
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			if (fmcount > 50) {
+				fmstr = fmString.substring(400);
+				String jas = "F0D21C00" + "" + ids + fmstr + "02";
+				log.info("根据qg添加阀门ID 阀门ID大于50 发送数据："+jas);
+				sessionmap = cz(jas, pt);
+			}
+
+		} else if (fmcount > 100 && fmcount <= 150) {
+			log.info("根据qg添加阀门ID 阀门ID大于100小于150");
+			if (fmcount > 0) {
+				fms = CzUtil.Uppercase(fmString).toString();
+				fmstr = fmString.substring(0, 400);
+				String jas = "F0D21C00" + "" + ids + fmstr + "01";
+				log.info("根据qg添加阀门ID 阀门ID大于0发送数据："+jas);
+				sessionmap = cz(jas, pt);
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (fmcount > 50) {
+				fms = CzUtil.Uppercase(fmString).toString();
+				fmstr = fmString.substring(400, 800);
+				String ja = "F0D21C00" + "" + ids + fmstr + "02";
+				log.info("根据qg添加阀门ID 阀门ID大于50发送数据："+ja);
+				sessionmap = cz(ja, pt);
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (fmcount > 100) {
+				fmstr = fmString.substring(800);
+				fms = CzUtil.Uppercase(fmString).toString();
+				String jas = "F0D21C00" + "" + ids + fmstr + "03";
+				log.info("根据qg添加阀门ID 阀门ID大于100发送数据："+jas);
+				sessionmap = cz(jas, pt);
+			}
+		} else if (fmcount > 150 && fmcount <= 200) {
+			log.info("根据qg添加阀门ID 阀门ID大于150小于200");
+			if (fmcount > 0) {
+				fms = CzUtil.Uppercase(fmString).toString();
+				fmstr = fmString.substring(0, 400);
+				String ja = "F0D21C00" + "" + ids + fmstr + "01";
+				log.info("根据qg添加阀门ID 阀门ID大于0发送数据："+ja);
+				sessionmap = cz(ja, pt);
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (fmcount > 50) {
+				fms = CzUtil.Uppercase(fmString).toString();
+				fmstr = fmString.substring(400, 800);
+				String ja = "F0D21C00" + "" + ids + fmstr + "02";
+				log.info("根据qg添加阀门ID 阀门ID大于50发送数据："+ja);
+				sessionmap = cz(ja, pt);
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (fmcount > 100) {
+
+				fms = CzUtil.Uppercase(fmString).toString();
+				fmstr = fmString.substring(800, 1200);
+				String ja = "F0D21C00" + "" + ids + fmstr + "03";
+				log.info("根据qg添加阀门ID 阀门ID大于100发送数据："+ja);
+				sessionmap = cz(ja, pt);
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (fmcount > 150) {
+				fms = CzUtil.Uppercase(fmString).toString();
+				fmstr = fmString.substring(1200);
+				String jas = "F0D21C00" + "" + ids + fmstr + "04";
+				log.info("根据qg添加阀门ID 阀门ID大于150");
+				sessionmap = cz(jas, pt);
+			}
+		} else if (fmcount <= 50) {
+ 
+			fms = CzUtil.Uppercase(fmString).toString();
+			String jas = "F0" + fmt + "1C00" + ids + "" + fms + "01";
+			log.info("根据qg添加阀门ID 阀门ID小于50发送数据："+jas);
+			sessionmap = cz(jas, pt);
+		}
+		try {
+			Thread.sleep(4000);
+
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		if (sessionmap == true && MapUtils.getMapUtils().get("tjfmId")!=null&& MapUtils.getMapUtils().get("tjfmId").equals("success")) {
+			MapUtils.getMapUtils().add("cs", null);
+			MapUtils.getMapUtils().add("tjfmId", null);
+
+			return "0";
+		} else if (sessionmap == true && MapUtils.getMapUtils().get("cs")!=null && MapUtils.getMapUtils().get("cs").equals("超时")) {
+			MapUtils.getMapUtils().add("cs", null);
+			MapUtils.getMapUtils().add("tjfmId", null);
+			return "2";
+		} else if (sessionmap == false && MapUtils.getMapUtils().get("tjfmId")==null) {
+			log.info("发送数据失败,集中器不在线");
+			return "3";
+		} else {
+			MapUtils.getMapUtils().add("cs", null);
+			MapUtils.getMapUtils().add("tjfmId", null);
+			return "1";
+		}
+	}
+//查询通信状态
+	public String qgTs(String jzqIp, int jzqPort, String jzqId) {
+		String pt = "/" + jzqIp + ":" + jzqPort;
+		String ja = "F00A0100" + jzqId;
+		sessionmap = cz(ja, pt);
+		
+		log.info("查询通信状态发送数据："+ja);
+		try {
+			Thread.sleep(3000);
+
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		if (sessionmap == true && MapUtils.getMapUtils().get("jzq")!=null && MapUtils.getMapUtils().get("jzq") .equals("success")) {
+			return "0";
+		} else if (sessionmap == true  && MapUtils.getMapUtils().get("jzq")!=null && MapUtils.getMapUtils().get("jzq") .equals("fail")) {
+			return "1";
+		} else if (sessionmap == false) {
+			log.info("发送数据失败,集中器不在线");
+			return "3";
+		} else {
+			return "2";
+		}
+	}
+
+	String param = null;
+//批量关阀
+	public String PlGf(String ip, int port, String qgId) {
+		param = "PlGfm";
+		MapUtils.getMapUtils().add("param", param);
+		// IP地址和端口号
+		String pt = "/" + ip + ":" + port;
+		String ja = "F00B2100" + qgId + "01";
+		log.info("批量关阀发送数据："+ja);
+		sessionmap = cz(ja, pt);
+		try {
+			Thread.sleep(6000);
+
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		if (sessionmap == true  && MapUtils.getMapUtils().get("PlGfm")!=null && MapUtils.getMapUtils().get("PlGfm").equals("success")) {
+			MapUtils.getMapUtils().add("cs", null);
+			MapUtils.getMapUtils().add("PlGfm", null);
+			MapUtils.getMapUtils().add("PlKFm", null);
+
+			return "0";
+		} else if (sessionmap == true  && MapUtils.getMapUtils().get("sb")!=null && MapUtils.getMapUtils().get("sb").equals("fail") 
+				&& MapUtils.getMapUtils().get("PlGfm") != null) {
+			MapUtils.getMapUtils().add("cs", null);
+			MapUtils.getMapUtils().add("PlGfm", null);
+			MapUtils.getMapUtils().add("PlKFm", null);
+			return "2";
+		} else if (sessionmap == true   && MapUtils.getMapUtils().get("cs")!=null && MapUtils.getMapUtils().get("cs") .equals("超时")
+				|| sessionmap == true && MapUtils.getMapUtils().get("PlGfm") == null) {
+			MapUtils.getMapUtils().add("cs", null);
+			MapUtils.getMapUtils().add("PlGfm", null);
+			MapUtils.getMapUtils().add("PlKFm", null);
+			return "3";
+		} else if (sessionmap == false) {
+			log.info("发送数据失败,集中器不在线");
+			return "4";
+		} else {
+			MapUtils.getMapUtils().add("cs", null);
+			MapUtils.getMapUtils().add("PlGfm", null);
+			MapUtils.getMapUtils().add("PlKFm", null);
+			return "1";
+		}
+	}
+//批量开阀
+	public String plKf(String ip, int port, String qgId) {
+		param = "PlKFm";
+		MapUtils.getMapUtils().add("param", param);
+		// IP地址和端口号
+		String pt = "/" + ip + ":" + port;
+		String ja = "F00B2000" + qgId + "00";
+		log.info("批量开阀发送数据："+ja);
+		sessionmap = cz(ja, pt);
+		try {
+			Thread.sleep(6000);
+
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		if (sessionmap == true && MapUtils.getMapUtils().get("PlKFm")!=null && MapUtils.getMapUtils().get("PlKFm").equals("success")) {
+			MapUtils.getMapUtils().add("cs", null);
+			MapUtils.getMapUtils().add("PlGf", null);
+			MapUtils.getMapUtils().add("PlKFm", null);
+			return "0";
+		} else if (sessionmap == true && MapUtils.getMapUtils().get("sb")!=null && MapUtils.getMapUtils().get("sb") .equals("fail")
+				&& MapUtils.getMapUtils().get("PlKFm") != null) {
+			MapUtils.getMapUtils().add("cs", null);
+			MapUtils.getMapUtils().add("PlGf", null);
+			MapUtils.getMapUtils().add("kPlKFmFm", null);
+			return "2";
+		} else if (sessionmap == true && MapUtils.getMapUtils().get("cs")!=null && MapUtils.getMapUtils().get("cs").equals("超时") 
+				|| sessionmap == true && MapUtils.getMapUtils().get("PlKFm") == null) {
+			MapUtils.getMapUtils().add("cs", null);
+			MapUtils.getMapUtils().add("PlGf", null);
+			MapUtils.getMapUtils().add("kPlKFm", null);
+			return "3";
+		} else if (sessionmap == false) {
+			log.info("发送数据失败,集中器不在线");
+			return "4";
+		} else {
+			MapUtils.getMapUtils().add("cs", null);
+			MapUtils.getMapUtils().add("PlGf", null);
+			MapUtils.getMapUtils().add("PlKFm", null);
+			return "1";
+		}
+
+	}
+//实时数据
+	public String sj(String ip, int port, String qgId) {
+//		 IP地址和端口号
+		String pt = "/" + ip + ":" + port;
+		// fmId十进制
+		String ja = "F00A0800" + qgId;
+		log.info("实时数据发送数据："+ja);
+		sessionmap = cz(ja, pt);
+		
+		try {
+			Thread.sleep(6000);
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+		if (sessionmap == true && MapUtils.getMapUtils().get("dFm")!=null && MapUtils.getMapUtils().get("dFm").equals("success")) {
+			MapUtils.getMapUtils().add("dFm", null);
+			return "0";
+		}
+		if (sessionmap == true && MapUtils.getMapUtils().get("dFm")!=null && MapUtils.getMapUtils().get("dFm").equals("fail")
+				|| sessionmap == true && MapUtils.getMapUtils().get("dFm") == null) {
+
+			return "1";
+		} else if (sessionmap == false) {
+			log.info("发送数据失败,集中器不在线");
+			return "4";
+		}
+		return "2";
+	}
+
+	// 抽取相同部分
+	public boolean cz(String ja, String pt) {
+		// 把十六进制数，转换为十进制相加
+		int jia = CzUtil.FsZh(ja);
+		// 十进制转换为十六进制
+		String hex = Integer.toHexString(jia);
+		StringBuffer stringBuffer = new StringBuffer();
+		// 转换为大写
+		if (hex != null) {
+			for (int i = 0; i < hex.length(); i++) {
+				char c = hex.charAt(i);
+				if (!Character.isDigit(c)) {
+					stringBuffer.append(Character.toUpperCase(c));
+				} else {
+					stringBuffer.append(c);
+				}
+			}
+		}
+		String sH = stringBuffer.toString();
+		// 截取相加结果后两位
+		String je = null;
+		for (int j = 0; j < sH.length() - 1; j++) {
+			je = sH.charAt(sH.length() - 2) + "" + sH.charAt(sH.length() - 1);
+		}
+		String[] keys = new String[] { pt };
+		String mString = ja + "" + je + "FF";
+		// 解码
+		byte[] b = CzUtil.jm(mString);
+		ServerSessionMap sessionMap = ServerSessionMap.getInstance();
+		boolean sessionmap = sessionMap.sendMessage(keys, b);
+		return sessionmap;
+	}
+
+	// 查找区管信息
+	@RequestMapping("qglist")
+	public String qglist(HttpServletRequest request) {
+		qglist = qgService.find();
+		request.setAttribute("Qg", qglist);
+		return "sbgls/qygl";
+	}
+
+	public List<Qg> getQglist() {
+		return qglist;
+	}
+
+	public void setQglist(List<Qg> qglist) {
+		this.qglist = qglist;
+	}
+
+	public List<Fm> getFmlist() {
+		return fmlist;
+	}
+
+	public void setFmlist(List<Fm> fmlist) {
+		this.fmlist = fmlist;
+	}
+
+}

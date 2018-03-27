@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.sbgl.dao.JzqDao">
+
+
+<resultMap type="Jzq" id="jzq">
+<id property="id" column="ID"/>
+<result property="jzqId" column="JzqID"/>
+<result property="xqName" column="XqName"/>
+<result property="status" column="Status"/>
+<result property="jzqIp" column="JzqIP"/>
+<result property="jzqPort" column="JzqPort"/>
+<result property="hrzName" column="HESName"/>
+<result property="installAd" column="InstallAd"/>
+<result property="dateTime" column="UpdateTime"/>
+<association property="qg" javaType="com.hnzy.hot.sbgl.pojo.Qg">
+<id property="id" column="ID"/>
+<result property="qgID" column="QgID"/>
+</association>
+</resultMap>
+
+<select id="find" resultMap="jzq">
+select j.ID,j.JzqID,j.JzqIp,j.JzqPort,j.Status,j.XqName,j.HESName,
+j.InstallAD,j.UpdateTime,q.ID,q.QgID from T_JzqInfo j,T_QgInfo q
+ where j.JzqID=q.JzqID
+</select>
+</mapper>

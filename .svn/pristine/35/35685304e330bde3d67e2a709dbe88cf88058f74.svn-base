@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.xtgl.dao.RoleDao" >
+
+   <resultMap type="Role" id="userRole">
+    <id property="id" column="rid"></id>
+    <result property="name" column="rname"/>
+    <collection property="users" ofType="User">
+    <id property="id" column="uid"/>
+    <result property="userName" column="uname"/>
+    </collection>
+   
+   </resultMap>
+	<select id="findAllRole" resultType="Role">
+ 		SELECT 
+			id,NAME
+		FROM
+			role
+ 	</select>
+ 	
+ 	<insert id="Insert" parameterType="Role">
+		INSERT INTO role(
+			NAME,createTime
+		)
+		VALUES(
+			#{name},
+			#{createTime}
+		)
+ 	</insert>
+ 	
+ 	<update id="update" parameterType="Role">
+		UPDATE role
+		<set>
+			<if test="name!=null">
+				NAME=#{name},
+			</if>
+			lastEditTime=#{lastEditTime}
+		</set>
+		WHERE
+			id = #{id}
+ 	</update>
+ 	
+ 	<delete id="delete">
+		DELETE FROM role
+		WHERE id = #{id}
+ 	</delete>
+ 	<insert id="save" parameterType="Role">
+ 	 INSERT INTO role(NAME,
+ 	 create_time,
+ 	 last_edit_time
+ 	 )
+ 	 VALUES(
+ 	 #{name},
+ 	 NOW(),
+ 	 NOW()
+ 	 )
+ 	</insert>
+ 
+ 	<resultMap type="User" id="findUserByURid">
+		<result property="userName" column="uname" />
+ 	</resultMap>
+ 	
+ 	<select id="findUsers" parameterType="String" resultMap="findUserByURid">
+ 		SELECT 
+ 			tul.UserName as uname
+ 		FROM
+			user_role as ur,
+			T_UserLogin as tul
+		WHERE
+			ur.user_id=tul.ID
+		AND
+			ur.role_id=#{id}
+ 	</select>
+ <select id="findRoleByUId" resultMap="userRole">
+ 	     SELECT  
+			xu.id uid,
+			xu.UserName uname,
+			xr.id rid,
+			xr.NAME rname
+		FROM 
+			T_UserLogin as xu,
+			user_role as xur,
+			role as xr
+		WHERE 
+			xu.id=xur.user_id
+ 		AND
+			xur.role_id=xr.id
+		AND
+			xu.UserName=#{userName}
+ 	</select>
+ 	
+ 	 <select id="findRoleId" resultMap="userRole">
+	     SELECT  
+			xu.id uid,
+			xu.UserName uname,
+			xr.id rid,
+			xr.NAME rname
+		FROM 
+			T_UserLogin as xu,
+			user_role as xur,
+			role as xr
+		WHERE 
+			xu.id=xur.user_id
+ 		AND
+			xur.role_id=xr.id
+		AND
+			xu.id=#{id}
+ 	</select>
+ 	<delete id="delURole" parameterType="Role">
+ 		DELETE FROM 
+ 			user_role 
+ 		WHERE 
+ 			user_id=#{id};
+ 	</delete>
+ <insert id="addURole" parameterType="Role">
+ 	    INSERT INTO 
+ 			user_role(user_id,role_id) 
+ 			VALUES(#{userId},#{roleId})
+ 	
+ </insert>
+</mapper>

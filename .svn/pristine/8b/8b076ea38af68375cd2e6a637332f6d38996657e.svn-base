@@ -1,0 +1,284 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+    pageEncoding="utf-8"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title></title>
+  <link href="../css/bootstrap.css" rel="stylesheet">
+<script src="../js/bootstrap.js"></script>
+<script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="../js/bootstrap-datetimepicker.min.js"></script>
+<script type="text/javascript" src="../js/bootstrap-datetimepicker.zh-CN.js"></script>
+<link href="../css/bootstrap.css" rel="stylesheet">
+<link href="../css/bootstrap-datetimepicker.min.css">
+<link href="../css/main.css" rel="stylesheet" type="text/css" />
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script type="text/javascript" src="../js/main.js"></script>
+<script type="text/javascript" src="../js/biao.js"></script>
+<script type="text/javascript">
+	/*页面加载就开始执行js*/
+	$(document).ready(function() {
+		$("#xqNameId").change(
+		function(){	
+		  $.get("findYhBuildNObyXqName.action?xqName="+ $("#xqNameId").val(),function(data) {
+			var d=data.xqlist;
+			$("#buildNoId option:gt(0)").remove();
+			$("#cellNoId option:gt(0)").remove();
+			for(var i=0;i<d.length;i++){
+				var buildNo=d[i].buildNO;
+				var opt="<option value='"+buildNo+"'>"+buildNo+"</option>"
+				$("#buildNoId").append(opt);
+			}
+			});
+		});
+		
+		$("#buildNoId").change(
+			function() {
+				$.get("findYhCellNOByBuild.action?build="+ $("#buildNoId").val()+"&xqName="+ $("#xqNameId").val(),function(data) {
+					var dd=data;
+					var d=dd.cellList;
+					$("#cellNoId option:gt(0)").remove();
+					for(var i=0;i<d.length;i++){
+						var cellNo=d[i].cellNO;
+						var opt="<option value='"+cellNo+"'>"+cellNo+"</option>"
+						$("#cellNoId").append(opt);
+					}
+					});
+				 });	
+      });
+
+ </script>
+ <script type="text/javascript">
+ //搜索
+function searchInfo(){
+	 debugger;
+    var   xqName = $('#xqNameId').val();
+    var   buildNo=$('#buildNoId').val();
+    var   cellNo=$('#cellNoId').val();
+    var   houseNo=$('#houseNoId').val();
+    var html ="";
+	$.ajax({ 
+		        url:"searchInfo.action",
+				async : false,
+				dataType : "json",
+				data : {
+					"xqName" : xqName,
+					"buildNo" : buildNo,
+					"cellNo" : cellNo,
+					"houseNo" : houseNo,
+					"houseNo" : houseNo,
+				},
+				success : function(data) {
+					$("#tablediv").empty();
+					var d=data.findList;
+					 html+="<div class='panel-body'  style='width: 99%; height: 70%; position: absolute; overflow:auto;'>"
+					 html+="<table id='tableSort' style='overflow: scroll;'>";
+					 html+="<thead>"
+					 html+="<tr>"
+					 html+="<th>"
+					 html+="</th>"
+					 html+="<th> 用户姓名"
+					 html+="</th>"
+					 html+="<th> 小区名称"
+					 html+="</th>"
+					 html+="<th> 楼栋号"
+					 html+="</th>"
+					 html+="<th> 单元号"
+					 html+="</th>"
+					 html+="<th> 户号"
+					 html+="</th>"
+					 html+="<th> 热表类型"
+					 html+="</th>"
+					 html+="<th> 热表编号"
+					 html+="</th>"
+					 html+="<th> 当前热量"
+					 html+="</th>"
+					 html+="<th> 热量单位"
+					 html+="</th>"
+				     html+="<th> 热功率"
+			         html+="</th>"
+			         html+="<th> 流量"
+					 html+="</th>"
+					 html+="<th> 进水温度"
+					 html+="</th>"
+				     html+="<th>回水温度"
+					 html+="</th>"
+				     html+="<th>温差"
+		             html+="</th>"
+		             html+="<th>工作时间"
+				     html+="</th>"
+				     html+="<th>错误代码"
+					 html+="</th>"
+			         html+="<th>实时时间"
+			         html+="</th>"
+					 html+="<th>更新时间"
+			         html+="</th>"
+					 html+="</tr>"
+					 html+="</thead>"
+					 html+="<tbody class='text-center'>"
+						 
+					for(var i=0;i<d.length;i++){
+						var id=d[i].id;
+						var yhName=d[i].yhName;
+						var xqName=d[i].xqName;
+						var buildNo=d[i].buildNO;
+						var cellNo=d[i].cellNO;
+						var houseNo =d[i].houseNO ;
+						var rbType=d[i].rb.rbType;
+						var rbAd=d[i].rb.rbAd;
+						var energy=d[i].rb.energy;	
+						var energyUnit=d[i].rb.energyUnit;
+						var power=d[i].rb.power;
+						var flow=d[i].rb.flow;
+						var inTmp=d[i].rb.inTmp;
+						var outTmp=d[i].rb.outTmp;	
+						var diffTmp=d[i].rb.diffTmp;
+						var operTime=FormatDate(d[i].rb.operTime) ;
+						var errCode=d[i].rb.errCode;
+						var readMTime=FormatDate(d[i].rb.readMTime) ;
+						var recordTime=FormatDate(d[i].rb.recordTime) ;
+						html+="<tbody class='text-center' id='fmInfo'>";
+						html+="<tr>";
+						html+="<td><input type='checkbox' value='"+id+"'/></td>";
+						html+="<td>"+yhName+"</td>";
+						html+="<td>"+xqName+"</td>";
+						html+="<td>"+buildNo+"</td>";
+						html+="<td>"+cellNo+"</td>";
+						html+="<td>"+houseNo+"</td>";
+						html+="<td>"+rbType+"</td>";
+						html+="<td>"+rbAd+"</td>";
+						html+="<td>"+energy+"</td>";
+						html+="<td>"+energyUnit+"</td>";
+						html+="<td >"+power+"</td>";
+						html+="<td>"+flow+"</td>";
+						html+="<td>"+inTmp+"</td>";
+						html+="<td>"+outTmp+"</td>";
+						html+="<td>"+diffTmp+"</td>";
+						html+="<td title='"+operTime+"'>"+operTime+"</td>";
+						html+="<td>"+errCode+"</td>";
+						html+="<td title='"+readMTime+"'>"+readMTime+"</td>";
+						html+="<td title='"+recordTime+"'>"+recordTime+"</td>";
+						html+="</tr>";
+						html+="</tbody>"
+						}
+					 html+="</tbody>"
+					  html+="</table>";
+					  html+="</div>";
+					$("#tablediv").append(html);
+				}
+
+			})
+		}
+//时间转换
+function FormatDate (strTime) {
+    var date = new Date(strTime);
+    return date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate()+" "+date.getHours()+":"+date.getMinutes()+":"+date.getSeconds();
+}
+</script>
+</head>
+<body>
+ <div class="panel panel-success">
+ <div class="panel-heading">热表管理</div>
+ <div class="panel-body"  style="width: 99%; height: 90%; position: absolute; overflow:auto;">
+
+	<p>
+		<label for="xqNameId">选择小区</label> 
+		<select id="xqNameId" name="xqName">
+			<c:if test="${!empty yhInfoList }">
+			   <option>--选择小区名称--</option>
+				<c:forEach items="${yhInfoList}" var="yhInfolist">
+					<option>${yhInfolist.xqName}</option>
+				</c:forEach>
+			</c:if>
+		</select>
+		&nbsp;&nbsp;&nbsp;
+
+		<label for="buildNoId">楼栋号</label>
+		 <select name="buildNo" id="buildNoId">
+			<option value=0>--选择楼栋号--</option>
+		</select>
+	&nbsp;&nbsp;&nbsp;
+		<label for="cellNoId">单元号</label> 
+		<select name="cellNo" id="cellNoId">
+			<option value=0>--选择单元号--</option>
+		</select>
+
+	户号：<input type="text" name="houseNo" id="houseNoId" value="${houseNo}"  />
+
+<input class="btn btn-success" type="button" onclick="searchInfo()" value="搜索">
+<button type="button" class="btn btn-success" onclick="sAlert('通讯故障 请检查网路状态是否正常！！！！！')">读取热表</button>
+<hr>
+<div id="tablediv">
+<form action="">
+<div class="panel-body"  style="width: 99%; height: 85%; position: absolute; overflow:auto;">
+<table id="tableSort" style="overflow:scroll;">
+	<thead>
+      <tr>
+      			<th align="center" nowrap="nowrap"></th>
+				<th align="center" nowrap="nowrap">用户姓名</th>
+				<th align="center" nowrap="nowrap">小区名称</th>
+				<th align="center" nowrap="nowrap">楼栋号</th>
+				<th align="center" nowrap="nowrap">单元号</th>
+				<th align="center" nowrap="nowrap">户号</th>
+				<th align="center" nowrap="nowrap">热表类型</th>
+				<th align="center" nowrap="nowrap">热表编号</th>
+				<th align="center" nowrap="nowrap">当前热量</th>
+				<th align="center" nowrap="nowrap">热量单位</th>
+				<th align="center" nowrap="nowrap">热功率</th>
+				<th align="center" nowrap="nowrap">流量</th>
+				<th align="center" nowrap="nowrap">进水温度</th>
+				<th align="center" nowrap="nowrap">回水温度</th>
+				<th align="center" nowrap="nowrap">温差</th>
+				<th align="center" nowrap="nowrap">工作时间</th>
+				<th align="center" nowrap="nowrap">错误代码</th>
+				<th align="center" nowrap="nowrap">实时时间</th>
+				<th align="center" nowrap="nowrap">更新时间</th>
+     </tr>
+  </thead>
+   
+  <tbody class="text-center" id="fmInfo">
+		<c:forEach  var="r" items="${findList}" varStatus="status">
+	 <tr class="hover" <c:if test="${status.index%2==1 }">style="background-color:#eef3fa"</c:if>  >
+	 
+	              <td><input type="checkbox" value="${r.id}" /></td>
+					<td align="center" nowrap="nowrap">${r.yhName}</td>
+					<td align="center" nowrap="nowrap">${r.xqName}</td>
+					<td align="center" nowrap="nowrap">${r.buildNO}</td>
+					<td align="center" nowrap="nowrap">${r.cellNO}</td>
+					<td align="center" nowrap="nowrap">${r.houseNO}</td>
+					<td align="center" nowrap="nowrap">${r.rb.rbType}</td>
+					<td align="center" nowrap="nowrap">${r.rb.rbAd}</td>
+					<td align="center" nowrap="nowrap">${r.rb.energy}</td>
+					<td align="center" nowrap="nowrap">${r.rb.energyUnit}</td>
+					<td align="center" nowrap="nowrap">${r.rb.power}</td>
+					<td align="center" nowrap="nowrap">${r.rb.flow}</td>
+					<td align="center" nowrap="nowrap">${r.rb.inTmp}</td>
+					<td align="center" nowrap="nowrap">${r.rb.outTmp}</td>
+					<td align="center" nowrap="nowrap">${r.rb.diffTmp}</td>
+					<td align="center" nowrap="nowrap">${r.rb.operTime}</td>
+					<td align="center" nowrap="nowrap">${r.rb.errCode}</td>
+					<td align="center"><fmt:formatDate value="${r.rb.readMTime}" pattern="yyyy-MM-dd HH:mm:ss" />
+					<td align="center"><fmt:formatDate value="${r.rb.recordTime}" pattern="yyyy-MM-dd HH:mm:ss" />
+			<%-- 		<td align="center" nowrap="nowrap">${r.rb.readMTime}</td>
+					<td align="center" nowrap="nowrap">${r.rb.recordTime}</td> --%>
+	 </tr>
+	</c:forEach>
+  </tbody>
+</table>
+</div>
+</form>
+</div>
+</div>
+</div>
+</body>
+</html>

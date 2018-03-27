@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.kfgl.dao.AddressDao">
+<resultMap type="Address" id="address">
+		<id property="id" column="id" />
+	</resultMap>
+  <select id="find" resultMap="address">
+		select * from Address
+	</select>
+	
+	<select id="findById" parameterType="Address" resultMap="address">
+		select * from Address where id=#{id}
+	</select>
+
+	<insert id="Insert" parameterType="Address">
+		insert into Address
+		(name,depart,tel,remarks)
+		values
+		(#{name},#{depart},#{tel},#{remarks})
+	</insert>
+	
+
+	<delete id="delete" parameterType="Address">
+		delete from Address where id=#{id}
+	</delete>
+	
+	
+	<update id="update" parameterType="Address">
+		update Address set name=#{name},depart=#{depart},tel=#{tel},remarks=#{remarks}
+		 where id=#{id}
+	</update>
+</mapper>

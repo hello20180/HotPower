@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.tjfx.dao.XqAvgDao">
+	<resultMap type="XqAvg" id="xqAvg">
+		<id property="id" column="id" />
+		<result property="xqName" column="XqName" />
+		<result property="avg" column="Avg" />
+		<result property="date" column="Date" />
+		<result property="tqyb" column="Tqyb"/>
+		<result property="tqybDate" column="TqybDate"/>
+	</resultMap>
+	
+	<insert id="InTAvg" parameterType="XqAvg">
+	insert into XqAvg (XqName,avg,Date,Tqyb,TqybDate)
+	values(#{xqName},#{avg},#{date},#{tqyb},#{tqybDate})
+	</insert>
+	<select id="findAvg" resultMap="xqAvg">
+	select top 500 * from XqAvg   order by date desc
+	</select>
+	<select id="searchInfo" resultMap="xqAvg" parameterType="XqAvg">
+     select * from XqAvg where 1=1
+		<if test="xqName!='--选择小区名称--'">
+			and XqName=#{xqName}
+		</if>
+		<if test="recordTime1!=null and recordTime1!=''">
+			and date &gt;= #{recordTime1}
+		</if>
+		<if test="recordTime2!=null and recordTime2!=''">
+			and date &lt;=#{recordTime2}
+		</if>
+           order by date desc
+	</select>
+	<select id="findPjWdJl" resultMap="xqAvg">
+	select top 70 * from XqAvg  where XqName='金领小区' order by date desc
+	</select>
+	<select id="findHisAvg" resultMap="xqAvg" parameterType="XqAvg">
+	select top 100 * from XqAvg  where 1=1
+	<if test="xqName!='--选择小区名称--'">
+			and XqName=#{xqName}
+		</if>
+		<if test="recordTime1!=null and recordTime1!=''">
+			and date &gt;= #{recordTime1}
+		</if>
+		<if test="recordTime2!=null and recordTime2!=''">
+			and date &lt;=#{recordTime2}
+		</if>
+	</select>
+</mapper>

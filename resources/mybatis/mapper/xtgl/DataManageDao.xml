@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.xtgl.dao.DataManageDao">
+
+<resultMap type="DataManage" id="dataManage">
+  <id property="id" column="ID"/>
+  <result property="savePath" column="Save_Path"/>
+</resultMap>
+
+<select id="findDataManage" resultMap="dataManage">
+select ID,Save_Path from T_Set
+</select>
+</mapper>

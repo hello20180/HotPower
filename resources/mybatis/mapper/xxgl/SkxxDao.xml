@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.xxgl.dao.SkxxDao">
+	<resultMap type="Skxx" id="skxx">
+		<id property="id" column="Id" />
+		<result property="skqSbh" column="SkqSbh"/>
+		<result property="kh" column="Kh"/>
+		<result property="fmState" column="FmState"/>
+		<result property="skSuccess" column="SkSuccess"/>
+		<result property="sfJf" column="SfJf"/>
+		<result property="dateTime" column="DateTime"/>
+		<result property="qg.skqSbh" column="skqSbh"/>
+		<result property="qg.xqName" column="XqName"/>
+		<result property="qg.installAd" column="InstallAd"/>
+		<result property="yh.xqName" column="XqName"/>
+		<result property="yh.buildNO" column="BuildNo"/>
+		<result property="yh.cellNO" column="CellNo"/>
+		<result property="yh.houseNO" column="HouseNo"/>
+	</resultMap>
+	
+	<select id="find" resultMap="skxx">
+				select top 500 skq.Id,skq.SkqSbh,skq.SfJf,skq.kh,skq.FmState,skq.SkSuccess,skq.DateTime,qg.xqName,yh.BuildNo,yh.CellNo,yh.HouseNO,qg.installAd from Skq skq,T_QgInfo qg,T_YhInfo yh
+ where skq.SkqSbh=qg.SkqSbh and yh.IDNum= skq.Kh order by skq.Id  desc   
+	</select>
+	<select id="Search" resultMap="skxx">
+					select  skq.Id,skq.SkqSbh,skq.SfJf,skq.kh,skq.FmState,skq.SkSuccess,skq.DateTime,qg.xqName,yh.BuildNo,yh.CellNo,yh.HouseNO,qg.installAd from Skq skq,T_QgInfo qg,T_YhInfo yh
+ where skq.SkqSbh=qg.SkqSbh and yh.IDNum= skq.Kh and skq.SkqSbh=qg.SkqSbh 
+ 
+<if test="xqName!='--选择小区名称--'">
+ and qg.XqName=#{xqName}
+</if>
+<if test="buildNo!=0">
+and yh.BuildNO=#{buildNo}
+</if>
+<if test="cellNo!=0">
+	and yh.CellNO=#{cellNo}
+</if>
+<if test="houseNo!=null">
+	and yh.HouseNO=#{houseNo}
+</if> 
+ order by skq.Id  desc 
+	</select>
+</mapper>

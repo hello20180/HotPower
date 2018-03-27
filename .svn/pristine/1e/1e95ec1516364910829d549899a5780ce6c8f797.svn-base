@@ -1,0 +1,26 @@
+package com.hnzy.hot.test.service.Impl;
+
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.hnzy.hot.datasource.DataSourceContextHolder;
+import com.hnzy.hot.datasource.DataSourceType;
+import com.hnzy.hot.test.dao.SFDao;
+import com.hnzy.hot.test.pojo.SF;
+import com.hnzy.hot.test.service.SFService;
+@Service
+public class SFServiceImpl implements SFService {
+
+	@Autowired
+	private SFDao sfDao;
+	@Override
+	public List<SF> find(){
+		  //切换数据库  
+//        DataSourceContextHolder. setDbType(DataSourceType.ds); 
+		return sfDao.find();
+	}
+	
+}

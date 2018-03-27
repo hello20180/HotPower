@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.chart.dao.CbtqDao">
+<resultMap type="Cbtq" id="cbtq">
+
+		<id property="id" column="ID" />
+		
+		<result property="fmId" column="FmId" />
+		
+		<result property="tqyb" column="Tqyb" />
+		<result property="date" column="Date" />
+</resultMap>
+<insert id="InsertTq" parameterType="Cbtq">
+insert into T_Cbtq (Tqyb,Date) values (#{wd},#{date})
+</insert>
+<!-- <update id="UpTq" parameterType="Cbtq">
+ update T_Cbtq set Tqyb=#{tqyb} where id=1
+</update> -->
+</mapper>

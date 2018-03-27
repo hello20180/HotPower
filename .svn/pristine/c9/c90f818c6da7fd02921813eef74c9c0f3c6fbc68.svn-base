@@ -1,0 +1,12 @@
+package com.hnzy.hot.test.dao;
+
+import java.util.List;
+
+import com.hnzy.hot.base.BaseDao;
+import com.hnzy.hot.test.pojo.SF;
+
+public interface SFDao extends BaseDao<SF> {
+	
+	public List<SF> find();
+
+}

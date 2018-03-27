@@ -1,0 +1,127 @@
+package com.hnzy.hot.socket;
+
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import org.junit.experimental.theories.PotentialAssignment.CouldNotGenerateValueException;
+
+import com.hnzy.hot.socket.util.DatabaseUtil;
+import com.hnzy.hot.socket.util.oracleHelper;
+
+public class tes
+{
+	public static void main(String[] args) throws SQLException
+	{
+		PreparedStatement Oracleps;
+		ResultSet Oraclerst ;
+		PreparedStatement Oraclep;
+		ResultSet Oraclers ;
+		int rs = 0;
+		String YHBM =null;
+		String oral="select   count(YHMC) as cou  from sf_jmxx_v  where XQ='天鹅堡'and LH='1#' and DYH='1' and CS='4'and SH='2' ";
+//		String oral="select  *  from sf_jmxx_v where XQ='砥柱大厦' ";
+//		String oracle=" select * from sf_jmxx_v";
+		System.out.println("-----------");
+		// 连接oracle数据库
+		oracleHelper OracledbUtil = oracleHelper.getInstance();
+		Connection Oracleconnc = OracledbUtil.getConnection();
+		Oracleps = Oracleconnc.prepareStatement(oral);
+		Oraclerst = Oracleps.executeQuery();
+//		
+//		Oraclep = Oracleconnc.prepareStatement(oracle);
+//		Oraclers = Oraclep.executeQuery();
+//		
+//			System.out.println("count--------"+Oraclers.getRow());
+		
+		// 连接SQLServer数据库
+		DatabaseUtil SqldbUtil = DatabaseUtil.getInstance();
+		Connection Sqlconnc = SqldbUtil.getConnection();
+		
+		
+		
+		
+		int jfzt =3;
+		String xq =
+		null;
+		String DYH=null;
+		Date JFSJ =
+				null;
+		String sfjf=null;
+		String LH=null;
+		String SH=null;
+		String CS=null;
+		String fGString=null;
+		
+		
+		String yhbm=null;
+		String yhmc=null;
+		String lxdh=null;
+		String lh=null;
+		String dyh=null;
+		String cs=null;
+		String sh=null;
+		String rlz=null;
+		String fgs=null;
+		int col = Oraclerst.getMetaData().getColumnCount();
+		while (Oraclerst.next())
+		{
+			
+			int rowCount=Oraclerst.getInt("cou");
+			
+//			yhbm = Oraclerst.getString("YHBM");
+//			yhmc = Oraclerst.getString("YHMC");
+//			lxdh = Oraclerst.getString("LXDH");
+//			xq = Oraclerst.getString("XQ");
+//			lh = Oraclerst.getString("LH");
+//			dyh = Oraclerst.getString("DYH");
+//			cs = Oraclerst.getString("CS");
+//			sh = Oraclerst.getString("SH");
+//			rlz = Oraclerst.getString("RLZ");
+//			fgs=Oraclerst.getString("FGS");
+//			
+//			System.out.println("------yhbm------"+yhbm);
+//			
+//			System.out.println("-------yhmc-----"+yhmc);
+			System.out.println("-----rowCount-------"+rowCount);
+//			System.out.println("-----yhbm-------"+yhbm);
+//			System.out.println("-----cs-------"+cs);
+//			
+//			System.out.println("-----sh-------"+sh);
+//			System.out.println("---------lh---"+lh);
+//			System.out.println("-----dyh-----"+dyh);
+			
+			
+			
+//			YHBM=Oraclerst.getString("YHBM");
+//		 	jfzt = Oraclerst.getInt("JFZT");
+//		 	xq=Oraclerst.getString("XQ");
+//		 	DYH=Oraclerst.getString("DYH");
+//		 	LH=Oraclerst.getString("LH");
+//		 	SH=Oraclerst.getString("SH");
+//		 	CS=Oraclerst.getString("CS");
+//		 	fGString=Oraclerst.getString("FGS");
+
+		 	String insert="INSERT INTO KFGL(YHBM,YhName,mobilephone,XqName,LH,DYH,CS,SH,HESName,Place) VALUES('"+yhbm+"','"+yhmc+"','"+lxdh+"','"+xq+"','"+lh+"','"+dyh+"','"+cs+"','"+sh+"','"+rlz+"','"+fgs+"')";
+		 	//执行查询SQLserver
+			Statement slqps=Sqlconnc .createStatement();
+//			Sqlrst=slqps.executeQuery(sql);
+//			ResultSetMetaData sData=Sqlrst.getMetaData();
+		 	
+			Oracleps = Sqlconnc.prepareStatement(insert);
+			Oracleps.execute();
+		 	
+		}
+//		System.out.println("-----jfzt---"+jfzt);
+//		System.out.println("-----XQ---"+xq);
+//		
+//		String houseNo="101";
+//		String[] str=houseNo.split("0");
+//		System.out.println(str[0]+"======="+str[1]);
+	}
+	 
+}

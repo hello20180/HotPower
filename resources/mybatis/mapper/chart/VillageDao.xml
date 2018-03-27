@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.chart.dao.VillageDao">
+
+	<resultMap type="Village" id="village">
+
+		<id property="id" column="ID" />
+		
+		<result property="yhName" column="YhName" />
+		
+		<result property="xqName" column="XqName" />
+		
+		<result property="buildNO" column="BuildNO" />
+		
+		<result property="cellNO" column="CellNO" />
+		
+		<result property="houseNO" column="HouseNO" />
+		
+		<result property="valAd" column="ValAd" />
+
+		<result property="numID" column="IDNum" />
+
+		<result property="rbAd" column="RbAd" />
+
+		<result property="rbType" column="RbType" />
+
+		<result property="telephone" column="Telephone" />
+
+		<result property="mobilephone" column="Mobilephone" />
+		
+		<result property="email" column="Email" />
+		
+		<result property="WCAd" column="WCAd" />
+		
+		<result property="AZWZ" column="AZWZ" />
+
+		<result property="YLFQ" column="YLFQ" />
+
+		<result property="faultInfor" column="FaultInfor" />
+
+		<result property="buileArea" column="BuileArea" />
+
+		<result property="useArea" column="UseArea" />
+
+		<result property="heatArea" column="HeatArea" />
+		
+		<result property="billWay" column="BillWay" />
+		
+		<result property="SFJF" column="SFJF" />
+		
+		<result property="SFQF" column="SFQF" />
+		
+		<result property="SFTR" column="SFTR" />
+
+	</resultMap>
+
+	<select id="findValAdByYh" parameterType="Village" resultMap="village">
+		select ValAd
+		from T_YhInfo 
+		<where>
+		<if test="xqName!='--选择小区名称--'">
+			 XqName=#{xqName}
+		</if>
+		<if test="buildNO!=0">
+			and BuildNO=#{buildNO}
+		</if>
+		<if test="cellNO!=0">
+			and CellNO=#{cellNO}
+		</if>
+		<if test="houseNO!=0">
+			and HouseNO=#{houseNO}
+		</if>
+		</where>
+	</select>
+
+   <select id="findXQ" resultMap="village">
+		select XqName
+		from T_YhInfo group by XqName
+	</select>
+
+   <select id="findBO" parameterType="Village" resultMap="village">
+		select BuildNO
+		from T_YhInfo where XqName =#{xqName}
+		group by BuildNO
+	</select>
+
+	<select id="findCO" parameterType="Village" resultMap="village">
+		select CellNO
+		from T_YhInfo where XqName =#{xqName} and BuildNO =#{buildNO} 
+		group by CellNO
+	</select>
+	<select id="findByXqName" parameterType="Village" resultMap="village" >
+	select * from T_YhInfo where XqName =#{xqName}
+	</select>
+</mapper>

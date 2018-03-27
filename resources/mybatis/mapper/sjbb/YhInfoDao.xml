@@ -1,0 +1,615 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.sjbb.dao.YhInfoDao">
+	<resultMap type="YhInfo" id="yhInfo">
+		<id property="id" column="ID" />
+		<result property="valAd" column="ValAd" />
+		<result property="xqName" column="XqName" />
+		<result property="buildNo" column="BuildNO" />
+		<result property="cellNo" column="CellNO" />
+		<result property="houseNo" column="HouseNO" />
+		<result property="yhName" column="YhName" />
+		<result property="idNum" column="IDNum" />
+		<result property="rbAd" column="RbAd" />
+		<result property="rbType" column="RbType" />
+		<result property="telephone" column="Telephone" />
+		<result property="mobilephone" column="Mobilephone" />
+		<result property="email" column="Email" />
+		<result property="buileArea" column="BuileArea" />
+		<result property="userArea" column="UseArea" />
+		<result property="heatArea" column="HeatArea" />
+		<result property="billway" column="BillWay" />
+		<result property="sfjf" column="SFJF" />
+		<result property="sfqf" column="SFQF" />
+		<result property="sftr" column="SFTR" />
+		<result property="wcad" column="WCAd" />
+		<result property="azwz" column="AZWZ" />
+		<result property="ylfq" column="YLFQ" />
+		<result property="LH" column="LH"/>
+		<result property="dYH" column="DYH"/>
+		<result property="xq" column="XQ"/>
+		<result property="hESName" column="HESName"/>
+		<result property="jfsj" column="JFSJ" />
+		<result property="bz" column="Bz" />
+		<result property="datetime" column="datetime" />
+		<result property="faultInfor" column="FaultInfor" />
+		<result property="yhfl" column="Yhfl" />
+		<result property="cou" column="cou"/>
+		<result property="bjxx" column="Bjxx"/>
+		<result property="bjTime" column="BjTime"/>
+		<result property="LH" column="LH"/>
+		<result property="CS" column="CS"/>
+		<result property="SH" column="SH"/>
+		<result property="jFZT" column="JFZT"/>
+		<result property="yHKH" column="YHKH"/>
+		<result property="yhbm" column="YHBM" />
+		<result property="yhRb" column="YhRb" />
+		<result property="cjq" column="Cjq" />
+		<association property="fmHistory" javaType="com.hnzy.hot.sjbb.pojo.FmHistory">
+			<id property="id" column="ID" />
+			<result property="valAd" column="ValAd" />
+			<result property="status" column="Status" />
+			<result property="famKd" column="FamKd" />
+			<result property="lockSt" column="LockSt" />
+			<result property="jfSt" column="JFSt" />
+			<result property="valTemp" column="ValTemp" />
+			<result property="roomTemp" column="RoomTemp" />
+			<result property="hTemSet" column="HTemSet" />
+			<result property="mTemSet" column="MTemSet" />
+			<result property="lTemSet" column="LTemSet" />
+			<result property="recordTime" column="RecordTime" />
+			<result property="tqyb" column="Tqyb" />
+		</association>
+	</resultMap>
+	
+		<sql id="xq">
+		  and Yhfl!='退费停暖'
+		<if test="xqName!='--选择小区名称--'">
+			and XqName=#{xqName}
+		</if>
+		<if test="buildNo!=0">
+			and BuildNO=#{buildNo}
+		</if>
+		<if test="cellNo!=0">
+			and CellNO=#{cellNo}
+		</if>
+		<if test="sfjf!='--选择缴费状态--'">
+			and SFJF=#{sfjf}
+		</if>
+		<if test="status!='--选择阀门状态--'">
+			and Status=#{status}
+		</if>
+		</sql>
+		
+		
+		
+		
+	 <select id="findrepair" resultMap="yhInfo">
+
+		select distinct XqName from KFGL  order by XqName
+	</select>
+	
+	
+	
+	<!-- 根据处,换热站选择小区 -->
+	<select id="findXqNamebyPlace" resultMap="yhInfo" parameterType="YhInfo">
+	select distinct XqName from KFGL where Place=#{place} and HESName=#{hESName}  order by XqName
+	</select>
+	
+	
+	
+	
+	<select id="findYhBuildNObyXqNamerepair" resultMap="yhInfo"
+		parameterType="YhInfo">
+		select distinct LH from KFGL where XqName=#{xqName} and Place=#{place} and HESName=#{hESName} order by LH
+
+	</select>
+	<select id="findYhCellNOByBuildrepair" resultMap="yhInfo"
+		parameterType="YhInfo">
+		select distinct DYH from KFGL where XqName=#{xqName} and Place=#{place} and HESName=#{hESName} and
+		LH=#{LH} order by DYH
+	 </select>
+			
+		
+   <!-- 根据小区名字查找供热面积 -->
+	<select id="HeatAreaByxqName" parameterType="YhInfo" resultType="double">
+	select sum(HeatArea) from T_YhInfo where XqName=#{xqName} and SFJF='是'
+	<if test="xqName=='砥柱大厦' or xqName=='枫桥水岸'">
+			and YLFQ='高区'
+	</if>
+	</select>	
+	<!-- 等于100多少 -->
+	<select id="findFamKdA" resultType="int">
+		select count(*)
+		  from T_YhInfo,T_FmInfo
+		where T_YhInfo.ValAd=T_FmInfo.ValAd and FamKd ='100'
+		<include refid="xq"></include>
+	</select>
+
+	<!-- 等于0多少 -->
+	<select id="findFamKdF" resultType="int">
+		select count(*)
+		  from T_YhInfo,T_FmInfo
+		where T_YhInfo.ValAd=T_FmInfo.ValAd and FamKd ='0'
+		<include refid="xq"></include>
+	</select>
+
+	<!-- 55-75之间 -->
+	<select id="findFamKdC" resultType="int">
+		select count(*)
+		  from T_YhInfo,T_FmInfo
+		where T_YhInfo.ValAd=T_FmInfo.ValAd and FamKd
+		&gt;'0' and FamKd &lt;= '15'
+		<include refid="xq"></include>
+	</select>
+	
+
+	<!-- 等于100多少 -->
+	<select id="findFKdA" resultMap="yhInfo">
+		select yh.XqName,yh.BuildNo,yh.CellNo,yh.HouseNo,fm.Status,yh.sfjf,fm.RoomTemp,fm.ValTemp,fm.FamKd,fm.RecordTime
+        from T_YhInfo yh,T_FmInfo fm
+		where yh.ValAd=fm.ValAd  and fm.FamKd ='100'
+		<include refid="xq"></include>
+	</select>
+
+	<!-- 等于0多少 -->
+	<select id="findFKdF" resultMap="yhInfo">
+		select yh.XqName,yh.BuildNo,yh.CellNo,yh.HouseNo,fm.Status,yh.sfjf,fm.RoomTemp,fm.ValTemp,fm.FamKd,fm.RecordTime
+        from T_YhInfo yh,T_FmInfo fm
+		where yh.ValAd=fm.ValAd  and fm.FamKd ='0'
+		<include refid="xq"></include>
+	</select>
+
+	<!-- 55-75之间 -->
+	<select id="findFKdC" resultMap="yhInfo">
+		select yh.XqName,yh.BuildNo,yh.CellNo,yh.HouseNo,fm.Status,yh.sfjf,fm.RoomTemp,fm.ValTemp,fm.FamKd,fm.RecordTime
+        from T_YhInfo yh,T_FmInfo fm
+		where yh.ValAd=fm.ValAd  and fm.FamKd
+		&gt;'0' and fm.FamKd &lt;='15'
+		<include refid="xq"></include>
+	</select>
+
+
+
+	<!-- 总数 -->
+	<select id="findFamKdSum" resultType="int">
+		select count(*)
+		  from T_YhInfo,T_FmInfo
+		where T_YhInfo.ValAd=T_FmInfo.ValAd
+		<include refid="xq"></include>
+	</select>	
+		
+		<select id="chartSearchA" resultType="int" parameterType="YhInfo">
+		select count(*) 
+        from T_YhInfo,T_FmInfo
+		where T_YhInfo.ValAd=T_FmInfo.ValAd
+        and RoomTemp &gt;'26'
+       <include refid="xq"></include>
+		</select>
+		<select id="chartSearchB" resultType="int" parameterType="YhInfo">
+		select count(*) 
+        from T_YhInfo,T_FmInfo
+		where T_YhInfo.ValAd=T_FmInfo.ValAd
+        and RoomTemp &gt;'0'  and RoomTemp &lt;='15'
+        <include refid="xq"></include>
+		</select>
+		
+		
+		<select id="chartSearchC" resultType="int" parameterType="YhInfo">
+		select count(*) 
+        from T_YhInfo,T_FmInfo
+		where T_YhInfo.ValAd=T_FmInfo.ValAd
+	 	and RoomTemp &gt;'15'  and RoomTemp &lt;'18'
+		<include refid="xq"></include>
+		
+		</select>
+		<select id="chartSearchD" resultType="int" parameterType="YhInfo">
+		select count(*) 
+        from T_YhInfo,T_FmInfo
+		where T_YhInfo.ValAd=T_FmInfo.ValAd
+		 and RoomTemp &gt;='18'  and RoomTemp &lt;= '22'
+		<include refid="xq"></include>
+		
+		</select>
+		
+		<select id="chartSearchE" resultType="int" parameterType="YhInfo">
+		select count(*) 
+        from T_YhInfo,T_FmInfo
+		where T_YhInfo.ValAd=T_FmInfo.ValAd
+		 and RoomTemp &gt; '22'  and RoomTemp &lt;='26'
+		<include refid="xq"></include>
+		</select>
+		<select id="chartSearchG" resultType="int" parameterType="YhInfo">
+		select count(*) 
+        from T_YhInfo,T_FmInfo
+		where T_YhInfo.ValAd=T_FmInfo.ValAd
+		and  RoomTemp=0
+		<include refid="xq"></include>
+		</select>
+		<!-- 在范围内获取用户信息处 -->
+		<select id="chartNameA" resultMap="yhInfo" parameterType="YhInfo">
+		select yh.XqName,yh.BuildNo,yh.CellNo,yh.HouseNo,fm.Status,yh.sfjf,fm.RoomTemp,fm.ValTemp,fm.FamKd,fm.RecordTime
+        from T_YhInfo yh,T_FmInfo fm
+		where yh.ValAd=fm.ValAd
+        and fm.RoomTemp &gt;'26'
+       <include refid="xq"></include>
+		</select>
+		<select id="chartNameB" resultMap="yhInfo" parameterType="YhInfo">
+		select yh.XqName,yh.BuildNo,yh.CellNo,yh.HouseNo,fm.Status,yh.sfjf,fm.RoomTemp,fm.ValTemp,fm.FamKd,fm.RecordTime
+        from T_YhInfo yh,T_FmInfo fm
+		where yh.ValAd=fm.ValAd
+        and fm.RoomTemp &gt;'0' and fm.RoomTemp &lt;='15'
+        <include refid="xq"></include>
+		</select>
+		<select id="chartNameC" resultMap="yhInfo" parameterType="YhInfo">
+		select yh.XqName,yh.BuildNo,yh.CellNo,yh.HouseNo,fm.Status,yh.sfjf,fm.RoomTemp,fm.ValTemp,fm.FamKd,fm.RecordTime
+        from T_YhInfo yh,T_FmInfo fm
+		where yh.ValAd=fm.ValAd
+		and  fm.RoomTemp &gt;'15'  and fm.RoomTemp &lt;'18'
+		<include refid="xq"></include>
+		
+		</select>
+		<select id="chartNameD" resultMap="yhInfo" parameterType="YhInfo">
+		select yh.XqName,yh.BuildNo,yh.CellNo,yh.HouseNo,fm.Status,yh.sfjf,fm.RoomTemp,fm.ValTemp,fm.FamKd,fm.RecordTime
+        from T_YhInfo yh,T_FmInfo fm
+		where yh.ValAd=fm.ValAd
+		and fm.RoomTemp &gt;='18'   and fm.RoomTemp &lt;='22'
+		<include refid="xq"></include>
+		</select>
+		
+		<select id="chartNameE" resultMap="yhInfo" parameterType="YhInfo">
+		select yh.XqName,yh.BuildNo,yh.CellNo,yh.HouseNo,fm.Status,yh.sfjf,fm.RoomTemp,fm.ValTemp,fm.FamKd,fm.RecordTime
+        from T_YhInfo yh,T_FmInfo fm
+		where yh.ValAd=fm.ValAd
+		and fm.RoomTemp &gt;'22'  and fm.RoomTemp &lt;='26'
+		<include refid="xq"></include>
+		</select>
+		<select id="chartNameG" resultMap="yhInfo" parameterType="YhInfo">
+		select yh.XqName,yh.BuildNo,yh.CellNo,yh.HouseNo,fm.Status,yh.sfjf,fm.RoomTemp,fm.ValTemp,fm.FamKd,fm.RecordTime
+        from T_YhInfo yh,T_FmInfo fm
+		where yh.ValAd=fm.ValAd
+		and  fm.RoomTemp=0
+		<include refid="xq"></include>
+		</select>
+
+	<select id="findXqInfoFmHistory" resultMap="yhInfo">
+		select 
+		top 100 XqName,Tqyb,BuildNO,CellNO,HouseNO,Status,FamKd,LockSt,SFJF,JFSt,ValTemp,RoomTemp,HTemSet,MTemSet,LTemSet,RecordTime 
+		from T_YhInfo y,T_FmInfo fm
+		where y.ValAd=fm.ValAd and XqName='砥柱大厦' order by y.ID Desc
+	</select>
+	
+    <select id="yhInfoJFStatus" resultMap="yhInfo">
+        select SFJF from T_YhInfo group by SFJF
+    </select>
+    <!-- 搜索 实时数据-->
+	<select id="searchInfo" resultMap="yhInfo" parameterType="YhInfo">
+      select 
+		T_FmInfo.ValAd ,Tqyb,XqName,BuildNO,CellNO,HouseNO,Status,FamKd,LockSt,SFJF,ValTemp,RoomTemp,HTemSet,MTemSet,LTemSet,RecordTime
+		from
+		T_YhInfo , T_FmInfo
+		where T_YhInfo.ValAd=T_FmInfo.ValAd 
+		<if test="xqName!='--选择小区名称--'">
+			and XqName=#{xqName}
+		</if>
+		<if test="buildNo!=0">
+			and BuildNO=#{buildNo}
+		</if>
+		<if test="cellNo!=0">
+			and CellNO=#{cellNo}
+		</if>
+		<if test="houseNo!=0">
+			and HouseNO=#{houseNo}
+		</if>
+		<if test="sfjf!='--选择缴费状态--'">
+			and SFJF=#{sfjf}
+		</if>
+		<if test="valTemp1!=null and valTemp1!=''">
+			and valTemp  &gt;= #{valTemp1}
+		</if>
+		<if test="valTemp2!=null and valTemp2!=''">
+			and valTemp &lt;= #{valTemp2}
+		</if>
+		<if test="roomTemp1!=null and roomTemp1!=''">
+			and roomTemp &gt;= #{roomTemp1}
+		</if>
+			<if test="roomTemp2!=null and roomTemp2!=''">
+			and roomTemp &lt;= #{roomTemp2}
+		</if>
+		<if test="recordTime1!=null and recordTime1!=''">
+			and recordTime &gt;= #{recordTime1}
+		</if>
+		<if test="recordTime2!=null and recordTime2!=''">
+			and recordTime &lt;=#{recordTime2}
+		</if>
+		<if test="famKd!=null and famKd!=''">
+			and FamKd=#{famKd}
+		</if>
+     order by RecordTime desc
+	</select>
+	
+
+	 <!-- 搜索历史数据 -->
+	<select id="searchFmHistory" resultMap="yhInfo" parameterType="YhInfo">
+      select top 700
+		T_FmHistory.ValAd ,Tqyb,XqName,BuildNO,CellNO,HouseNO,Status,FamKd,LockSt,SFJF,ValTemp,RoomTemp,HTemSet,MTemSet,LTemSet,RecordTime
+		from
+		T_YhInfo , T_FmHistory
+		where T_YhInfo.ValAd=T_FmHistory.ValAd 
+		
+		<if test="xqName!='--选择小区名称--'">
+			and XqName=#{xqName}
+		</if>
+		<if test="buildNo!=0">
+			and BuildNO=#{buildNo}
+		</if>
+		<if test="cellNo!=0">
+			and CellNO=#{cellNo}
+		</if>
+		<if test="houseNo!=0">
+			and HouseNO=#{houseNo}
+		</if>
+		<if test="sfjf!='--选择缴费状态--'">
+			and SFJF=#{sfjf}
+		</if>
+		<if test="valTemp1!=null and valTemp1!=''">
+			and valTemp  &gt;= #{valTemp1}
+		</if>
+		<if test="valTemp2!=null and valTemp2!=''">
+			and valTemp &lt;= #{valTemp2}
+		</if>
+		<if test="roomTemp1!=null and roomTemp1!=''">
+			and roomTemp &gt;= #{roomTemp1}
+		</if>
+		<if test="roomTemp2!=null and roomTemp2!=''">
+			and roomTemp &lt;= #{roomTemp2}
+		</if>
+		<if test="recordTime1!=null and recordTime1!=''">
+			and recordTime &gt;= #{recordTime1}
+		</if>
+		<if test="recordTime2!=null and recordTime2!=''">
+			and recordTime &lt;=#{recordTime2}
+		</if>
+		<if test="famKd!=null and famKd!=''">
+			and FamKd=#{famKd}
+		</if>
+     order by RecordTime desc
+		
+	</select>
+    <!-- 阀门开度所占面积 -->
+    <select id="chartgrfxStatusK" resultType="double">
+  	select sum(HeatArea) as kArea 
+		from
+		T_YhInfo , T_FmInfo
+       where  T_YhInfo.ValAd=T_FmInfo.ValAd and Status ='开' 
+    </select>
+    <!-- 阀门关所占面积 -->
+    <select id="chartgrfxStatusG" resultType="double">
+  	select sum(HeatArea) as gArea 
+		from
+		T_YhInfo , T_FmInfo
+       where  T_YhInfo.ValAd=T_FmInfo.ValAd and Status ='关' 
+    
+    </select>
+    
+    <select id="chartSearchGr" resultType="double">
+    	select sum(HeatArea) as GArea 
+		from
+		T_YhInfo , T_FmInfo
+       where  T_YhInfo.ValAd=T_FmInfo.ValAd and SFJF ='是' 
+		<if test="xqName!='--选择小区名称--'">
+			and XqName=#{xqName}
+		</if>
+		<if test="buildNo!=0">
+			and BuildNO=#{buildNo}
+		</if>
+		<if test="cellNo!=0">
+			and CellNO=#{cellNo}
+		</if>
+		<if test="ylfq!='--选择分区--'">
+			and YLFQ=#{ylfq}
+		</if>
+    </select>
+    
+     <select id="chartSearchNoGr" resultType="double">
+    	select sum(HeatArea) as NArea 
+		from
+		T_YhInfo , T_FmInfo
+       where  T_YhInfo.ValAd=T_FmInfo.ValAd and SFJF ='否' 
+		<if test="xqName!='--选择小区名称--'">
+			and XqName=#{xqName}
+		</if>
+		<if test="buildNo!=0">
+			and BuildNO=#{buildNo}
+		</if>
+		<if test="cellNo!=0">
+			and CellNO=#{cellNo}
+		</if>
+		<if test="ylfq!='--选择分区--'">
+			and YLFQ=#{ylfq}
+		</if>
+    </select>
+
+    <!-- 总面积 -->
+    <select id="ChartgrfxZ" resultType="double">
+    select sum(HeatArea) as sumArea
+    from
+    T_YhInfo 
+    </select>
+    
+    
+    
+	 <select id="find" resultMap="yhInfo">
+		select XqName from T_YhInfo group by
+		XqName
+	</select>
+	
+	<select id="findYhBuildNObyXqName" resultMap="yhInfo"
+		parameterType="YhInfo">
+		select BuildNO from T_YhInfo where XqName=#{xqName}
+		group by BuildNO
+	</select>
+	<select id="findYhCellNOByBuild" resultMap="yhInfo"
+		parameterType="YhInfo">
+		select CellNO from T_YhInfo where XqName=#{1} and
+		BuildNO=#{0} group by
+		CellNO
+	</select>
+		<select id="findYhHouseNOByBuild" resultMap="yhInfo"
+		parameterType="YhInfo">
+		select HouseNO from T_YhInfo where XqName=#{2} and
+		BuildNO=#{1} and CellNO=#{0} group by HouseNO
+		
+	</select>
+	
+	
+	<select id="yzglFindAll" resultMap="yhInfo">
+		select top 500 *  from T_YhInfo order by ValAd asc 
+	</select>
+	<update id="update" parameterType="YhInfo">
+		update T_YhInfo
+		set
+		YhName=#{yhName},YHBM=#{yhbm},RbAd=#{rbAd}, RbType=#{rbType},
+		BuildNO=#{buildNo}, CellNO=#{cellNo},
+		HouseNO=#{houseNo},ValAd=#{valAd}, Telephone=#{telephone}
+		,Mobilephone=#{mobilephone},Email=#{email}, XqName=#{xqName},
+		BuileArea=#{buileArea}, UseArea=#{userArea},
+		HeatArea=#{heatArea},
+		BillWay=#{billway}, SFJF=#{sfjf}, SFQF=#{sfqf}, SFTR=#{sftr},
+		WCAd=#{wcad}, AZWZ=#{azwz}, YLFQ=#{ylfq}, FaultInfor=#{faultInfor}
+		where ID=#{id}
+	</update>
+	<insert id="Insert" parameterType="YhInfo">
+		insert into T_YhInfo (YhName,YHBM,RbAd, RbType,
+		BuildNO, CellNO,
+		HouseNO,ValAd, Telephone
+		,Mobilephone,Email, XqName,
+		BuileArea, UseArea,
+		HeatArea,
+		BillWay, SFJF, SFQF, SFTR,
+		WCAd, AZWZ, YLFQ, FaultInfor)
+		values(
+		#{yhName},#{yhbm},#{rbAd},#{rbType},
+		#{buildNo},#{cellNo},
+		#{houseNo},#{valAd},#{telephone}
+		,#{mobilephone},#{email},#{xqName},
+		#{buileArea},#{userArea},
+		#{heatArea},
+		#{billway},#{sfjf},#{sfqf},#{sftr},
+		#{wcad},#{azwz},#{ylfq},#{faultInfor}
+         )
+	</insert>
+	<delete id="delete" parameterType="YhInfo">
+	delete  from T_YhInfo where ID=#{id}
+	</delete>
+	
+	<select id="WkqEption" resultMap="yhInfo" parameterType="YhInfo">
+      select 
+		T_FmInfo.ValAd ,XqName,BuildNO,CellNO,HouseNO,Status,FamKd,LockSt,SFJF,ValTemp,RoomTemp,HTemSet,MTemSet,LTemSet,RecordTime,Tqyb
+		from
+		T_YhInfo , T_FmInfo
+		where T_YhInfo.ValAd=T_FmInfo.ValAd 
+		<if test="roomTemp!=''">
+			and RoomTemp &lt;#{roomTemp}
+		</if>
+		<if test="valTemp!=''">
+			and ValTemp  &gt; #{valTemp}
+		</if>
+		<if test="sfjf!='--选择缴费状态--'">
+			and SFJF=#{sfjf}
+		</if>
+	</select>
+		
+		<select id="SbfEption" resultMap="yhInfo" parameterType="YhInfo">
+      select 
+		T_FmInfo.ValAd ,XqName,BuildNO,CellNO,HouseNO,Status,FamKd,LockSt,SFJF,ValTemp,RoomTemp,HTemSet,MTemSet,LTemSet,RecordTime,Tqyb
+		from
+		T_YhInfo , T_FmInfo
+		where T_YhInfo.ValAd=T_FmInfo.ValAd 
+		<if test="sFJF!=''">
+			and SFJF=#{sFJF}
+		</if>
+		<if test="valTemp!=''">
+			and ValTemp  &gt; #{valTemp}
+		</if>
+	</select>
+	
+	
+	<select id="WdEption" resultMap="yhInfo" parameterType="YhInfo">
+      	select 
+		T_FmInfo.ValAd ,XqName,BuildNO,CellNO,HouseNO,Status,FamKd,LockSt,SFJF,ValTemp,RoomTemp,HTemSet,MTemSet,LTemSet,RecordTime,Tqyb
+		from
+		T_YhInfo , T_FmInfo
+		where T_YhInfo.ValAd=T_FmInfo.ValAd 
+		<if test="famKd!=''">
+			and FamKd &lt; #{famKd}
+		</if>
+		<if test="valTemp!=''">
+			and ValTemp  &gt; #{valTemp}
+		</if>
+	</select>
+	
+	<update id="UpBz">
+	  update T_YhInfo set Bz=#{bz},Time=#{date} where ValAd=#{valAd}
+	</update>
+	<select id="yhflSear" resultMap="yhInfo" parameterType="YhInfo">
+	select * from T_YhInfo where 1=1
+	<if test="yhfl!=''">
+	and Yhfl=#{yhfl}
+	 </if>
+	</select>
+	<update id="UpYhlb" parameterType="YhInfo">
+	 update T_YhInfo set Yhfl=#{yhfl} where  XqName=#{xqName} and BuildNO=#{buildNo} and CellNO=#{cellNo} and HouseNo=#{houseNo}
+	</update>
+	<select id="findFq" resultMap="yhInfo" parameterType="YhInfo">
+	  select distinct YLFQ from T_YhInfo where   YLFQ!=''
+	 <if test="xqName!='--选择小区名称--'">
+			and XqName=#{xqName}
+	 </if>
+	</select>
+	
+	<select id="findFmId" resultMap="yhInfo" parameterType="YhInfo">
+	select XqName,BuildNo,CellNo,HouseNo from T_YhInfo  where ValAd=#{valAd}
+	</select>
+	<select id="SeYhlb" resultMap="yhInfo">
+	select XqName,BuildNo,CellNo,HouseNo,Yhfl,Bz from T_YhInfo  where  XqName=#{xqName} and BuildNO=#{buildNo} and CellNO=#{cellNo} and HouseNO=#{houseNo}
+	</select>
+	<update id="UpYhBz" parameterType="YhInfo">
+	 update T_YhInfo set Bz=#{bz} where  XqName=#{xqName} and BuildNO=#{buildNo} and CellNO=#{cellNo} and HouseNO=#{houseNo}
+	</update>
+	
+	    <select id="Search" resultType="yhInfo">
+    	select *
+		from
+		T_YhInfo where 1=1
+		<if test="xqName!='--选择小区名称--'">
+			and XqName=#{xqName}
+		</if>
+		<if test="buildNo!=0">
+			and BuildNO=#{buildNo}
+		</if>
+		<if test="cellNo!=0">
+			and CellNO=#{cellNo}
+		</if>
+	   <if test="houseNo!=''and houseNo!=null">
+			and HouseNO=#{houseNo}
+		</if>
+    </select>
+	<select id="findVd" resultMap="yhInfo" >
+		select * from T_YhInfo where SFJF='是' and xqName!='德馨苑廉租房' 
+	</select>
+	<select id="findHist" resultMap="yhInfo" parameterType="YhInfo">
+	select top 50 fm.ValAd,fm.RoomTemp,fm.RecordTime from T_YhInfo yh,T_FmHistory fm  
+	where yh.ValAd=fm.ValAd and yh.ValAd=#{valAd} Order by RecordTime desc 
+	</select>
+	<update id="upBjxx" parameterType="YhInfo">
+	
+	update T_YhInfo set Bjxx=#{bjxx},BjTime=#{bjTime} where ValAd=#{valAd}
+	</update>
+	<select id="ObrSel" resultMap="yhInfo" parameterType="YhInfo">
+	select Bz
+		from
+		T_YhInfo where XqName=#{xqName} and BuildNO=#{buildNo} and CellNO=#{cellNo} and HouseNO=#{houseNo}
+	
+	</select>
+</mapper>

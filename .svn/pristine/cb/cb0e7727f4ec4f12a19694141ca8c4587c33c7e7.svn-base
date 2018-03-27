@@ -1,0 +1,34 @@
+package com.hnzy.hot.test.controller;
+
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.hnzy.hot.datasource.DataSourceContextHolder;
+import com.hnzy.hot.datasource.DataSourceType;
+import com.hnzy.hot.test.pojo.SF;
+import com.hnzy.hot.test.service.SFService;
+
+@Controller
+@RequestMapping("/Test")
+public class SFController {
+
+	@Autowired
+	private SFService service;
+	private List<SF> sflist;
+	
+	@RequestMapping("SF")
+	public String sflist(HttpServletRequest request) throws UnsupportedEncodingException {
+//		  //切换数据库  
+//        DataSourceContextHolder. setDbType(DataSourceType.ds); 
+//		sflist = service.find();
+//		request.setAttribute("SF", sflist);
+		return "/test/sf";
+
+	}
+}

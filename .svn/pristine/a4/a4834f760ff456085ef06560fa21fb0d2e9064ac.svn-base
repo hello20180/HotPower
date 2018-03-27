@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.xtgl.dao.UserDao">
+	<resultMap type="User" id="user">
+		<id property="id" column="ID" />
+		<result property="userName" column="UserName" />
+		<result property="passWord" column="Password" />
+	</resultMap>
+	<select id="find" resultMap="user">
+		select ID,UserName,Password from
+		T_UserLogin
+	</select>
+	<insert id="Insert" parameterType="User">
+		insert into T_UserLogin
+		(UserName,Password) values (#{userName},#{passWord})
+	</insert>
+	<delete id="delete">
+		delete from T_UserLogin where
+		ID=#{id}
+	</delete>
+	<select id="findById" parameterType="User" resultMap="user">
+		select
+		ID,UserName,Password from T_UserLogin where ID=#{id}
+	</select>
+	<update id="update" parameterType="User">
+		update T_UserLogin set
+		UserName=#{userName} ,Password=#{passWord} where
+		ID=#{id}
+	</update>
+	<select id="findNamePass" parameterType="User" resultMap="user">
+		select
+		ID,UserName,Password from T_UserLogin where UserName=#{userName} and
+		Password=#{passWord}
+	</select>
+	<select id="findpwd" resultType="int" parameterType="User">
+		select
+		count(Password) from T_UserLogin where Password=#{pwd}
+	</select>
+	<select id="findPassWord" parameterType="User" resultMap="user">
+		select
+		Password from T_UserLogin where Password=#{passWord}
+	</select>
+
+	<select id="addCheck" resultType="int" parameterType="User">
+		select count(*) from T_UserLogin where userName =#{userName}
+	</select>
+	<select id="findID" parameterType="User" resultType="int">
+	select ID from T_UserLogin where userName =#{userName}
+	</select>
+	
+</mapper>

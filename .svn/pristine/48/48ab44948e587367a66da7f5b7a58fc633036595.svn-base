@@ -1,0 +1,59 @@
+package com.hnzy.hot.xxgl.controller;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSONObject;
+import com.hnzy.hot.xxgl.pojo.Rz;
+import com.hnzy.hot.xxgl.service.RzService;
+
+@Controller
+@RequestMapping("rz")
+public class RzController
+{
+	@Autowired
+	private RzService rzService;
+	private Rz rz;
+//查询列表
+	@RequestMapping("rzList")
+	public String rzList(HttpServletRequest request)
+	{
+	
+		List<Rz> rzList = rzService.rzList();
+		request.setAttribute("log", rzList);
+		return "xxgl/rzgl/log";
+	}
+	//index页面显示
+	@ResponseBody
+	@RequestMapping("rzindex")
+	public JSONObject rzindex(HttpServletRequest request)
+	{
+	
+		List<Rz> rzList = rzService.rzList();
+		JSONObject jsonObject=new JSONObject();
+		jsonObject.put("log", rzList);
+		return jsonObject;
+	}
+//添加
+	@RequestMapping("insert")
+	public String insert(Rz rz)
+	{
+		rzService.insert(rz);
+		return "redirect:rzList.action";
+	}
+	public Rz getRz()
+	{
+		return rz;
+	}
+	public void setRz(Rz rz)
+	{
+		this.rz = rz;
+	}
+
+}

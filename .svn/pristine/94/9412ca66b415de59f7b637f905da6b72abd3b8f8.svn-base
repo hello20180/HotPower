@@ -1,0 +1,11 @@
+package com.hnzy.hot.xxgl.dao;
+
+import java.util.List;
+
+import com.hnzy.hot.base.BaseDao;
+import com.hnzy.hot.xxgl.pojo.GZgl;
+
+public interface GZglDao extends BaseDao<GZgl>  {
+	public List<GZgl> findgz();
+
+}

@@ -1,0 +1,97 @@
+package com.hnzy.hot.socket;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Date;
+import java.util.TimerTask;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.hnzy.hot.socket.server.ServerSessionMap;
+import com.hnzy.hot.socket.util.CzUtil;
+import com.hnzy.hot.socket.util.DatabaseUtil;
+import com.hnzy.hot.socket.util.MapUtils;
+
+public class ReplyTask extends TimerTask {
+	
+      //日志文件
+      private static Log log = LogFactory.getLog(ReplyTask.class);
+	@Override
+	public void run() {		
+			try {
+				doSomething();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}		
+	}
+
+	String qgId = null;
+	String JzqIP = null;
+	int JzqPort = 0;
+
+	private void doSomething() throws SQLException {
+		//连接数据库
+		  DatabaseUtil dbUtil = DatabaseUtil.getInstance();   
+	      Connection connc = dbUtil.getConnection(); 
+	      ResultSet rstqg = null;
+	      ResultSet rst;
+	      PreparedStatement psqg = null;
+	      PreparedStatement ps;
+	      
+		String sqlcx = "select T_JzqInfo.Socket,T_JzqInfo.jzqIP,T_JzqInfo.jzqport,T_QgInfo.QgID from T_JzqInfo,T_QgInfo where T_JzqInfo.JzqID=T_QgInfo.JzqID and T_JzqInfo.Status='1' and T_QgInfo.Mode='自动' order by T_QgInfo.QgID";
+		 ps=connc.prepareStatement(sqlcx);
+		  rst = ps.executeQuery();
+		int col = rst.getMetaData().getColumnCount();
+		while (rst.next()) {
+			qgId = rst.getString("QgID");
+			JzqIP = rst.getString("jzqIP");
+			JzqPort = rst.getInt("jzqport");
+			//根据区管ID查询阀门总数
+			String sqlqg="select Count(ValAd)  as fmCount from T_FmInfo where  QgID='"+qgId+"'";
+		     psqg=connc.prepareStatement(sqlqg);
+			 rstqg = psqg.executeQuery();
+			 int rowCount = 0;      
+			 if(rstqg.next())      
+			 {      
+			    rowCount = rstqg.getInt(1);  
+			}   
+			 String cot=String.valueOf(rowCount);
+			//根据阀门总数设置停留时间
+			try {
+				Thread.sleep(rowCount*500);
+
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
+			
+			// IP地址和端口号
+			String pt = "/" + JzqIP + ":" + JzqPort;
+			String ja = "F00A0800" + qgId;
+			String je=CzUtil.getTimerJe(ja);
+			String[] keys = new String[] { pt };
+			String mString = ja + "" + je + "FF";
+//			System.out.println("发送指令--"+new Date());
+			//输出日志
+			 log.info("监听器发送数据"+mString);  
+			 // 在任何需要记录日志的类中   
+			  
+			// 解码
+			byte[] b = CzUtil.jm(mString);
+			ServerSessionMap sessionMap = ServerSessionMap.getInstance();
+			boolean sessionmap = sessionMap.sendMessage(keys, b);
+			
+			
+		}
+		
+		ps.close();
+		psqg.close();
+		rstqg.close();
+		rst.close();
+		connc.close();
+	}
+	
+}

@@ -1,0 +1,57 @@
+package com.hnzy.hot.socket.util;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Properties;
+
+public class oracleHelper {
+	 private static oracleHelper dbUtil;   
+	    private String drivers;   
+	    private String url;   
+	    private String username;   
+	    private String password;   
+	    //加反斜线就表示在默认包目录，不加则表示在与当前类同路径去查找该属性文件   
+	    private static String FILE_PATH_NAME = "/jdbc.properties";   
+	    private void init() {   
+	        try {   
+	            InputStream in = getClass().getResourceAsStream(FILE_PATH_NAME);   
+	            Properties props = new Properties();   
+	           
+	            props.load(in);   
+	            in.close();   
+	            drivers = props.getProperty("or.driver");   
+	            url = props.getProperty("or.url");   
+	            username = props.getProperty("or.username");   
+	            password = props.getProperty("or.password");   
+	        } catch (IOException e) {   
+	            e.printStackTrace();   
+	        }   
+	           
+	    }   
+	       
+	    private oracleHelper() {   
+	        init();   
+	    }   
+	    public static oracleHelper getInstance() {   
+	        if(dbUtil == null) {   
+	            dbUtil = new oracleHelper();   
+	        }   
+	        return dbUtil;    
+	    }   
+	    public Connection getConnection() {   
+	           
+	        Connection conn = null;   
+	        try {   
+	            Class.forName(drivers);   
+	            conn = DriverManager.getConnection(url, username, password);   
+	        } catch (SQLException e) {   
+	            e.printStackTrace();   
+	        } catch (ClassNotFoundException e) {   
+	            e.printStackTrace();   
+	        }   
+	        return conn;   
+	    }   
+}

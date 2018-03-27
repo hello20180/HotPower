@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.kfgl.dao.RepairDao">
+	<resultMap type="Repair" id="repair">
+		<id property="id" column="ID" />
+		<result property="hea.place" column="Place" />
+		<result property="hea.hesName" column="HESName" />
+		<result property="xqName" column="XqName" />
+		<result property="buildNo" column="BuildNO" />
+		<result property="cellNo" column="CellNO" />
+		<result property="houseNo" column="HouseNO" />
+		<result property="name" column="YhName" />
+		<result property="telephone" column="Telephone" />
+		<result property="problem" column="Problem" />
+		<result property="tJname" column="TJ_Name" />
+		<result property="tJtime" column="TJ_Time" />
+		<result property="jSname" column="JS_Name" />
+		<result property="jStime" column="JS_Time" />
+		<result property="wCname" column="WC_Name" />
+		<result property="wCtime" column="WC_Time" />
+		<result property="state" column="State" />
+	</resultMap>
+	<select id="stateCx" resultType="Integer">		
+     select count(State) 
+     from T_KfInfo kf,(select hea.HESName,hea.Place,XqName from T_HeatESInfo hea,T_XqInfo xq where hea.HESName=xq.HESName ) h 
+		where kf.XqName=h.XqName
+		<if test="place!='--选择处--'">
+			and h.Place=#{place}
+		</if>
+		<if test="hesName!='--选择换热站--'">
+			and h.HESName=#{hesName}
+		</if>
+		<if test="state!='--状态--'">
+			and kf.State=#{state}
+		</if>
+		
+	</select>
+	<select id="stateywc" resultType="Integer">		
+     select count(State) 
+     from T_KfInfo kf,(select hea.HESName,hea.Place,XqName from T_HeatESInfo hea,T_XqInfo xq where hea.HESName=xq.HESName ) h 
+		where kf.XqName=h.XqName
+		<if test="state=='已完成'" >
+			and kf.State='已完成'
+		</if>
+		<if test="state=='未接单'">
+		    and kf.State='0'
+		</if>
+		<if test="state=='已接单'">
+		    and kf.State='1'
+		</if>
+		<if test="place!='--选择处--'">
+			and h.Place=#{place} and kf.State='已完成'
+		</if>
+		<if test="place=='--选择处--' and hesName=='--选择换热站--' and state=='--状态--'">
+		   and kf.State='已完成'
+		</if>
+		<if test="hesName!='--选择换热站--'">
+			and h.HESName=#{hesName} and kf.State='已完成'
+		</if>
+	</select>
+	<select id="stateyjd" resultType="Integer">		
+     select count(State) 
+     from T_KfInfo kf,(select hea.HESName,hea.Place,XqName from T_HeatESInfo hea,T_XqInfo xq where hea.HESName=xq.HESName ) h 
+		where kf.XqName=h.XqName
+		<if test="state=='已接单'">
+			and kf.State='已接单'
+		</if>
+		<if test="state=='未接单'">
+		   and kf.State='0'
+		</if>
+		<if test="state=='已完成'">
+		    and kf.State='1'
+		</if>
+		<if test="place!='--选择处--'">
+			and h.Place=#{place} and kf.State='已接单'
+		</if>
+		<if test="place=='--选择处--' and hesName=='--选择换热站--' and state=='--状态--'">
+		   and kf.State='已接单'
+		</if>
+		<if test="hesName!='--选择换热站--'">
+			and h.HESName=#{hesName} and kf.State='已接单'
+		</if>
+	</select>
+	<select id="statewjd" resultType="Integer">		
+     select count(State) 
+     from T_KfInfo kf,(select hea.HESName,hea.Place,XqName from T_HeatESInfo hea,T_XqInfo xq where hea.HESName=xq.HESName) h 
+		where kf.XqName=h.XqName
+		<if test="state=='未接单'">
+			and kf.State='未接单'
+		</if>
+		<if test="state=='已接单'">
+		   and kf.State='0'
+		</if>
+		<if test="state=='已完成'">
+		    and kf.State='1'
+		</if>
+		<if test="place!='--选择处--'">
+			and h.Place=#{place} and kf.State='未接单'
+		</if>
+		<if test="place=='--选择处--' and hesName=='--选择换热站--' and state=='--状态--'">
+		   and kf.State='未接单'
+		</if>
+		<if test="hesName!='--选择换热站--'">
+			and h.HESName=#{hesName} and kf.State='未接单'
+		</if>
+	</select>
+
+<!-- 	添加时选择小区后边提示换热站 -->
+	<select id="findPlace" resultMap="repair" parameterType="java.lang.String">
+	select Place,HESName from T_HeatESInfo 
+	where HESName in(select HESName from T_KfInfo kf,T_XqInfo xq 
+	where kf.XqName=xq.XqName 
+	<if test="_parameter!='--请选择小区--'">
+		and kf.XqName=#{_parameter}
+	</if>
+	)
+	</select>
+	<!-- 显示页面 -->
+	<select id="findRepair" resultMap="repair">
+		select *  from T_KfInfo kf,(select hea.HESName,hea.Place,XqName from T_HeatESInfo hea,T_XqInfo xq where hea.HESName=xq.HESName) h 
+		where kf.XqName=h.XqName ORDER BY kf.ID desc
+	</select>
+	
+	<insert id="Insert" parameterType="Repair">
+		insert into T_KfInfo
+		(XqName,BuildNO,CellNO,HouseNO,YhName,Telephone,Problem,TJ_Name,TJ_Time,State)
+		values
+		(#{xqName},#{buildNo},#{cellNo},#{houseNo},#{name},#{telephone},#{problem},#{tJname},#{tJtime},'未接单')
+	</insert>
+
+	<delete id="delete" parameterType="Repair">
+		delete from T_KfInfo where
+		id=#{id}
+	</delete>
+
+	<select id="findById" parameterType="Repair" resultMap="repair">
+		select *
+		from T_KfInfo where id=#{id}
+	</select>
+	<update id="update" parameterType="Repair">
+		update T_KfInfo set
+		XqName=#{xqName},BuildNO=#{buildNo},CellNO=#{cellNo},HouseNO=#{houseNo},YhName=#{name},Telephone=#{telephone},Problem=#{problem},TJ_Name=#{tJname},TJ_Time=#{tJtime}
+		where id=#{id}
+	</update>
+<!-- 搜索 -->
+	<select id="findByState" parameterType="Repair" resultMap="repair">
+	select *  from T_KfInfo kf,(select hea.HESName,hea.Place,XqName from T_HeatESInfo hea,T_XqInfo xq where hea.HESName=xq.HESName) h 
+		where kf.XqName=h.XqName
+		<if test="place!='--选择处--'">
+			and h.Place=#{place}
+		</if>
+		<if test="hesName!='--选择换热站--'">
+			and h.HESName=#{hesName}
+		</if>
+		<if test="state!='--状态--'">
+			and kf.State=#{state}
+		</if>
+		
+	</select>
+<!-- 加载状态 -->
+	<select id="findState" resultMap="repair" >
+		select State from T_KfInfo group by State
+		</select>
+
+	<select id="sum" parameterType="Repair" resultType="int">
+		select count(*) from T_KfInfo
+	</select>
+
+	<select id="state0" resultType="int">
+		select count(State) as wjd from T_KfInfo
+		where State='未接单'
+	</select>
+	<select id="state1" resultType="int">
+		select count(State) as yjd from T_KfInfo
+		where State='已接单'
+	</select>
+	<select id="state2" resultType="int">
+		select count(State) as ywc from T_KfInfo
+		where State='已完成'
+	</select>
+	
+	
+	<select id="statePlace0" resultType="Integer">
+		select count(State) as wjd from T_KfInfo
+		where State='未接单'
+		<if test="xqName!='--选择小区--'">
+			and T_KfInfo.XqName=#{xqName}
+		</if>
+	</select>
+	<select id="statePlace1" resultType="Integer">
+		select count(State) as yjd from T_KfInfo
+		where State='已接单'
+		<if test="xqName!='--选择小区--'">
+			and T_KfInfo.XqName=#{xqName}
+		</if>		
+	</select>
+	<select id="statePlace2" resultType="Integer">
+		select count(State) as ywc from T_KfInfo
+		where State='已完成'
+		<if test="xqName!='--选择小区--'">
+			and T_KfInfo.XqName=#{xqName}
+		</if>
+	</select>
+	
+</mapper>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.sbgls.dao.CbDao">
+<resultMap type="Cb" id="cb">
+</resultMap>
+<select id="findFmId" resultMap="cb">
+select FmId from T_Cb where id=1
+</select>
+
+</mapper>

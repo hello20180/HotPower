@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.sbgls.dao.RbsglDao">
+	<resultMap type="Yh" id="yh">
+		<id property="id" column="ID" />
+		<result property="yhName" column="YhName" />
+		<result property="numID" column="IDNum" />
+		<result property="valAd" column="ValAd" /> 
+		<result property="rbAd" column="RbAd" />
+		<result property="rbType" column="RbType" />
+		<result property="buildNO" column="BuildNO" />
+		<result property="cellNO" column="CellNO" />
+		<result property="houseNO" column="HouseNO" />
+		<result property="telephone" column="Telephone" />
+		<result property="mobilephone" column="Mobilephone" />
+		<result property="email" column="Email" />
+		<result property="xqName" column="XqName" />
+		<result property="buileArea" column="BuileArea" />
+		<result property="useArea" column="UseArea" />
+		<result property="heatArea" column="HeatArea" />
+		<result property="billWay" column="BillWay" />
+		<result property="sFJF" column="SFJF" />
+		<result property="sFQF" column="SFQF" />
+		<result property="sFTR" column="SFTR" />
+		<result property="WCAd" column="WCAd" />
+		<result property="AZWZ" column="AZWZ" />
+		<result property="YLFQ" column="YLFQ" />
+		<result property="faultInfor" column="FaultInfor" />
+		<association property="rb" javaType="com.hnzy.hot.sbgl.pojo.Rb" >
+		<result property="rbType" column="RbType" />
+		<result property="rbAd" column="RbAd" />	
+		<result property="energy" column="Energy" />
+		<result property="energyUnit" column="EnergyUnit" />
+		<result property="power" column="Power" />
+		<result property="flow" column="Flow" />
+		<result property="inTmp" column="In_Tmp" />
+		<result property="outTmp" column="Out_Tmp" />
+		<result property="diffTmp" column="Diff_Tmp" />
+		<result property="operTime" column="OperTime" />
+		<result property="errCode" column="ErrCode" />
+		<result property="readMTime" column="ReadMTime" />
+		<result property="recordTime" column="RecordTime" />
+		</association>	
+	</resultMap>
+	
+	<select id="findYhNameList" resultMap="yh">
+         select distinct XqName  from T_YhInfo
+	</select>
+	
+	<select id="findYhBuildNObyXqName" parameterType="Yh" resultMap="yh">
+	    select BuildNO   from T_YhInfo where XqName=#{xqName} group by BuildNO
+	</select>
+	
+	<select id="findYhCellNOByBuild" parameterType="Yh" resultMap="yh">
+	    select CellNO   from T_YhInfo where XqName=#{xqName} and BuildNO=#{build} group by CellNO
+	</select>
+	<select id="findList" resultMap="yh">
+	 select * 
+           from T_RbInfo,T_YhInfo
+       where T_RbInfo.RbAd=T_YhInfo.RbAd
+	</select>
+	   <select id="searchInfo" resultMap="yh">
+	  select * 
+        from T_RbInfo,T_YhInfo
+        where T_RbInfo.RbAd=T_YhInfo.RbAd
+		<if test="xqName!='--选择小区名称--'">
+			and XqName=#{xqName}
+		</if>
+		<if test="buildNo!=0">
+			and BuildNO=#{buildNo}
+		</if>
+		<if test="cellNo!=0">
+			and CellNO=#{cellNo}
+		</if>
+		<if test="houseNo!=0">
+			and HouseNO=#{houseNo}
+		</if>
+		</select>
+</mapper>

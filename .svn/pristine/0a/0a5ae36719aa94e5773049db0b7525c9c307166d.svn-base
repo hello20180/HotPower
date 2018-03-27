@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd">
+	<context:annotation-config />
+	<aop:aspectj-autoproxy />
+	<!-- 扫描service层 -->
+	<context:component-scan base-package="com.hnzy.hot.*.service"></context:component-scan>
+	<!-- 加载数据库配置文件 -->
+	<context:property-placeholder location="classpath:jdbc.properties" />
+	<!-- 配置数据库连接池 -->
+	<bean id="dse" class="org.apache.commons.dbcp.BasicDataSource"
+		p:url="${jdbc.url}"
+	    p:username="${jdbc.user}" 
+		p:password="${jdbc.password}"
+		p:driverClassName="${jdbc.driver}" 
+		p:maxActive="30"
+		p:maxIdle="10"
+		p:maxWait="1000" />
+
+
+  <bean id ="ds" class= "org.apache.commons.dbcp.BasicDataSource" >  
+          <property name ="driverClassName" value= "oracle.jdbc.driver.OracleDriver"></property >  
+          <property name ="url" value= "jdbc:oracle:thin:@192.168.16.202:1521:ORCL" ></property >  
+          <property name ="username" value="CHARGE_SMX_SLRL"> </property>  
+          <property name ="password" value="CHARGE_SMX_SLRL"></property>  
+   </bean >  
+
+	<!-- 配置mybatis session工厂类，指定数据源，主配置文件，mapper映射文件，实体类所在包信息 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean"
+		p:dataSource-ref="dataSource" 
+		p:configLocation="classpath:mybatis/config.xml"
+		p:mapperLocations="classpath:mybatis/mapper/**/*.xml"
+		p:typeAliasesPackage="com.hnzy.hot.*.pojo" 
+		/>
+
+	<!-- 指定dao接口所在位置，该类会根据接口和mapper配置文件自动创建接口的实现类，service层直接使用即可 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer"
+		p:basePackage="com.hnzy.hot.*.dao" />
+
+ <!-- 动态配置数据源 -->  
+   <bean id ="dataSource" class= "com.hnzy.hot.datasource.DynameicDataSource" >  
+          <property name ="targetDataSources">  
+                <map key-type ="java.lang.String">  
+                      <entry value-ref ="dse" key= "dse"></entry >  
+                      <entry value-ref ="ds" key= "ds"></entry >  
+                </map >  
+          </property >  
+          <property name ="defaultTargetDataSource" ref= "dse"></property > 
+   </bean>
+
+	<!-- 事物管理 -->
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+		p:dataSource-ref="dataSource" />
+
+	<aop:config>
+		<aop:pointcut expression="execution(* com.hnzy.hot.*.service.**.*(..))"
+			id="serviceMethods" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="serviceMethods" />
+	</aop:config>
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="save" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="delete*" propagation="REQUIRED" />
+			<tx:method name="get*" read-only="true" />
+			<tx:method name="find*" read-only="true" />
+		</tx:attributes>
+	</tx:advice>
+
+
+</beans>

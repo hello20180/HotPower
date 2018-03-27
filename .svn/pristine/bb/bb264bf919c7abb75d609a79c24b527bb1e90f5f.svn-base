@@ -1,0 +1,23 @@
+package com.hnzy.hot.test.pojo;
+
+import java.io.Serializable;
+
+public class SF implements Serializable{
+	
+	private String yHBM;
+	private String yHMC;
+	public String getyHBM() {
+		return yHBM;
+	}
+	public void setyHBM(String yHBM) {
+		this.yHBM = yHBM;
+	}
+	public String getyHMC() {
+		return yHMC;
+	}
+	public void setyHMC(String yHMC) {
+		this.yHMC = yHMC;
+	}
+	
+	
+}

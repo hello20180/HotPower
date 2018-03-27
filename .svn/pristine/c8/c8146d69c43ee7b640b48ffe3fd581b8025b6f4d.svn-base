@@ -1,0 +1,18 @@
+package com.hnzy.hot.sbgls.service;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.hnzy.hot.sbgl.pojo.Yh;
+
+public interface FmsService {
+	
+	public List<Yh> findYhNameList();
+	public List<Yh> findYhBuildNObyXqName(String xqName);
+	public List<Yh> findYhCellNOByBuild(String xqName,int build);
+	public List<Yh> findList();
+    public List<Yh> searchInfo(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("houseNo")Integer houseNo);
+    //根据Qg查找阀门个数
+//     public  int fmCount(Qg qgId);
+}

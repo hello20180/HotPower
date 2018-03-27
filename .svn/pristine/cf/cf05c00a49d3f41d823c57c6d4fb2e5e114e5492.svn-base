@@ -1,0 +1,43 @@
+package com.hnzy.hot.sbgls.service.Impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.hnzy.hot.sbgl.pojo.Yh;
+import com.hnzy.hot.sbgls.dao.RbsglDao;
+import com.hnzy.hot.sbgls.service.RbsglService;
+
+
+@Service
+public class RbsglServiceImpl implements RbsglService {
+ 
+	@Autowired
+	private RbsglDao rbsglDao;
+	@Override
+	public List<Yh> findYhNameList() {
+		return rbsglDao.findYhNameList();
+	}
+
+	@Override
+	public List<Yh> findYhBuildNObyXqName(String xqName) {
+		return rbsglDao.findYhBuildNObyXqName(xqName);
+	}
+
+	@Override
+	public List<Yh> findYhCellNOByBuild(String xqName, int build) {
+		return rbsglDao.findYhCellNOByBuild(xqName, build);
+	}
+
+	@Override
+	public List<Yh> findList() {
+		return rbsglDao.findList();
+	}
+
+	@Override
+	public List<Yh> searchInfo(String xqName, int buildNo, int cellNo, Integer houseNo) {
+		return rbsglDao.searchInfo(xqName, buildNo, cellNo, houseNo);
+	}
+
+}

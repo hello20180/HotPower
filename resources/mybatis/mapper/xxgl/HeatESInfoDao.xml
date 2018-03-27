@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.xxgl.dao.HeatESInfoDao">
+	<resultMap type="HeatESInfo" id="heatESInfo">
+		<id property="id" column="ID" />
+		<result property="hesName" column="HESName" />
+		<result property="lxrName" column="LxrName" />
+		<result property="lxrPhone" column="LxrPhone" />
+		<result property="hesAd" column="HESAd" />
+		<result property="place" column="Place" />
+		
+	</resultMap>
+	<select id="findPlace" resultMap="heatESInfo"
+		parameterType="HeatESInfo">
+		select distinct Place from T_HeatESInfo
+	</select>
+		
+	<select id="findHes" resultMap="heatESInfo"
+		parameterType="HeatESInfo">
+		select HESName from T_HeatESInfo where Place=#{place}
+		group by HESName
+	</select>
+
+	<select id="find" resultMap="heatESInfo">
+		select * from T_HeatESInfo
+	</select>
+
+	<insert id="Insert" parameterType="HeatESInfo">
+		insert into T_HeatESInfo
+		(HESName,LxrName,LxrPhone,HESAd)
+		values (#{hesName},#{lxrName},#{lxrPhone},#{hesAd})
+	</insert>
+
+	<delete id="delete" parameterType="HeatESInfo">
+		delete from T_HeatESInfo 
+		where ID=#{id}
+	</delete>
+
+	<select id="findByName" resultMap="heatESInfo">
+		select HESName
+		from T_HeatESInfo 
+		group by HESName
+	</select>
+	
+	<update id="update" parameterType="HeatESInfo">
+		update T_HeatESInfo set
+		HESName=#{hesName},LxrName=#{lxrName},LxrPhone=#{lxrPhone},HESAd=#{hesAd}
+		where ID=#{id}
+	</update>
+
+</mapper>

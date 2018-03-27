@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.hrzgl.dao.HeatStationDao">
+	<resultMap type="HeatStation" id="heatStation">
+		<id property="id" column="id" />
+	</resultMap>
+	<select id="findById" resultType="HeatStation" parameterType="int">
+		select * from HeatStation where id=#{id}
+	</select>
+	<select id="findList" resultType="HeatStation" parameterType="int">
+		select * from HeatStation where id=#{id}
+	</select>
+	
+</mapper>

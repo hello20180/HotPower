@@ -1,0 +1,90 @@
+package com.hnzy.hot.xxgl.pojo;
+
+import java.io.Serializable;
+
+public class XqInfo implements Serializable
+{
+
+	private int id;
+	private String xqName;
+	private String lxrName;
+	private String lxrPhone;
+	private Double nhPrice;
+	private Double areaPriceOne;
+	private Double areaPriceTwo;
+	private String hesName;
+	private String xqAd;
+	public int getId()
+	{
+		return id;
+	}
+	public void setId(int id)
+	{
+		this.id = id;
+	}
+	public String getXqName()
+	{
+		return xqName;
+	}
+	public void setXqName(String xqName)
+	{
+		this.xqName = xqName;
+	}
+	public String getLxrName()
+	{
+		return lxrName;
+	}
+	public void setLxrName(String lxrName)
+	{
+		this.lxrName = lxrName;
+	}
+	public String getLxrPhone()
+	{
+		return lxrPhone;
+	}
+	public void setLxrPhone(String lxrPhone)
+	{
+		this.lxrPhone = lxrPhone;
+	}
+	public Double getNhPrice()
+	{
+		return nhPrice;
+	}
+	public void setNhPrice(Double nhPrice)
+	{
+		this.nhPrice = nhPrice;
+	}
+	public Double getAreaPriceOne()
+	{
+		return areaPriceOne;
+	}
+	public void setAreaPriceOne(Double areaPriceOne)
+	{
+		this.areaPriceOne = areaPriceOne;
+	}
+	public Double getAreaPriceTwo()
+	{
+		return areaPriceTwo;
+	}
+	public void setAreaPriceTwo(Double areaPriceTwo)
+	{
+		this.areaPriceTwo = areaPriceTwo;
+	}
+	public String getHesName()
+	{
+		return hesName;
+	}
+	public void setHesName(String hesName)
+	{
+		this.hesName = hesName;
+	}
+	public String getXqAd()
+	{
+		return xqAd;
+	}
+	public void setXqAd(String xqAd)
+	{
+		this.xqAd = xqAd;
+	}
+	
+}

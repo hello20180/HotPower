@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.sbgl.dao.QgDao">
+
+	<resultMap type="Qg" id="qg">
+		<id property="id" column="ID" />
+		<result property="qgID" column="QgID" />
+		<result property="jzqID" column="JzqID" />
+		<result property="xqName" column="XqName" />
+		<result property="qgStatus" column="QgStatus" />
+		<result property="version" column="Version" />
+		<result property="mode" column="Mode" />
+		<result property="readCycle" column="ReadCycle" />
+		<result property="vALstID" column="VALstID" />
+		<result property="vALedID" column="VALedID" />
+		<result property="installAd" column="InstallAd" />
+		<result property="recordTime" column="RecordTime" />
+		<association property="jzq" javaType="com.hnzy.hot.sbgl.pojo.Jzq">
+		<id property="id" column="ID"/>
+		<result property="jzqId" column="JzqId"/>
+		<result property="jzqPort" column="JzqPort"/>
+		<result property="jzqIp" column="JzqIP"/>
+		</association>
+	</resultMap>
+
+   
+	<select id="find" resultMap="qg">
+		select * from T_QgInfo
+	</select>
+
+	<insert id="Insert" parameterType="Qg">
+		insert into T_QgInfo
+		(QgID,JzqID,XqName,QgStatus,Version,Mode,ReadCycle,VALstID,VALedID,InstallAd,RecordTime)
+		values(#{qgID},#{jzqID},#{xqName},#{qgStatus},#{version},#{mode},#{readCycle},#{vALstID},#{vALedID},#{installAd},#{recordTime})
+	</insert>
+
+	<delete id="delete" parameterType="Qg">
+		delete from T_QgInfo
+		where
+		ID=#{id}
+	</delete>
+
+	<update id="update" parameterType="Qg">
+		update T_QgInfo set
+		QgID=#{qgID},JzqID=#{jzqID},XqName=#{xqName},QgStatus=#{qgStatus},Version=#{version},Mode=#{mode},ReadCycle=#{readCycle},VALstID=#{vALstID},VALedID=#{vALedID},InstallAd=#{installAd},RecordTime=#{recordTime}
+		where ID=#{id}
+	</update>
+    <select id="findVALs" parameterType="Qg" resultMap="qg">
+        select VALstID,VALedID from T_QgInfo where QgID=#{QgID}; 
+    </select>
+    <select id="findQgID" parameterType="Qg" resultMap="qg" >
+        select distinct qg.QgID,qg.VALstID,qg.VALedID,jzq.JzqID,jzq.JzqIP,jzq.JzqPort from T_QgInfo qg,T_JzqInfo jzq where jzq.JzqID=qg.JzqID and QgID=#{id}
+    </select>
+    <select id="findJzqIDByQg" parameterType="Qg" resultMap="qg" >
+     select QgID from T_QgInfo where JzqID=#{JzqID}
+    </select>
+    <select id="QgCount" parameterType="Qg" resultType="int" >
+    select Count(QgID) from T_QgInfo where JzqID=#{JzqID}
+    </select>
+ 
+</mapper>

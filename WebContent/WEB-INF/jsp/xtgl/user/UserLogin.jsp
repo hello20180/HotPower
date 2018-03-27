@@ -1,0 +1,55 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+    pageEncoding="utf-8"%>
+<%  
+  String path=request.getContextPath();
+  String basePath=request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>智能锁闭阀管理系统</title>
+<script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript">
+function ajaxlogin(){
+	var userName=$("#userName").val();
+	var passWord=$("#passWord").val();
+	var msg;
+	$.ajax({
+		url:"loginUser.action",
+		async:false,
+		dataType:"json",
+		data:{
+			"userName":userName,
+			"passWord":passWord,
+		},
+		success:function(data){
+			msg=data.msg;
+			if(msg=="0"){
+				alert("账号或密码错误")
+				return false;
+			}
+			if(msg=="1"){
+				$("#myform").submit();
+				return true;
+			}
+		}
+		
+	})
+}
+</script>
+</head>
+<body>
+<form action="<%=basePath %>ruser/Userlist.action" id="myform">
+<table>
+<tr><td>登录名称：<input type="text" name="userName" id="userName"/></td></tr>
+<tr><td>登录密码：<input type="text" name="passWord" id="passWord"/></td></tr>
+<tr><td><input type="button" value="登录" onclick="ajaxlogin()"/></td>
+<td><input type="button" value="取消"/></td>
+<td><a href="toregister">注册</a></td>
+</tr>
+</table>
+
+</form>
+</body>
+</html>

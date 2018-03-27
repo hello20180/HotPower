@@ -1,0 +1,112 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+    pageEncoding="utf-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Insert title here</title>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script type="text/javascript" src="../js/biao.js"></script>
+<link href="../css/main.css" rel="stylesheet" type="text/css" />
+<link href="../css/bootstrap.css" rel="stylesheet">
+	
+	<link href="../css/fixed_table_rc.css" type="text/css" rel="stylesheet" media="all" />
+	<script src="https://code.jquery.com/jquery.min.js" type="text/javascript"></script>
+	<script src="https://meetselva.github.io/fixed-table-rows-cols/js/sortable_table.js" type="text/javascript"></script>
+	<script src="../js/fixed_table_rc.js" type="text/javascript"></script>
+	<style>
+		html, body {
+			font-family: Arial,​​sans-serif;
+			font-size: 13px;
+			margin: 0;
+			padding: 0;
+			background-color: #f2f2f2;
+		}
+		
+		div.container {
+			padding: 5px 10px;
+			width: 2330px;
+			margin: 10px auto;
+		}
+		
+		.ft_container table tr th {
+			background: url(../images/secai.jpg);
+		}
+	</style>
+	<script>
+	$(function () {
+		
+		$('#fixed_hdr2').fxdHdrCol({
+			fixedCols: 0,
+			width: "100%",
+			height: 600,
+			colModal: [
+			{ width: 130, align: 'center' },
+			{ width: 150, align: 'center' },
+			{ width: 100, align: 'center' },
+			{ width: 100, align: 'center' },
+			{ width: 100, align: 'center' },
+			{ width: 100, align: 'center' },
+			{ width: 150, align: 'center' },
+			{ width: 400, align: 'center' },
+			{ width: 150, align: 'center' },
+			{ width: 120, align: 'center' }
+			],
+			sort: true
+		});
+		
+	});
+	</script>
+<link href="../css/main.css" rel="stylesheet" type="text/css" />
+<link href="../css/bootstrap.css" rel="stylesheet">
+<script type="text/javascript" src="../js/bootstrap.js">
+</script>
+</head>
+<body>
+<div class="panel panel-success">
+ 		<div class="panel-heading">故障管理</div>
+				<div id="tablediv">
+				<form id="myForm">
+					<div class="dwrapper">
+	<table id="fixed_hdr2">
+	<thead>
+	<tr>
+						<th>业主</th>
+						<th>小区名称</th>
+						<th>楼栋号</th>
+						<th>单元号</th>
+						<th>户号</th>
+						<th>故障类型</th>
+						<th>序号</th>
+						<th>故障信息</th>
+						<th>记录时间</th>
+						<th>备注</th>
+					</tr>
+				</thead>
+				<tbody >
+					<c:forEach  var="gzgl" items="${gzglList}" varStatus="status">
+								<tr <c:if test="${status.index%2==1 }">style="background-color:#eef3fa"</c:if>>
+								    <td>${gzgl.yhInfo.yhName}</td>
+                                     <td>${gzgl.yhInfo.xqName}</td>
+									<td>${gzgl.yhInfo.buildNo}</td>
+								<td>${gzgl.yhInfo.cellNo}</td>
+									<td>${gzgl.yhInfo.houseNo}</td>
+								    <td>${gzgl.deviceType}</td>
+                                     <td>${gzgl.deviceId}</td>
+									<td title="${gzgl.errinfor}">${gzgl.errinfor}</td>
+									<td title="<fmt:formatDate value="${gzgl.recordTime}"
+											pattern="yyyy-MM-dd HH:mm:ss" />"><fmt:formatDate value="${gzgl.recordTime}"
+											pattern="yyyy-MM-dd HH:mm:ss" /></td>
+											<td>无</td>
+                                </tr>
+					</c:forEach>
+				</tbody>
+			</table>
+			</div>
+			</form>
+			</div>
+			</div>
+</body>
+</html>

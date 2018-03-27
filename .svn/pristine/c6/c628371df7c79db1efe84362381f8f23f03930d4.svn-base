@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.home.dao.MenuDao">
+	<resultMap type="Menu" id="menu">
+		<id property="id" column="id" />
+		<result property="name" column="NAME" />
+		<result property="pid" column="pid" />
+		<result property="url" column="url" />
+	</resultMap>
+	<resultMap type="Menu" id="roleMenu">
+		<id property="id" column="mid" />
+		<result property="name" column="mname" />
+		<collection property="role" ofType="Role">
+			<id property="id" column="rid" />
+			<result property="name" column="rname" />
+		</collection>
+	</resultMap>
+	<resultMap type="Menu" id="findAllResult">
+		<id property="id" column="fid" />
+		<result property="name" column="fname" />
+		<result property="url" column="furl" />
+		<result property="pid" column="pid" />
+		<collection property="childMenus" column="fid" ofType="Menu">
+			<id property="id" column="cid" />
+			<result property="name" column="cname" />
+			<result property="url" column="curl" />
+		</collection>
+	</resultMap>
+	<select id="getMenu">
+		select id,name from menu where pid=-1
+	</select>
+	<select id="findMenuByRId" parameterType="int" resultMap="findAllResult">
+		SELECT
+		a.id fid,
+		a. NAME fname,
+		b.id cid,
+		b. NAME cname
+		FROM
+		(
+		SELECT
+		xm.*
+		FROM
+		role xr,
+		role_menu xrm,
+		menu xm
+		WHERE
+		xr.id = xrm.role_id
+		AND xm.id = xrm.menu_id
+		AND xr.id = #{id}
+		) a
+		LEFT JOIN (
+		SELECT
+		xm.*
+		FROM
+		role xr,
+		role_menu xrm,
+		menu xm
+		WHERE
+		xr.id = xrm.role_id
+		AND xm.id = xrm.menu_id
+		AND xr.id = #{id}
+		) b ON a.id = b.pid
+		WHERE
+		a.pid =- 1
+	</select>
+	<!-- 根据用户id 查询所有的菜单 -->
+	<select id="findMenuByUserId" parameterType="int" resultMap="findAllResult">
+
+		select
+		m1.id fid,
+		m1. NAME fname,
+		m1.url furl,
+	
+		m2.id cid,
+		m2. NAME cname,
+		m2.url curl
+		
+		from menu m1 LEFT JOIN menu m2
+		ON m2.pid=m1.id
+		LEFT JOIN role_menu xrm
+		ON m1.id=xrm.menu_id
+		LEFT JOIN user_role xur
+		ON xrm.role_id=xur.role_id
+		where xur.user_id=#{id}
+	</select>
+	<insert id="addURole" parameterType="RoleMenu">	
+		INSERT INTO
+		role_menu(role_id,menu_id)
+		VALUES(#{roleId},#{menuId})
+	</insert>
+	<delete id="delURole" parameterType="RoleMenu">
+		DELETE FROM
+		role_menu
+		WHERE
+		role_id=#{id};
+	</delete>
+	
+	<!-- 保存菜单 -->
+	<insert id="Insert" parameterType="Menu">
+		insert
+		into menu (name,pid,url)
+		values
+		(#{name},#{pid},#{url})
+
+	</insert>
+	<!-- 删除菜单 -->
+	<delete id="delete">
+		delete from menu where id=#{id}
+	</delete>
+	<!-- 修改菜单 -->
+	<update id="update" parameterType="Menu">
+		update menu
+		set
+		name=#{name},pid=#{pid},url=#{url}
+		where id=#{id}
+	</update>
+	<!-- 查询所有的菜单 -->
+	<select id="find" resultMap="findAllResult">
+		
+	SELECT
+		m1.id fid,
+		m1. NAME fname,
+		m1.url furl,
+
+		m2.id cid,
+		m2. NAME cname,
+		m2.url curl
+		FROM
+		menu m1
+		LEFT JOIN menu m2 ON m1.id = m2.pid
+		WHERE
+		m1.pid =-1
+	</select>
+	<select id="xxglFind" resultMap="findAllResult">
+		select
+		m1.id fid,
+		m1.NAME fname,
+		m1.url furl,
+		m2.id cid,
+		m2.NAME cname,
+		m2.url curl
+		FROM
+		menu m1 LEFT JOIN menu m2 ON m1.id=m2.pid where m1.pid=5
+	</select>
+	<!-- 根据pid查询子菜单 -->
+	<select id="getSec" parameterType="int" resultMap="menu">
+		select id,NAME,pid,url from menu where pid=#{pid}
+	</select>
+	<select id="findMenuByRoleId" parameterType="int" resultMap="findAllResult">
+		SELECT
+		a.id fid,
+		a. NAME fname,
+		b.id cid,
+		b. NAME cname
+		FROM
+		(
+		SELECT
+		xm.*
+		FROM
+		role xr,
+		role_menu xrm,
+		menu xm
+		WHERE
+		xr.id = xrm.role_id
+		AND xm.id =
+		xrm.menu_id
+		AND xr.id = #{id}
+		) a
+		LEFT JOIN (
+		SELECT
+		xm.*
+		FROM
+		role xr,
+		role_menu xrm,
+		menu xm
+		WHERE
+		xr.id = xrm.role_id
+		AND xm.id = xrm.menu_id
+		AND xr.id = #{id}
+		) b ON a.id = b.pid
+		WHERE
+		a.pid =- 1
+	</select>
+</mapper>

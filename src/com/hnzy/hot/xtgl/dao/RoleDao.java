@@ -1,0 +1,38 @@
+package com.hnzy.hot.xtgl.dao;
+
+import java.util.List;
+
+import com.hnzy.hot.base.BaseDao;
+import com.hnzy.hot.xtgl.pojo.Role;
+import com.hnzy.hot.xtgl.pojo.User;
+import com.hnzy.hot.xtgl.pojo.UserRole;
+
+
+public interface RoleDao extends BaseDao<Role>{
+	
+	
+	/**
+	 * 查询角色列表
+	 * @return
+	 */
+	public List<Role> findAllRole();
+	/**
+	 * 查询某个角色下的所有用户
+	 */
+	public List<User> findUsers(String id);
+	//根据用户的id查询用户的角色
+	public List<Role> findRoleByUId(String userName);
+	public List<Role>findRoleId(String id);
+	/**
+	 * 根据用户的ID查询该用户的角色
+	 * @param id
+	 * @return
+	 */
+	public List<Role> findRoleNotByUId(String id);
+	//删除用户角色
+	public int delURole(String id);
+	//增加用户角色
+	public int addURole(UserRole userRole);
+	//
+}
+

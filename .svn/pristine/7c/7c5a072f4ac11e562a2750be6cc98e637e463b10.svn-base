@@ -1,0 +1,207 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+	pageEncoding="utf-8"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>登录</title>
+<link href="<%=basePath%>css/login.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+	<div class="wrap">
+		<div class="banner-show" id="js_ban_content">
+			<div class="cell bns-01">
+				<div class="con"></div>
+			</div>
+			<div class="cell bns-02" style="display: none;">
+				<div class="con">
+					<a href="#" target="_blank" class="banner-link"> <i>圈子</i></a>
+				</div>
+			</div>
+			<div class="cell bns-03" style="display: none;">
+				<div class="con">
+					<a href="#" target="_blank" class="banner-link"> <i>企业云</i></a>
+				</div>
+			</div>
+		</div>
+		<div class="banner-control" id="js_ban_button_box">
+			<a href="javascript:;" class="left">左</a> 
+			<a href="javascript:;" class="right">右</a>
+		</div>
+
+		<div class="container">
+			<div class="top">
+				<ul>
+				   <li><font style="font:14px/1.8 Tahoma,Geneva,'\5B8B\4F53'" color="#000000">链接：</font></li>
+				   	<li><a href=" http://www.nea.gov.cn/"><font size="5px" color="#000000" style="font:14px/1.8 Tahoma,Geneva,'\5B8B\4F53'">国家能源局</font></a></li>
+					<li><a href="http://www.intelligent-heating.org"><font color="#000000"size="5px" style="font:14px/1.8 Tahoma,Geneva,'\5B8B\4F53'">智能供热网</font></a></li>
+					<li><a href="http://www.hnzyzn.com" ><font  size="5px"color="#000000" style="font:14px/1.8 Tahoma,Geneva,'\5B8B\4F53'">河南众源系统工程有限公司 </font></a></li>
+				</ul>
+				<div class="clear"></div>
+				<div class="tel"><ul></ul></div>
+			</div>
+
+			<div class="register-box">
+				<div class="reg-slogan">智能锁闭阀管理登录系统</div>
+				<div class="reg-form" id="js-form-mobile">
+					<br>
+					<form action="<%=basePath%>home/index.action" id="myform"
+						method="post">
+						<div style="font-size: 20px">用户名</div>
+						<div class="cell">
+							<input type="text" name="userName" id="userName" class="text"
+								maxlength="10" />
+						</div>
+						<div style="font-size: 20px">密码</div>
+						<div class="cell">
+							<input type="password" name="passWord" id="passWord" class="text" />
+						</div>
+						<div class="rem-password left">
+							<input type="checkbox" />记住密码
+						</div>
+						<div class="rem-password right">
+							<a href="#">忘记密码？</a>
+						</div>
+						<div class=" clear"></div>
+
+						<!-- !短信验证码 -->
+						<div class="bottom">
+							<button id="js-mobile_btn" class="button btn-green"
+								onclick="ajaxlogin()">登录</button>
+						</div>
+					</form>
+				</div>
+
+			</div>
+		</div>
+
+
+	</div>
+	<div class="footer"><font  size="3px">河南众源系统工程有限公司 版权所有</font></div>
+	
+	<script src="<%=basePath%>js/jquery-1.9.1.min.js"></script>
+	<script src="<%=basePath%>js/login.js"></script>
+
+<script type="text/javascript">
+//解决子框架嵌套的问题  
+if(window != window.parent){  
+    window.parent.location.reload(true);  
+}  
+//登录时鼠标定在用户名上
+window.onload=function()
+{
+	document.getElementById("userName").focus();
+}
+
+function ajaxlogin(){
+	var userName=$("#userName").val();
+	var passWord=$("#passWord").val();
+	var msg;
+	$.ajax({
+		url:"<%=basePath%>ruser/loginUser.action",
+		async : false,
+		dataType : "json",
+				data : {
+					"userName" : userName,
+					"passWord" : passWord,
+				},
+				success : function(data) {
+					msg = data.msg;
+					if (msg == "1") {
+						$("#myform").submit();
+						return true;
+					}
+					if (msg == "0") {
+						alert("账号或密码错误")
+						return false;
+					}
+					
+				}
+
+			})
+		}
+	</script>
+	<script type="text/javascript">
+		;
+		(function() {
+
+			var defaultInd = 0;
+			var list = $('#js_ban_content').children();
+			var count = 0;
+			var change = function(newInd, callback) {
+				if (count)
+					return;
+				count = 2;
+				$(list[defaultInd]).fadeOut(600, function() {
+					count--;
+					if (count <= 0) {
+						if (start.timer)
+							window.clearTimeout(start.timer);
+						callback && callback();
+					}
+				});
+				$(list[newInd]).fadeIn(600, function() {
+					defaultInd = newInd;
+					count--;
+					if (count <= 0) {
+						if (start.timer)
+							window.clearTimeout(start.timer);
+						callback && callback();
+					}
+				});
+			}
+
+			var next = function(callback) {
+				var newInd = defaultInd + 1;
+				if (newInd >= list.length) {
+					newInd = 0;
+				}
+				change(newInd, callback);
+			}
+
+			var start = function() {
+				if (start.timer)
+					window.clearTimeout(start.timer);
+				start.timer = window.setTimeout(function() {
+					next(function() {
+						start();
+					});
+				}, 3000);
+			}
+
+			start();
+
+			$('#js_ban_button_box').on('click', 'a', function() {
+				var btn = $(this);
+				if (btn.hasClass('right')) {
+					//next
+					next(function() {
+						start();
+					});
+				} else {
+					//prev
+					var newInd = defaultInd - 1;
+					if (newInd < 0) {
+						newInd = list.length - 1;
+					}
+					change(newInd, function() {
+						start();
+					});
+				}
+				return false;
+			});
+
+		})();
+	</script>
+
+
+	<!-- 代码 end -->
+</body>
+</html>

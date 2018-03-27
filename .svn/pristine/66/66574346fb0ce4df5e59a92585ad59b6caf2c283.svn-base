@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+<typeAliases>		
+		<typeAlias type="com.hnzy.hot.xtgl.pojo.User" alias="User" />
+		<typeAlias type="com.hnzy.hot.xtgl.pojo.Role" alias="Role" />
+		<typeAlias type="com.hnzy.hot.xtgl.pojo.RoleMenu" alias="RoleMenu" />
+		<typeAlias type="com.hnzy.hot.xtgl.pojo.UserRole" alias="UserRole" />
+		<typeAlias type="com.hnzy.hot.xtgl.pojo.ServerSet" alias="ServerSet" />
+		<typeAlias type="com.hnzy.hot.xtgl.pojo.DataManage" alias="DataManage"/>
+		
+		<typeAlias type="com.hnzy.hot.kfgl.pojo.Repair" alias="Repair" />
+		<typeAlias type="com.hnzy.hot.kfgl.pojo.Notice" alias="Notice" />
+
+		<typeAlias type="com.hnzy.hot.kfgl.pojo.Address" alias="Address" />
+		<typeAlias type="com.hnzy.hot.kfgl.pojo.Address" alias="Address" />
+		<typeAlias type="com.hnzy.hot.sbgl.pojo.Jzq" alias="Jzq" />
+		<typeAlias type="com.hnzy.hot.sbgl.pojo.Qg" alias="Qg" />
+		<typeAlias type="com.hnzy.hot.sbgl.pojo.Fm" alias="Fm" />
+		<typeAlias type="com.hnzy.hot.sbgl.pojo.Yh" alias="Yh" />
+		<typeAlias type="com.hnzy.hot.sbgl.pojo.Rb" alias="Rb"/>
+		<typeAlias type="com.hnzy.hot.sjbb.pojo.YhInfo" alias="YhInfo"/>
+		<typeAlias type="com.hnzy.hot.sjbb.pojo.FmHistory" alias="FmHistory"/>
+		<typeAlias type="com.hnzy.hot.nhfx.pojo.HeatStationHistory" alias="HeatStationHistory"/>
+		
+		<typeAlias type="com.hnzy.hot.home.pojo.Menu" alias="Menu"/>
+		
+		<typeAlias type="com.hnzy.hot.chart.pojo.Village" alias="Village"/>
+		<typeAlias type="com.hnzy.hot.chart.pojo.FmHistoryLog" alias="FmHistoryLog"/>
+		
+		<typeAlias type="com.hnzy.hot.xxgl.pojo.GZgl" alias="GZgl"/>
+		<typeAlias type="com.hnzy.hot.xxgl.pojo.XqInfo" alias="XqInfo"/>
+		<typeAlias type="com.hnzy.hot.xxgl.pojo.HeatESInfo" alias="HeatESInfo"/>
+		<typeAlias type="com.hnzy.hot.xxgl.pojo.JzqInfo" alias="JzqInfo"/>
+		<typeAlias type="com.hnzy.hot.xxgl.pojo.Rbgl" alias="Rbgl"/>
+		<typeAlias type="com.hnzy.hot.xxgl.pojo.Rz" alias="Rz"/>
+		<typeAlias type="com.hnzy.hot.xxgl.pojo.ReadInfo" alias="ReadInfo"/>
+		
+		<typeAlias type="com.hnzy.hot.hrzgl.pojo.HeatStation" alias="HeatStation"/>
+		<typeAlias type="com.hnzy.hot.hrzgl.pojo.HeatWX" alias="HeatWX"/>
+		
+	</typeAliases>
+</configuration>

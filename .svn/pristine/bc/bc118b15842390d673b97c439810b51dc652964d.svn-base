@@ -1,0 +1,302 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+	pageEncoding="utf-8"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
+<!-- Bootstrap -->
+<link href="../css/bootstrap.css" rel="stylesheet">
+<script src="../js/bootstrap.js"></script>
+<script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript"
+	src="../js/bootstrap-datetimepicker.min.js"></script>
+<script type="text/javascript"
+	src="../js/bootstrap-datetimepicker.zh-CN.js"></script>
+<link href="../css/bootstrap.css" rel="stylesheet">
+<link href="../css/bootstrap-datetimepicker.min.css">
+<link href="../css/main.css" rel="stylesheet" type="text/css" />
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script type="text/javascript" src="../js/biao.js"></script>
+<script type="text/javascript">
+	/*页面加载就开始执行js*/
+	$(document).ready(
+		
+			function() {
+				$("#xqNameId").change(
+						function() {
+							$.get("findYhBuildNObyXqName.action?xqName="
+									+ $("#xqNameId").val(), function(data) {
+								var dd = data;
+								var d = dd.xqlist;
+								$("#buildNoId option:gt(0)").remove();
+								$("#cellNoId option:gt(0)").remove();
+								for (var i = 0; i < d.length; i++) {
+									var buildNo = d[i].buildNo;
+
+									var opt = "<option value='"+buildNo+"'>"
+											+ buildNo + "</option>"
+									$("#buildNoId").append(opt);
+								}
+							});
+						});
+
+				$("#buildNoId").change(
+						function() {
+							$.get("findYhCellNOByBuild.action?build="
+									+ $("#buildNoId").val() + "&xqName="
+									+ $("#xqNameId").val(), function(data) {
+								var dd = data;
+								var d = dd.cellList;
+								$("#cellNoId option:gt(0)").remove();
+								for (var i = 0; i < d.length; i++) {
+									var cellNo = d[i].cellNo;
+									var opt = "<option value='"+cellNo+"'>"
+											+ cellNo + "</option>"
+									$("#cellNoId").append(opt);
+								}
+							});
+						});
+			});
+</script>
+<script type="text/javascript">
+	function searchInfo() {
+		debugger;
+		var xqName = $('#xqNameId').val();
+		var buildNo = $('#buildNoId').val();
+		var cellNo = $('#cellNoId').val();
+		var houseNo = $('#houseNoId').val();
+		var status = $('#fmStatusId').val();
+		var valTemp1=$('#valTempId1').val();
+		var valTemp2=$('#valTempId2').val();
+		var roomTemp1=$('#roomTempId1').val();
+		var roomTemp2=$('#roomTempId2').val();
+		var famKd=$('#famKdId').val();
+		var html = "";
+		$.ajax({
+			url : "searchInfo.action",
+			async : false,
+			dataType : "json",
+			data : {
+				"xqName" : xqName,
+				"buildNo" : buildNo,
+				"cellNo" : cellNo,
+				"houseNo" : houseNo,
+				"status" : status,
+				"valTemp1":valTemp1,
+				"valTemp2":valTemp2,
+				"roomTemp1":roomTemp1,
+				"roomTemp2":roomTemp2,
+				"famKd":famKd,
+			},
+			success : function(data) {
+				$("#tablediv").empty();
+				var d = data.findXqInfoFmHistory;
+				html+="<div class='panel-body'  style='width: 99%; height: 80%; position: absolute; overflow:auto;'>"
+				html += "<table id='tableSort' style='overflow: scroll;'>";
+				html += "<thead>"
+				html += "<tr>"
+				html += "<th > 小区名字"
+				html += "</th>"
+				html += "<th> 楼栋号"
+				html += "</th>"
+				html += "<th> 单元号"
+				html += "</th>"
+				html += "<th> 户号"
+				html += "</th>"
+				html += "<th> 阀门状态"
+				html += "</th>"
+				html += "<th> 阀门开度"
+				html += "</th>"
+				html += "<th> 管道温度"
+				html += "</th>"
+				html += "<th> 室内温度"
+				html += "</th>"
+				html += "<th> 采集时间"
+				html += "</th>"
+				html += "<th>锁定标识"
+				html += "</th>"
+				html += "<th>缴费标识"
+				html += "</th>"
+				html += "<th>采集周期"
+				html += "</th>"
+				html += "<th>设定温度"
+				html += "</th>"
+				html += "<th>阀门参数"
+				html += "</th>"
+				html += "</tr>"
+				html += "</thead>"
+				html += "<tbody class='text-center'>"
+
+				for (var i = 0; i < d.length; i++) {
+					var xqName = d[i].xqName;
+					var buildNo = d[i].buildNo;
+					var cellNo = d[i].cellNo;
+					var houseNo = d[i].houseNo;
+					var status = d[i].fmHistory.status;
+					var famKd = d[i].fmHistory.famKd;
+					var valTemp = d[i].fmHistory.valTemp;
+					var roomTemp = d[i].fmHistory.roomTemp;
+					var recordTime = FormatDate(d[i].fmHistory.recordTime);
+					var lockSt = d[i].fmHistory.lockSt;
+					var jfSt = d[i].fmHistory.jfSt;
+					var hTemSet = d[i].fmHistory.hTemSet;
+					var mTemSet = d[i].fmHistory.mTemSet;
+					var lTemSet = d[i].fmHistory.lTemSet;
+					html += "<tr>";
+					html += "<td>" + xqName + "</td>";
+					html += "<td>" + buildNo + "</td>";
+					html += "<td>" + cellNo + "</td>";
+					html += "<td>" + houseNo + "</td>";
+					html += "<td>" + status + "</td>";
+					html += "<td>" + famKd + "</td>";
+					html += "<td>" + valTemp + "</td>";
+					html += "<td>" + roomTemp + "</td>";
+					html += "<td title='"+recordTime+"'>" + recordTime
+							+ "</td>";
+					html += "<td>" + lockSt + "</td>";
+					html += "<td>" + jfSt + "</td>";
+					html += "<td>" + hTemSet + "</td>";
+					html += "<td>" + mTemSet + "</td>";
+					html += "<td>" + lTemSet + "</td>";
+
+					html += "</tr>";
+				}
+				html += "</tbody>"
+				html += "</table>";
+				html+="</div>";
+				$("#tablediv").append(html);
+			}
+
+		})
+	}
+	function FormatDate(strTime) {
+		var date = new Date(strTime);
+		return date.getFullYear() + "-" + (date.getMonth() + 1) + "-"
+				+ date.getDate() + " " + date.getHours() + ":"
+				+ date.getMinutes() + ":" + date.getSeconds();
+	}
+</script>
+<script type="text/javascript">
+	//导出
+	function doExportExcel() {
+		var xqName = $('#xqNameId').val();
+		var buildNo = $('#buildNoId').val();
+		var cellNo = $('#cellNoId').val();
+		var houseNo = $('#houseNoId').val();
+		var status = $('#fmStatusId').val();
+		var valTemp1=$('#valTempId1').val();
+		var valTemp2=$('#valTempId2').val();
+		var roomTemp1=$('#roomTempId1').val();
+		var roomTemp2=$('#roomTempId2').val();
+		var famKd=$('#famKdId').val();
+		window.open("YhInfodoExportExcel.action?xqName=" + xqName + "&buildNo="
+				+ buildNo + "&cellNo=" + cellNo + "&houseNo=" + houseNo
+				+ "&status=" + status+ "&valTemp1=" + valTemp1+"&valTemp2=" + valTemp2+"&roomTemp1="+ roomTemp1+"&roomTemp2="+ roomTemp2+"&famKd=" + famKd);
+	}
+</script>
+
+</head>
+<body>
+	<div class="panel panel-success">
+		<div class="panel-heading">数据报表</div>
+		<div class="panel-body">
+			<label for="xqNameId">选择小区</label> <select id="xqNameId"
+				name="xqName">
+				<c:if test="${!empty yhInfoList }">
+					<option>--选择小区名称--</option>
+					<c:forEach items="${yhInfoList}" var="yhInfolist">
+						<option value="${yhInfolist.xqName}">${yhInfolist.xqName}</option>
+					</c:forEach>
+				</c:if>
+			</select> &nbsp;&nbsp;&nbsp; <label for="buildNoId">楼栋号</label> <select
+				name="buildNo" id="buildNoId">
+				<option value=0>--选择楼栋号--</option>
+			</select> &nbsp;&nbsp;&nbsp; <label for="cellNoId">单元号</label> <select
+				name="cellNo" id="cellNoId">
+				<option value=0>--选择单元号--</option>
+			</select> 
+			户号：<input type="text" name="houseNo" id="houseNoId" value="${houseNo}" /> 
+				<label for="fmStatusId">选择阀门状态</label> 
+				<select id="fmStatusId" name="status">
+				<c:if test="${!empty yhInfoList }">
+					<option>--选择阀门状态--</option>
+					<c:forEach items="${fmHistoriesStatus}" var="fmHistoriesStatus">
+						<option value="${fmHistoriesStatus.status}">${fmHistoriesStatus.status}</option>
+					</c:forEach>
+				</c:if>
+				</select>
+				
+			管道温度：<input type="text" name="valTemp" id="valTempId1" value="${valTemp}" /> 
+		-	<input type="text" name="valTemp" id="valTempId2" value="${valTemp}" /> 
+		
+			室内温度：<input type="text" name="roomTemp" id="roomTempId1" value="${roomTemp}" /> 
+		-<input type="text" name="roomTemp" id="roomTempId2" value="${roomTemp}" /> 
+		 	阀门开度：<input type="text" name="famKd" id="famKdId" value="${famKd}" /> 
+		 	
+			 <input type="button" onclick="searchInfo()" value="搜索" class="btn btn-success" /> 
+			<input type="button" value="导出"class="btn btn-success" onclick="doExportExcel()" />
+			</div>
+			<div id="tablediv">
+				<form id="myForm">
+					<div class="panel-body" style="width: 99%; height: 80%; position: absolute; overflow: auto;">
+						<table id="tableSort" style="overflow: scroll;">
+							<thead>
+								<tr>
+									<th class="text-center" nowrap="nowrap">小区名称</th>
+									<th class="text-center" nowrap="nowrap">楼栋号</th>
+									<th class="text-center" nowrap="nowrap">单元号</th>
+									<th class="text-center" nowrap="nowrap">户号</th>
+									<th class="text-center" nowrap="nowrap">阀门状态</th>
+									<th class="text-center" nowrap="nowrap">阀门开度</th>
+									<th class="text-center" nowrap="nowrap">管道温度</th>
+									<th class="text-center" nowrap="nowrap">室内温度</th>
+									<th class="text-center" nowrap="nowrap">采集时间</th>
+									<th class="text-center" nowrap="nowrap">锁定标识</th>
+									<th class="text-center" nowrap="nowrap">缴费标识</th>
+									<th class="text-center" nowrap="nowrap">采集周期</th>
+									<th class="text-center" nowrap="nowrap">设定温度</th>
+									<th class="text-center" nowrap="nowrap">阀门参数</th>
+								</tr>
+							</thead>
+							<tbody class="text-center">
+								<c:forEach var="findXqFm" items="${findXqInfoFmHistory}">
+									<tr>
+										<td>${findXqFm.xqName }</td>
+										<td>${findXqFm.buildNo }</td>
+										<td>${findXqFm.cellNo }</td>
+										<td>${findXqFm.houseNo }</td>
+										<td>${findXqFm.fmHistory.status }</td>
+										<td>${findXqFm.fmHistory.famKd }</td>
+										<td>${findXqFm.fmHistory.valTemp }</td>
+										<td>${findXqFm.fmHistory.roomTemp}</td>
+										<td
+											title="<fmt:formatDate value="${findXqFm.fmHistory.recordTime }" pattern="yyyy-MM-dd HH:mm:ss"/>"><fmt:formatDate
+												value="${findXqFm.fmHistory.recordTime }"
+												pattern="yyyy-MM-dd HH:mm:ss" /></td>
+										<td>${findXqFm.fmHistory.lockSt }</td>
+										<td>${findXqFm.fmHistory.jfSt }</td>
+										<td>${findXqFm.fmHistory.hTemSet}</td>
+										<td>${findXqFm.fmHistory.mTemSet}</td>
+										<td>${findXqFm.fmHistory.lTemSet}</td>
+									</tr>
+								</c:forEach>
+							</tbody>
+						</table>
+					</div>
+				</form>
+			</div>
+		</div>
+	
+
+</body>
+</html>

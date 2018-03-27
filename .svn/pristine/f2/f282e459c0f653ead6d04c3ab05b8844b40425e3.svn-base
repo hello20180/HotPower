@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.nhfx.dao.HeatStationHistoryDao">
+	<resultMap type="HeatStationHistory" id="heatStationHistory">
+		<id property="id" column="id" />
+		
+	</resultMap>
+
+	<select id="findHeat" resultMap="heatStationHistory" parameterType="HeatStationHistory">
+		select DISTINCT readTime,ylHeat
+		from HeatStationHistory hsh,T_HeatESInfo hes
+		where hsh.headId=hes.ID
+		<if test="hesName!='' and hesName!=null">
+			and hes.HESName=#{hesName}
+		</if>
+		<if test="readTime1!=null and readTime1!=''">
+			and readTime >=#{readTime1}
+		</if>
+		<if test="readTime2!=null and readTime2!=''">
+			and readTime &lt;=#{readTime2}
+		</if>
+	</select>
+	<select id="sumYlHeat" parameterType="HeatStationHistory" resultMap="heatStationHistory">
+	select ylHeat ,readTime
+	from HeatStationHistory
+	<where>
+	<if test="xqName!='' and xqName!='--选择小区名称--'">
+	  xqName=#{xqName}
+	</if>
+	<if test="readTime1!=null and readTime1!='' and readTime2!=null and readTime2!='' ">
+	 and readTime between #{readTime1} and #{readTime2}
+	</if>
+	</where>
+	</select>
+</mapper>

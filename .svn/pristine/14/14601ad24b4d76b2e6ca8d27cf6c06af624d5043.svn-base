@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.xxgl.dao.GZglDao">
+	<resultMap type="GZgl" id="gz">
+		<id property="id" column="ID" />
+		<result property="deviceType" column="DeviceType" />
+		<result property="deviceId" column="DeviceID" />
+		<result property="errinfor" column="ErrInfor" />
+		<result property="recordTime" column="RecordTime" />
+		<association property="yhInfo" javaType="com.hnzy.hot.sjbb.pojo.YhInfo">
+		<id property="id" column="ID" />
+		<result property="valAd" column="ValAd" />
+		<result property="xqName" column="XqName" />
+		<result property="buildNo" column="BuildNO" />
+		<result property="cellNo" column="CellNO" />
+		<result property="houseNo" column="HouseNO" />
+		<result property="yhName" column="YhName" />
+		</association>
+	</resultMap>
+<select id="find" resultMap="gz"  >
+select  top 200  YhName,XqName,BuildNO,CellNO,HouseNO,DeviceType,DeviceID,ErrInfor,RecordTime
+from T_AlarmInfor a,T_YhInfo y
+where a.DeviceID=y.ValAd
+order by a.ID desc 
+</select>
+<select id="findgz" resultMap="gz">
+select  top 1  YhName,XqName,BuildNO,CellNO,HouseNO,DeviceType,DeviceID,ErrInfor,RecordTime
+from T_AlarmInfor a,T_YhInfo y
+where a.DeviceID=y.ValAd
+order by a.ID desc 
+</select>
+</mapper>

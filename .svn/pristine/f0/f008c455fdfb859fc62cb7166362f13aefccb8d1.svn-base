@@ -1,0 +1,168 @@
+package com.hnzy.hot.sbgl.pojo;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.sql.Date;
+
+/**
+ * @author Administrator
+ *
+ */
+/**
+ * @author Administrator
+ *
+ */
+public class Rb implements Serializable {
+	
+	
+	private int id;
+	
+	private String rbType;
+	
+	private String rbAd;
+	
+	private Double energy;
+	
+	private String energyUnit;
+	
+	private Double power;
+	
+	private String flow;
+	
+	private Double inTmp;
+	
+	private Double outTmp;
+	
+	private Double diffTmp;
+	
+	private Integer operTime;
+	
+	private String errCode;
+	
+	private Date readMTime;
+	
+	private Date recordTime;
+	
+	private Yh yh;
+
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public String getRbType() {
+		return rbType;
+	}
+
+	public void setRbType(String rbType) {
+		this.rbType = rbType;
+	}
+
+	public String getRbAd() {
+		return rbAd;
+	}
+
+	public void setRbAd(String rbAd) {
+		this.rbAd = rbAd;
+	}
+
+	public Double getEnergy() {
+		return energy;
+	}
+
+	public void setEnergy(Double energy) {
+		this.energy = energy;
+	}
+
+	public String getEnergyUnit() {
+		return energyUnit;
+	}
+
+	public void setEnergyUnit(String energyUnit) {
+		this.energyUnit = energyUnit;
+	}
+
+	public Double getPower() {
+		return power;
+	}
+
+	public void setPower(Double power) {
+		this.power = power;
+	}
+
+	public String getFlow() {
+		return flow;
+	}
+
+	public void setFlow(String flow) {
+		this.flow = flow;
+	}
+
+	public Double getInTmp() {
+		return inTmp;
+	}
+
+	public void setInTmp(Double inTmp) {
+		this.inTmp = inTmp;
+	}
+
+	public Double getOutTmp() {
+		return outTmp;
+	}
+
+	public void setOutTmp(Double outTmp) {
+		this.outTmp = outTmp;
+	}
+
+	public Double getDiffTmp() {
+		return diffTmp;
+	}
+
+	public void setDiffTmp(Double diffTmp) {
+		this.diffTmp = diffTmp;
+	}
+
+	public Integer getOperTime() {
+		return operTime;
+	}
+
+	public void setOperTime(Integer operTime) {
+		this.operTime = operTime;
+	}
+
+	public String getErrCode() {
+		return errCode;
+	}
+
+	public void setErrCode(String errCode) {
+		this.errCode = errCode;
+	}
+
+	public Date getReadMTime() {
+		return readMTime;
+	}
+
+	public void setReadMTime(Date readMTime) {
+		this.readMTime = readMTime;
+	}
+
+	public Date getRecordTime() {
+		return recordTime;
+	}
+
+	public void setRecordTime(Date recordTime) {
+		this.recordTime = recordTime;
+	}
+
+	public Yh getYh() {
+		return yh;
+	}
+
+	public void setYh(Yh yh) {
+		this.yh = yh;
+	}
+}

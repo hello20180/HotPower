@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.xxgl.dao.XqInfoDao">
+	<resultMap type="XqInfo" id="xqInfo">
+		<id property="id" column="ID" />
+		<result property="xqName" column="XqName" />
+		<result property="lxrName" column="LxrName" />
+		<result property="lxrPhone" column="LxrPhone" />
+		<result property="nhPrice" column="NHPrice" />
+		<result property="areaPriceOne" column="AreaPrice1" />
+		<result property="areaPriceTwo" column="AreaPrice2" />
+		<result property="hesName" column="HESName" />
+		<result property="xqAd" column="XqAd" />
+	</resultMap>
+
+	<select id="find" resultMap="xqInfo">
+		select * from T_XqInfo
+	</select>
+
+	<insert id="Insert" parameterType="XqInfo">
+		insert into T_XqInfo
+		(XqName,LxrName,LxrPhone,NHPrice,AreaPrice1,AreaPrice2,HESName,XqAd)
+		values (#{xqName},#{lxrName},#{lxrPhone},#{nhPrice},#{areaPriceOne},#{areaPriceTwo},#{hesName},#{xqAd})
+	</insert>
+
+	<delete id="delete" parameterType="XqInfo">
+		delete from T_XqInfo 
+		where ID=#{id}
+	</delete>
+
+	<select id="findById" parameterType="XqInfo" resultMap="xqInfo">
+		select ID,XqName,LxrName,LxrPhone,NHPrice,AreaPrice1,AreaPrice2,HESName,XqAd 
+		from T_XqInfo 
+		where ID=#{id}
+	</select>
+	
+	<update id="update" parameterType="XqInfo">
+		update T_XqInfo set
+		XqName=#{xqName},LxrName=#{lxrName},LxrPhone=#{lxrPhone},NHPrice=#{nhPrice},AreaPrice1=#{areaPriceOne},AreaPrice2=#{areaPriceTwo},HESName=#{hesName},XqAd=#{xqAd}
+		where ID=#{id}
+	</update>
+
+</mapper>

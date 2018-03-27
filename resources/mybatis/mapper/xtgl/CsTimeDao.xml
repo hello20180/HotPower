@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.xtgl.dao.CsTimeDao">
+<resultMap type="CsTime"  id="csTime">
+<id property="id" column="id"/>
+  <result property="cstime" column="cstime"/>
+  <result property="createTime" column="createTime"/>
+   <result property="lastEditTime" column="lastEditTime"/>
+</resultMap>
+<select id="findCsTiem" resultMap="csTime">
+select cstime from CsTime 
+</select>
+<update id="updateCsTime" parameterType="CsTime">
+update CsTime set  cstime=#{cstime} where id=1
+</update>
+</mapper>

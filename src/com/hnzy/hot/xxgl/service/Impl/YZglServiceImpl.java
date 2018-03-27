@@ -1,0 +1,38 @@
+package com.hnzy.hot.xxgl.service.Impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.hnzy.hot.sjbb.dao.YhInfoDao;
+import com.hnzy.hot.sjbb.pojo.YhInfo;
+import com.hnzy.hot.xxgl.service.YZglService;
+
+@Service
+public class YZglServiceImpl implements YZglService {
+
+	@Autowired
+	private YhInfoDao yhInfoDao;
+	@Override
+	public List<YhInfo> findYhInfo() {
+		return yhInfoDao.yzglFindAll();
+	}
+	@Override
+	public void update(YhInfo yhInfo) {
+		yhInfoDao.update(yhInfo);
+	}
+	@Override
+	public void Insert(YhInfo yhInfo) {
+		yhInfoDao.Insert(yhInfo);
+	}
+	@Override
+	public void delete(String id) {
+		yhInfoDao.delete(Integer.parseInt(id));
+	}
+	@Override
+	public List<YhInfo> yhflSear(String yhfl)
+	{
+		return yhInfoDao.yhflSear(yhfl);
+	}
+}

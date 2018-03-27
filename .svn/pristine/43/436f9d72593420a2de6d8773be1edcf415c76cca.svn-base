@@ -1,0 +1,30 @@
+package com.hnzy.hot.socket;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import com.hnzy.hot.socket.util.oracleHelper;
+
+public class tes
+{
+	public static void main(String[] args) throws SQLException
+	{
+		PreparedStatement ps;
+		ResultSet rst;
+		int rs = 0;
+		String YHBM =null;
+		String sql = "select * from ZY";
+		oracleHelper dbUtil = oracleHelper.getInstance();   
+	     Connection connc = dbUtil.getConnection();
+	     ps=connc.prepareStatement(sql);
+	     rst = ps.executeQuery();
+			int col = rst.getMetaData().getColumnCount();
+			while (rst.next()) {
+				 YHBM = rst.getString("YHBM");
+			}
+		  System.out.println(YHBM);
+	}
+	 
+}

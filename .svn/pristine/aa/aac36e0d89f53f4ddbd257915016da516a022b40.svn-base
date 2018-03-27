@@ -1,0 +1,106 @@
+package com.hnzy.hot.sjbb.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.hnzy.hot.base.BaseDao;
+import com.hnzy.hot.sjbb.pojo.YhInfo;
+public interface YhInfoDao extends BaseDao<YhInfo>{
+	public List<YhInfo> findYhBuildNObyXqName(String xqName);
+	public List<YhInfo> findYhCellNOByBuild(int build,String xqName);
+	public List<YhInfo> findYhHouseNOByBuild(int house,int build,String xqName);
+	
+	//查找客服管理小区楼栋单元
+	//根据处查找小区
+	public List<YhInfo> findXqNamebyPlace(@Param("place") String place,@Param("hESName") String hESName);
+	public List<YhInfo> findYhBuildNObyXqNamerepair(@Param("xqName") String xqName,@Param("place") String place,@Param("hESName") String hESName);
+	public List<YhInfo> findYhCellNOByBuildrepair(@Param("LH") String LH,@Param("xqName")  String xqName,@Param("place") String place,@Param("hESName") String hESName);
+	public List<YhInfo> findYhHouseNOByBuildrepair(@Param("house") String house,@Param("LH") String LH,@Param("xqName")  String xqName);
+	public List<YhInfo> findrepair();
+	
+	//一对一的查询
+    public List<YhInfo> findXqInfoFmHistory();
+    //搜索导出
+    public List<YhInfo> YhInfodoExportExcel(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("houseNo")Integer houseNo,@Param("status")String status,@Param("valTemp1")String  valTemp1,@Param("valTemp2")String  valTemp2,@Param("roomTemp1")String  roomTemp1,@Param("roomTemp2")String  roomTemp2,@Param("famKd")Integer famKd,@Param("recordTime1") String recordTime1,@Param("recordTime2") String recordTime2);
+    //设备管理搜索
+    public List<YhInfo> searchInfo(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("houseNo")int houseNo,@Param("status")String status,@Param("valTemp1")String valTemp1,@Param("valTemp2")String valTemp2,@Param("roomTemp1")String roomTemp1,@Param("roomTemp2")String roomTemp2,@Param("famKd")Integer famKd,@Param("recordTime1") String recordTime1,@Param("recordTime2") String recordTime2);
+    //业主管理
+    public List<YhInfo> yzglFindAll();
+    //缴费状态查询
+    public List<YhInfo> yhInfoJFStatus();
+   
+    //阀门开度所占面积 
+    public Double chartgrfxStatusK();
+    //阀门关度所占面积 
+    public Double chartgrfxStatusG();
+    //总面积
+    public Double ChartgrfxZ();
+    //根据搜索条件进行查询温度大于26度
+	public int chartSearchA(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+    //根据搜索条件进行查询温度温度小于16度
+	public int chartSearchB(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+	//根据搜索条件进行查询温度温度18-20度
+	public int chartSearchC(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+	//根据搜索条件进行查询温度温度20-22度
+	public int chartSearchD(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+	//根据搜索条件进行查询温度温度22-24度
+	public int chartSearchE(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+	//根据搜索条件进行查询温度温度24-26度
+	public int chartSearchF(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+	//根据搜索条件进行查询温度温度为0
+	public int chartSearchG(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+
+
+	public int findFamKdA(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+
+	public int findFamKdB(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+
+	public int findFamKdC(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+
+	public int findFamKdD(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+
+	public int findFamKdE(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+
+	public int findFamKdF(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+   
+	
+	//小区供热面积
+	public int HeatAreaByxqName(@Param("xqName")String xqName);
+   //小区供热
+	public Double chartSearchGr(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo);
+   //小区不供热
+	public Double chartSearchNoGr(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo);
+	
+	
+	    //根据搜索条件进行查询温度大于26度的信息
+		public List<YhInfo> chartNameA(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+	    //根据搜索条件进行查询温度温度小于16度的信息
+		public List<YhInfo> chartNameB(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+		//根据搜索条件进行查询温度温度18-20度的信息
+		public List<YhInfo> chartNameC(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+		//根据搜索条件进行查询温度温度20-22度的信息
+		public List<YhInfo> chartNameD(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+		//根据搜索条件进行查询温度温度22-24度的信息
+		public List<YhInfo> chartNameE(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+		//根据搜索条件进行查询温度温度24-26度的信息
+		public List<YhInfo> chartNameF(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+		//根据搜索条件进行查询温度温度为0的信息
+		public List<YhInfo> chartNameG(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+	   
+		
+		
+		//根据阀门开度查找信息
+		public List<YhInfo> findFKdA(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+
+		public List<YhInfo> findFKdB(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+
+		public List<YhInfo> findFKdC(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+
+		public List<YhInfo> findFKdD(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+
+		public List<YhInfo> findFKdE(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+
+		public List<YhInfo> findFKdF(@Param("xqName")String xqName,@Param("buildNo")int buildNo,@Param("cellNo")int cellNo,@Param("sfjf")String sfjf,@Param("status")String status);
+	
+}

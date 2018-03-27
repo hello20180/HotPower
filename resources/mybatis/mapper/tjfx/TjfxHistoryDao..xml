@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.tjfx.dao.TjfxHistoryDao">
+	<resultMap type="TjfxHistory" id="tjfxHistory">
+		<id property="id" column="id" />
+		<result property="xqName" column="XqName" />
+		<result property="zerot" column="Zerot" />
+		<result property="zFift" column="ZFift" />
+		<result property="fiftOct" column="FiftOct" />
+		<result property="octTw" column="OctTw" />
+		<result property="twSix" column="TwSix" />
+		<result property="twentySix" column="TwentySix" />
+		<result property="date" column="Date" />
+	</resultMap>
+	
+	<insert id="InTjfx" parameterType="TjfxHistory">
+	insert into tjfxSj (XqName,Zerot,ZFift,FiftOct,OctTw,TwSix,TwentySix,Date)
+	values(#{xqName},#{zerot},#{zFift},#{fiftOct},#{octTw},#{twSix},#{twentySix},#{date})
+	</insert>
+	<select id="findTjfx" resultMap="tjfxHistory">
+	select top 500 * from tjfxSj   order by date desc
+	</select>
+	<select id="searchInfo" resultMap="tjfxHistory" parameterType="tjfxHistory">
+     select * from tjfxSj where 1=1
+		<if test="xqName!='--选择小区名称--'">
+			and XqName=#{xqName}
+		</if>
+		<if test="recordTime1!=null and recordTime1!=''">
+			and date &gt;= #{recordTime1}
+		</if>
+		<if test="recordTime2!=null and recordTime2!=''">
+			and date &lt;=#{recordTime2}
+		</if>
+           order by date desc
+	</select>
+	<select id="findSwJl" resultMap="tjfxHistory">
+	select top 70 * from tjfxSj where XqName='金领小区' order by date desc
+	</select>
+</mapper>

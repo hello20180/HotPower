@@ -1,0 +1,93 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+    pageEncoding="utf-8"%>
+    <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script type="text/javascript" src="../js/biao.js"></script>
+<link href="../css/main.css" rel="stylesheet" type="text/css" />
+<link href="../css/bootstrap.css" rel="stylesheet">
+<title>阀门信息列表</title>
+</head>
+<script src="../js/jquery-1.9.1.min.js"></script>
+	<script src="../js/bootstrap.js"></script>
+	<script src="../js/bootstrap-table.js"></script>
+	<script src="../js/bootstrap-datetimepicker.min.js"></script>
+	<script src="../js/bootstrap-datetimepicker.zh-CN.js"></script>	
+<body>
+<div style="width: 99%; height: 100%; position: absolute; overflow:auto;" align="center">
+<table id="tableSort" style="overflow:scroll;">
+	<thead>
+      <tr>
+      		<th class="text-center" nowrap="nowrap" >序号</th>
+            <th class="text-center" nowrap="nowrap" >用户姓名</th>
+            <th class="text-center" nowrap="nowrap">小区名称</th>
+            <th class="text-center" nowrap="nowrap" >楼栋号</th>
+            <th class="text-center" nowrap="nowrap" >单元号</th>
+            <th class="text-center" nowrap="nowrap" >户号</th>
+            <th class="text-center" nowrap="nowrap">阀门状态</th>
+            <th class="text-center" nowrap="nowrap" >阀门开度</th>
+            <th class="text-center" nowrap="nowrap" >室内温度</th>
+            <th class="text-center" nowrap="nowrap" >管道温度</th>
+            <th class="text-center" nowrap="nowrap" >更新时间</th>
+            <th class="text-center" nowrap="nowrap" >阀门地址</th>
+            <th class="text-center" nowrap="nowrap" >传感器地址</th>
+            <th class="text-center" nowrap="nowrap" >锁定标识</th>
+            <th class="text-center" nowrap="nowrap" >缴费标识</th>
+            <th class="text-center" nowrap="nowrap" >用户面积</th>
+            <th class="text-center" nowrap="nowrap">区管ID</th>
+            <th class="text-center" nowrap="nowrap">缴费状态</th>
+            <th class="text-center" nowrap="nowrap">欠费状态</th>
+            <th class="text-center" nowrap="nowrap">停热状态</th>
+     </tr>
+  </thead>
+   
+  <tbody>
+	<c:forEach  var="fm" items="${Fm}" varStatus="status">
+	
+	   <tr class="hover" <c:if test="${status.index%2==1 }">style="background-color:#eef3fa"</c:if> >
+	   
+	 	<td class="sequence" align="center">${fm.id}</td>
+		<td align="center" nowrap="nowrap" ><a href="/HotPower/FmHController/goHistoryLine.action?xqName=${fm.yh.xqName}&buildNO=${fm.yh.buildNO}&cellNO=${fm.yh.cellNO}&houseNO=${fm.yh.houseNO}">${fm.yh.yhName}</a></td>
+		<td align="center" nowrap="nowrap" >${fm.yh.xqName}</td>
+		<td align="center" nowrap="nowrap" >${fm.yh.buildNO}</td>
+		<td align="center" nowrap="nowrap" >${fm.yh.cellNO}</td>
+		<td align="center" nowrap="nowrap" >${fm.yh.houseNO}</td>
+		<c:if test="${fm.status=='开'}">
+			<td align="center" nowrap="nowrap" ><font color="green" >${fm.status}</font></td>	
+		</c:if>	
+		<c:if test="${fm.status=='关'}">
+			<td align="center" nowrap="nowrap" >${fm.status}</td>	
+		</c:if>		
+		<td align="center" nowrap="nowrap" >${fm.famKd}</td>
+		<td align="center" nowrap="nowrap" >${fm.roomTemp}</td>
+		<td align="center" nowrap="nowrap" >${fm.valTemp}</td>
+		
+		<td align="center" nowrap="nowrap"><fmt:formatDate value="${fm.recordTime}"
+											pattern="yyyy-MM-dd HH:mm:ss" /></td>
+		<td align="center" nowrap="nowrap" >${fm.valAd}</td>
+		<td align="center" nowrap="nowrap" >${fm.valAd}</td>
+		<td align="center" nowrap="nowrap" >${fm.lockSt}</td>
+		<td align="center" nowrap="nowrap" >${fm.jFSt}</td>
+		<td align="center" nowrap="nowrap" >${fm.yh.heatArea}</td>
+		<td align="center" nowrap="nowrap" >${fm.qgID}</td>
+		<td align="center" nowrap="nowrap" >${fm.yh.sFJF}</td>
+		<td align="center" nowrap="nowrap" >${fm.yh.sFQF}</td>
+		<td align="center" nowrap="nowrap" >${fm.yh.sFTR}</td>
+		
+	 </tr>
+	
+	</c:forEach>
+  </tbody>
+</table>
+</div>
+
+</body>
+</html>

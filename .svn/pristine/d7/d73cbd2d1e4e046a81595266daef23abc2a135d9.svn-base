@@ -1,0 +1,100 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+	pageEncoding="utf-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script type="text/javascript" src="../js/biao.js"></script>
+<link href="../css/main.css" rel="stylesheet" type="text/css" />
+<link href="../css/bootstrap.css" rel="stylesheet">
+<title>热表信息列表</title>
+</head>
+<script type="text/javascript"></script>
+<body>
+<body>
+<div style="width: 99%; height: 100%; position: absolute; overflow:auto;" align="center">
+<table id="tableSort" style="overflow:scroll;">
+	<thead>
+         <tr>
+				<td class="text-center" nowrap="nowrap">序号
+				</td>
+				<td class="text-center" nowrap="nowrap">用户姓名
+				</td>
+				<td class="text-center" nowrap="nowrap">小区名称
+				</td>
+				<td class="text-center" nowrap="nowrap">楼栋号
+				</td>
+				<td class="text-center" nowrap="nowrap">单元号
+				</td>
+				<td class="text-center" nowrap="nowrap">户号
+				</td>
+				<td class="text-center" nowrap="nowrap">热表类型
+				</td>
+				<td class="text-center" nowrap="nowrap">热表编号
+				</td>
+				<td class="text-center" nowrap="nowrap">当前热量
+				</td>
+				<td class="text-center" nowrap="nowrap">热量单位
+				</td>
+				<td class="text-center" nowrap="nowrap">热功率
+				</td>
+				<td class="text-center" nowrap="nowrap">流量
+				</td>
+				<td class="text-center" nowrap="nowrap">进水温度
+				</td>
+				<td class="text-center" nowrap="nowrap">回水温度
+				</td>
+				<td class="text-center" nowrap="nowrap">温差
+				</td>
+				<td class="text-center" nowrap="nowrap">工作时间
+				</td>
+				<td class="text-center" nowrap="nowrap">错误代码
+				</td>
+				<td class="text-center" nowrap="nowrap">实时时间
+				</td>
+				<td class="text-center" nowrap="nowrap">更新时间
+				</td>
+			</tr>
+		</thead>
+			<c:forEach var="rb" items="${Rb}" varStatus="status">
+				<tr class="hover" <c:if test="${status.index%2==1 }">style="background-color:#eef3fa"</c:if> data-toggle="modal"
+				data-target="#add">
+					<td class="sequence" align="center">${rb.id}</td>
+					<td align="center" nowrap="nowrap">${rb.yh.yhName}</td>
+					<td align="center" nowrap="nowrap">${rb.yh.xqName}</td>
+					<td align="center" nowrap="nowrap">${rb.yh.buildNO}</td>
+					<td align="center" nowrap="nowrap">${rb.yh.cellNO}</td>
+					<td align="center" nowrap="nowrap">${rb.yh.houseNO}</td>
+					<td align="center" nowrap="nowrap">${rb.rbType}</td>
+					<td align="center" nowrap="nowrap">${rb.rbAd}</td>
+					<td align="center" nowrap="nowrap">${rb.energy}</td>
+					<td align="center" nowrap="nowrap">${rb.energyUnit}</td>
+					<td align="center" nowrap="nowrap">${rb.power}</td>
+					<td align="center" nowrap="nowrap">${rb.flow}</td>
+					<td align="center" nowrap="nowrap">${rb.inTmp}</td>
+					<td align="center" nowrap="nowrap">${rb.outTmp}</td>
+					<td align="center" nowrap="nowrap">${rb.diffTmp}</td>
+					<td align="center" nowrap="nowrap">${rb.operTime}</td>
+					<td align="center" nowrap="nowrap">${rb.errCode}</td>
+					<td align="center" nowrap="nowrap">${rb.readMTime}</td>
+					<td align="center" nowrap="nowrap">${rb.recordTime}</td>
+
+				</tr>
+			</c:forEach>
+		</tbody>
+	</table>
+</div>
+<script src="../js/jquery-1.9.1.min.js"></script>
+	<script src="../js/bootstrap.js"></script>
+	<script src="../js/bootstrap-table.js"></script>
+	<script src="../js/bootstrap-datetimepicker.min.js"></script>
+	<script src="../js/bootstrap-datetimepicker.zh-CN.js"></script>	
+</body>
+</html>

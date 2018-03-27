@@ -1,0 +1,10 @@
+package com.hnzy.hot.xxgl.service;
+
+import java.util.List;
+
+import com.hnzy.hot.xxgl.pojo.GZgl;
+
+public interface GZglService {
+	public List<GZgl> find();
+	public List<GZgl> findgz();
+}

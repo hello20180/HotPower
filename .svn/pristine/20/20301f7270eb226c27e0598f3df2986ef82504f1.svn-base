@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "http://mybatis.org/dtd/mybatis-3-mapper.dtd" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.hnzy.hot.xxgl.dao.JzqInfoDao">
+	<resultMap type="JzqInfo" id="jzqInfo">
+		<id property="id" column="ID"/>
+		<result property="jzqID" column="JzqID"/>
+		<result property="socket" column="Socket"/>
+		<result property="jzqIP" column="JzqIP"/>
+		<result property="jzqPort" column="JzqPort"/>
+		<result property="status" column="Status"/>
+		<result property="updateTime" column="UpdateTime"/>
+		<result property="xqName" column="XqName"/>
+		<result property="hesName" column="HESName"/>
+		<result property="installAd" column="InstallAd"/>
+		<result property="remark" column="Remark"/>
+	</resultMap>
+
+	<select id="find" resultMap="jzqInfo">
+		select * from T_JzqInfo
+	</select>
+
+	<insert id="Insert" parameterType="JzqInfo">
+		insert into T_JzqInfo
+		(JzqID,Socket,JzqIP,JzqPort,Status,UpdateTime,XqName,HESName,InstallAd,Remark)
+		values(#{jzqID},#{socket},#{jzqIP},#{jzqPort},#{status},#{updateTime},#{xqName},#{hesName},#{installAd},#{remark})
+	</insert>
+
+	<delete id="delete" parameterType="JzqInfo">
+		delete from T_JzqInfo
+		where ID=#{id}
+	</delete>
+	
+	<update id="update" parameterType="JzqInfo">
+		update T_JzqInfo set
+		JzqID=#{jzqID},Socket=#{socket},JzqIP=#{jzqIP},JzqPort=#{jzqPort},Status=#{status},XqName=#{xqName},HESName=#{hesName},InstallAd=#{installAd},Remark=#{remark}
+		where ID=#{id}
+	</update>
+
+</mapper>

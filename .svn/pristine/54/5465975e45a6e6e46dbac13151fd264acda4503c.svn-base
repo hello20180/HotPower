@@ -1,0 +1,214 @@
+package com.hnzy.hot.sjbb.pojo;
+
+import java.io.Serializable;
+
+public class YhInfo implements Serializable {
+private int id;
+private String valAd;
+private String xqName;
+private Integer buildNo;
+private Integer cellNo;
+private Integer houseNo;
+private String yhName;
+private String idNum;
+private String rbAd;
+private String rbType;
+private String telephone;
+private String mobilephone;
+private String email;
+private Double buileArea;
+private Double userArea;
+private Double heatArea;
+private String billway;
+private String sfjf;
+private String sfqf;
+private String sftr;
+private String wcad;
+private String azwz;
+private String ylfq;
+private Double  kArea;
+private Double  gArea;
+private Double sumArea;
+private FmHistory fmHistory;
+public Double getSumArea() {
+	return sumArea;
+}
+public void setSumArea(Double sumArea) {
+	this.sumArea = sumArea;
+}
+public Double getkArea() {
+	return kArea;
+}
+public void setkArea(Double kArea) {
+	this.kArea = kArea;
+}
+public Double getgArea() {
+	return gArea;
+}
+public void setgArea(Double gArea) {
+	this.gArea = gArea;
+}
+private String faultInfor;
+
+public String getYhName() {
+	return yhName;
+}
+public void setYhName(String yhName) {
+	this.yhName = yhName;
+}
+public String getIdNum() {
+	return idNum;
+}
+public void setIdNum(String idNum) {
+	this.idNum = idNum;
+}
+public String getRbAd() {
+	return rbAd;
+}
+public void setRbAd(String rbAd) {
+	this.rbAd = rbAd;
+}
+public String getRbType() {
+	return rbType;
+}
+public void setRbType(String rbType) {
+	this.rbType = rbType;
+}
+public String getTelephone() {
+	return telephone;
+}
+public void setTelephone(String telephone) {
+	this.telephone = telephone;
+}
+public String getMobilephone() {
+	return mobilephone;
+}
+public void setMobilephone(String mobilephone) {
+	this.mobilephone = mobilephone;
+}
+public String getEmail() {
+	return email;
+}
+public void setEmail(String email) {
+	this.email = email;
+}
+
+public Double getBuileArea() {
+	return buileArea;
+}
+public void setBuileArea(Double buileArea) {
+	this.buileArea = buileArea;
+}
+public Double getUserArea() {
+	return userArea;
+}
+public void setUserArea(Double userArea) {
+	this.userArea = userArea;
+}
+public Double getHeatArea() {
+	return heatArea;
+}
+public void setHeatArea(Double heatArea) {
+	this.heatArea = heatArea;
+}
+public String getBillway() {
+	return billway;
+}
+public void setBillway(String billway) {
+	this.billway = billway;
+}
+public String getSfjf() {
+	return sfjf;
+}
+public void setSfjf(String sfjf) {
+	this.sfjf = sfjf;
+}
+
+public String getSfqf() {
+	return sfqf;
+}
+public void setSfqf(String sfqf) {
+	this.sfqf = sfqf;
+}
+public String getSftr() {
+	return sftr;
+}
+public void setSftr(String sftr) {
+	this.sftr = sftr;
+}
+public String getWcad() {
+	return wcad;
+}
+public void setWcad(String wcad) {
+	this.wcad = wcad;
+}
+public String getAzwz() {
+	return azwz;
+}
+public void setAzwz(String azwz) {
+	this.azwz = azwz;
+}
+public String getYlfq() {
+	return ylfq;
+}
+public void setYlfq(String ylfq) {
+	this.ylfq = ylfq;
+}
+public String getFaultInfor() {
+	return faultInfor;
+}
+public void setFaultInfor(String faultInfor) {
+	this.faultInfor = faultInfor;
+}
+
+public FmHistory getFmHistory() {
+	return fmHistory;
+}
+public void setFmHistory(FmHistory fmHistory) {
+	this.fmHistory = fmHistory;
+}
+public String getValAd() {
+	return valAd;
+}
+public void setValAd(String valAd) {
+	this.valAd = valAd;
+}
+public int getId() {
+	return id;
+}
+public void setId(int id) {
+	this.id = id;
+}
+public Integer getBuildNo() {
+	return buildNo;
+}
+public void setBuildNo(Integer buildNo) {
+	this.buildNo = buildNo;
+}
+public Integer getCellNo() {
+	return cellNo;
+}
+public void setCellNo(Integer cellNo) {
+	this.cellNo = cellNo;
+}
+public Integer getHouseNo() {
+	return houseNo;
+}
+public void setHouseNo(Integer houseNo) {
+	this.houseNo = houseNo;
+}
+public String getXqName() {
+	return xqName;
+}
+public void setXqName(String xqName) {
+	this.xqName = xqName;
+}
+
+public void setBuildNo(int buildNo) {
+	this.buildNo = buildNo;
+}
+
+public void setHouseNo(int houseNo) {
+	this.houseNo = houseNo;
+}
+}
