@@ -80,18 +80,5 @@ public class Tqxb
             System.out.println("加载文件出错");  
         }  
         return tqMap;  
-    } 
-//   
-//	public static void main(String[] args) throws SQLException
-//	{
-//		 try {  
-//	            //测试获取实时天气1(包含风况，湿度)  
-//	            String map = getTodayWeather1("101181701");  
-//	            System.out.println("------"+map);
-//	              
-//	        } catch (Exception e) {  
-//	            e.printStackTrace();  
-//	        }  
-//	    }  
-	 
+    } 	 
 }

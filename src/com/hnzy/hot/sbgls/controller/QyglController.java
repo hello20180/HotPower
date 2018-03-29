@@ -357,8 +357,8 @@ public class QyglController {
 //查询通信状态
 	public String qgTs(String jzqIp, int jzqPort,String ids) {
 		String pt = "/" + jzqIp + ":" + jzqPort;
-		String ja = "F00A0500" + ids;//改为区管地址
-		sessionmap = cz(ja, pt);
+		String ja = "F00A0500" + ids;//改为区管地址 F0 0A 05 00 AA AA AA AA XX FF 
+		sessionmap = cz(ja, pt);//改为区管地址 F0 0A 05 01 D0 D0 D0 11 XX FF 
 		
 		log.info("查询通信状态发送数据："+ja);
 		try {

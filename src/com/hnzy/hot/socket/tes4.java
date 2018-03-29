@@ -25,6 +25,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.DESKeySpec;
+import javax.crypto.spec.IvParameterSpec;
+
 import org.apache.commons.io.filefilter.FalseFileFilter;
 
 import com.alibaba.fastjson.JSON;
@@ -109,15 +115,15 @@ public class tes4
 //	    System.out.println(date1);
 	    
 	    
-	    String date = "2018-02-25T16:40:00+08:00"; 
-	    date = date.replace("Z", " UTC");//注意是空格+UTC
-	    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");//注意格式化的表达式
-	    Date d = format.parse(date );
-	    System.out.println(d );
-	    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		String dates = df.format(d);
-		System.out.println(dates );
-		
+//	    String date = "2018-02-25T16:40:00+08:00"; 
+//	    date = date.replace("Z", " UTC");//注意是空格+UTC
+//	    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");//注意格式化的表达式
+//	    Date d = format.parse(date );
+//	    System.out.println(d );
+//	    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//		String dates = df.format(d);
+//		System.out.println(dates );
+//		
 //		  DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");  //yyyy-MM-dd'T'HH:mm:ss.SSSZ
 //		  Date  date = df.parse("2018-02-25T16:40:00+08:00");
 //		  SimpleDateFormat df1 = new SimpleDateFormat ("EEE MMM dd HH:mm:ss Z yyyy", Locale.UK);
@@ -126,9 +132,65 @@ public class tes4
 //		  DateFormat df2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		
 		
-		
+		String content="aaaaaaaabbbbbbbbaaaaaaaa";  
+        String key="01234567";  
+      
+        System.out.println("加密前："+byteToHexString(content.getBytes()));  
+        byte[] encrypted=DES_CBC_Encrypt(content.getBytes(), key.getBytes());  
+        System.out.println("加密后："+byteToHexString(encrypted));  
+        byte[] decrypted=DES_CBC_Decrypt(encrypted, key.getBytes());  
+        System.out.println("解密后："+byteToHexString(decrypted));
 		
 	    
 	}
-	 
+	 public static byte[] DES_CBC_Encrypt(byte[] content, byte[] keyBytes){        
+	        try {  
+	            DESKeySpec keySpec=new DESKeySpec(keyBytes);  
+	            SecretKeyFactory keyFactory=SecretKeyFactory.getInstance("DES");              
+	            SecretKey key=keyFactory.generateSecret(keySpec);         
+	              
+	            Cipher cipher=Cipher.getInstance("DES/CBC/PKCS5Padding");  
+	            cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(keySpec.getKey()));             
+	            byte[] result=cipher.doFinal(content);  
+	            return result;  
+	        } catch (Exception e) {  
+	            // TODO Auto-generated catch block  
+	            System.out.println("exception:"+e.toString());  
+	        }  
+	        return null;  
+	    }  
+	      
+	    public static byte[] DES_CBC_Decrypt(byte[] content, byte[] keyBytes){        
+	        try {  
+	            DESKeySpec keySpec=new DESKeySpec(keyBytes);  
+	            SecretKeyFactory keyFactory=SecretKeyFactory.getInstance("DES");  
+	            SecretKey key=keyFactory.generateSecret(keySpec);  
+	              
+	            Cipher cipher=Cipher.getInstance("DES/CBC/PKCS5Padding");  
+	            cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(keyBytes));  
+	            byte[] result=cipher.doFinal(content);  
+	            return result;  
+	        } catch (Exception e) {  
+	            // TODO Auto-generated catch block  
+	            System.out.println("exception:"+e.toString());  
+	        }  
+	        return null;  
+	    }  
+	      
+	    public static String byteToHexString(byte[] bytes) {  
+	        StringBuffer sb = new StringBuffer(bytes.length);  
+	        String sTemp;  
+	        for (int i = 0; i < bytes.length; i++) {  
+	            sTemp = Integer.toHexString(0xFF & bytes[i]);  
+	            if (sTemp.length() < 2)  
+	                sb.append(0);  
+	            sb.append(sTemp.toUpperCase());  
+	        }  
+	        return sb.toString();  
+	    }  
+	        
+	     private static byte toByte(char c) {  
+	        byte b = (byte) "0123456789ABCDEF".indexOf(c);  
+	        return b;  
+	     }  
 }

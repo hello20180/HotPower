@@ -78,15 +78,15 @@ public class ServerHandler extends IoHandlerAdapter
 		Connection connc = dbUtil.getConnection();
 
 		// 获取集中器IP
-		for (int i = 0; i < clientIp.length(); i++)
-		{
+//		for (int i = 0; i < clientIp.length(); i++)
+//		{
 			String[] ipPortString = clientIp.split(":");
 			String IP = ipPortString[0];
 
 			String[] ip = IP.split("/");
 			port = Integer.valueOf(ipPortString[1]);
 			Ip = ip[1];
-		}
+//		}
 		SimpleDateFormat Sdate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		// 获取发送的时间
 		String time = Sdate.format(new Date());
@@ -124,11 +124,22 @@ public class ServerHandler extends IoHandlerAdapter
 			String mString = "F00A0100AAAAAAAAA3FF";
 			// 解码
 			byte[] b = CzUtil.jm(mString);
-			String[] keys = new String[]
-			{ clientIp };
+			String[] keys = new String[]{ clientIp };
 			logs.info("集中器ID不存在发送数据" + mString);
 			// 发送数据
 			sessionMap.sendMessage(keys, b);
+			try {
+				Thread.sleep(2000);
+
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			//当动态IP和端口号连接是发送查找区管地址指令
+			String SetQgID = "F00A0500AAAAAAAAB4FF";//改为区管地址 F0 0A 05 00 AA AA AA AA XX FF 
+			// 解码
+			byte[] bQg = CzUtil.jm(SetQgID);
+			// 给所有区管发送数据
+			sessionMap.sendMessage(keys, bQg);
 		}
 		DatabaseUtil.close(rst, ps, connc);
 
@@ -253,7 +264,7 @@ public class ServerHandler extends IoHandlerAdapter
 				{
 					try
 					{
-						qgCx(base,connc);
+						qgCx(base,connc,clientIp);
 					} catch (SQLException e)
 					{
 						// TODO Auto-generated catch block
@@ -1461,8 +1472,15 @@ public class ServerHandler extends IoHandlerAdapter
 	}
 
 	// 区管查询
-	public void qgCx(byte[] base,Connection connc) throws SQLException, ClassNotFoundException
+	public void qgCx(byte[] base,Connection connc,String clientIp) throws SQLException, ClassNotFoundException
 	{
+		String[] ipPortString = clientIp.split(":");
+		String IP = ipPortString[0];
+
+		String[] ip = IP.split("/");
+		Integer port = Integer.valueOf(ipPortString[1]);
+		String Ip = ip[1];
+         //接收数据F00B0501D0D0D0200192FF
 		logs.info("区管查询接收数据：" + Utils.bytesToHexString(base));
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		// 获取发送的时间
@@ -1511,6 +1529,11 @@ public class ServerHandler extends IoHandlerAdapter
 								+ "'";
 						ps = connc.prepareStatement(sql);
 						rs = ps.executeUpdate();
+						//根据区管地址更新区管的IP和port
+						String UpSql="update T_JzqInfo  set JzqIp='"+Ip+"',JzqPort='"+port+"' from T_JzqInfo jzq,T_QgInfo qg  where qg.QgID='"+qgId+"' and jzq.JzqID=qg.JzqID";
+						ps = connc.prepareStatement(UpSql);
+						rs = ps.executeUpdate();
+						logs.info("更新区管地址的IP和Port" + qgId);
 						logs.info("区管查询成功：" + stringHandler);
 						MapUtils.getMapUtils().add("jzq", "success");
 						logs.info("区管查询成功");
